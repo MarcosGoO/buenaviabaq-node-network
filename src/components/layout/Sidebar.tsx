@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Menu } from "lucide-react"
+import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { StatCard } from "@/components/ui/stat-card"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -35,18 +36,39 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                 </Button>
             </div>
 
-            <div className="flex-1 py-6">
+            <div className="flex-1 py-6 flex flex-col gap-6 overflow-y-auto">
                 <nav className="grid gap-2 px-3">
                     <NavItem icon={Car} label="Traffic Flow" collapsed={collapsed} active />
                     <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} />
                     <NavItem icon={Settings} label="Settings" collapsed={collapsed} />
                 </nav>
+
+                {!collapsed && (
+                    <div className="px-3 space-y-3">
+                        <div className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold px-1">
+                            Live Metrics
+                        </div>
+                        <StatCard
+                            label="Avg Speed"
+                            value={42}
+                            unit="km/h"
+                            icon={Activity}
+                            trend={{ value: 8, isPositive: true }}
+                        />
+                        <StatCard
+                            label="Active Zones"
+                            value={12}
+                            icon={MapPin}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="border-t p-4 bg-muted/30">
                 {!collapsed && (
-                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold p-1">
-                        System Status: <span className="text-emerald-600 ml-1">Live ●</span>
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold p-1" suppressHydrationWarning>
+                        System Status: <span className="text-emerald-600 ml-1">Live</span>
+                        <span className="inline-block w-1.5 h-1.5 bg-emerald-600 rounded-full ml-1.5 animate-pulse" />
                     </div>
                 )}
             </div>

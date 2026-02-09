@@ -10,7 +10,9 @@ import { AlertsPanel } from "@/components/panels/AlertsPanel"
 const BARRANQUILLA_COORDS = {
     longitude: -74.7964,
     latitude: 10.9639,
-    zoom: 12
+    zoom: 12,
+    pitch: 0,
+    bearing: 0
 }
 
 const ATLANTICO_BOUNDS: [number, number, number, number] = [
@@ -22,21 +24,25 @@ export function MapViewport() {
     const [viewState, setViewState] = React.useState(BARRANQUILLA_COORDS)
 
     return (
-        <div className="relative h-full w-full overflow-hidden bg-[#0a0a0a]">
+        <div className="relative h-full w-full overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
             <Map
                 {...viewState}
                 onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
                 style={{ width: '100%', height: '100%' }}
-                mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+                mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
                 mapLib={maplibregl}
                 maxBounds={ATLANTICO_BOUNDS}
                 minZoom={10}
                 maxZoom={18}
+                attributionControl={false}
             >
-                <NavigationControl position="top-right" />
+                <NavigationControl position="top-right" showCompass={false} />
 
                 {/* Placeholder for Traffic/Arroyo Data */}
             </Map>
+
+            {/* Gradient overlay for depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent pointer-events-none" />
 
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-lg px-4 pointer-events-auto">
                 <TimeTraveler />
@@ -44,6 +50,11 @@ export function MapViewport() {
 
             {/* Top Left Overlay for Alerts */}
             <AlertsPanel />
+
+            {/* Bottom right branding */}
+            <div className="absolute bottom-4 right-4 text-[9px] text-muted-foreground/40 font-medium tracking-wider pointer-events-none">
+                BUENAVIA-BAQ © 2026
+            </div>
         </div>
     )
 }
