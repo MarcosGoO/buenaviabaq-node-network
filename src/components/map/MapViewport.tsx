@@ -13,17 +13,25 @@ const BARRANQUILLA_COORDS = {
     zoom: 12
 }
 
+const ATLANTICO_BOUNDS: [number, number, number, number] = [
+    -75.25, 10.15, // Southwest (Long, Lat) - Near Galapa/Usiacurí
+    -74.55, 11.15  // Northeast (Long, Lat) - Past Puerto Colombia/River
+]
+
 export function MapViewport() {
     const [viewState, setViewState] = React.useState(BARRANQUILLA_COORDS)
 
     return (
-        <div className="relative h-full w-full overflow-hidden">
+        <div className="relative h-full w-full overflow-hidden bg-[#0a0a0a]">
             <Map
                 {...viewState}
                 onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
                 style={{ width: '100%', height: '100%' }}
                 mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
                 mapLib={maplibregl}
+                maxBounds={ATLANTICO_BOUNDS}
+                minZoom={10}
+                maxZoom={18}
             >
                 <NavigationControl position="top-right" />
 
