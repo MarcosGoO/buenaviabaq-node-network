@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin } from "lucide-react"
+import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/ui/stat-card"
@@ -14,63 +14,94 @@ export function Sidebar({ className, ...props }: SidebarProps) {
     return (
         <div
             className={cn(
-                "relative flex flex-col border-r bg-background transition-all duration-300 ease-in-out",
-                collapsed ? "w-16" : "w-64",
+                "relative flex flex-col border-r bg-background shadow-xl z-20",
+                "transition-[width] duration-300 ease-in-out will-change-[width]",
+                collapsed ? "w-20" : "w-72",
                 className
             )}
             {...props}
         >
-            <div className="flex h-14 items-center justify-between border-b px-4 py-4">
-                {!collapsed && (
-                    <span className="font-extrabold tracking-tight text-xl text-primary drop-shadow-sm">
-                        BUENAVIA<span className="text-muted-foreground/60">-</span>BAQ
-                    </span>
-                )}
+            {/* Header */}
+            <div className="flex h-16 items-center justify-between px-4 border-b bg-background/95 backdrop-blur-sm">
+                <div className={cn(
+                    "transition-opacity duration-200",
+                    collapsed ? "opacity-0 w-0" : "opacity-100"
+                )}>
+                    {!collapsed && (
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                                <Car className="h-4 w-4 text-primary-foreground" />
+                            </div>
+                            <span className="font-extrabold tracking-tight text-lg text-foreground">
+                                BUENA<span className="text-primary">VIA</span>
+                            </span>
+                        </div>
+                    )}
+                </div>
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setCollapsed(!collapsed)}
-                    className={cn("hover:bg-accent/50", collapsed && "mx-auto")}
+                    className={cn(
+                        "h-9 w-9 rounded-lg hover:bg-accent transition-all hover:scale-105",
+                        collapsed && "mx-auto"
+                    )}
                 >
                     {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                 </Button>
             </div>
 
-            <div className="flex-1 py-6 flex flex-col gap-6 overflow-y-auto">
-                <nav className="grid gap-2 px-3">
-                    <NavItem icon={Car} label="Traffic Flow" collapsed={collapsed} active />
+            {/* Navigation */}
+            <div className="flex-1 py-6 flex flex-col gap-6 overflow-y-auto overflow-x-hidden">
+                <nav className="flex flex-col gap-2 px-3">
+                    <NavItem icon={TrendingUp} label="Traffic Flow" collapsed={collapsed} active />
                     <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} />
                     <NavItem icon={Settings} label="Settings" collapsed={collapsed} />
                 </nav>
 
-                {!collapsed && (
-                    <div className="px-3 space-y-3">
-                        <div className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold px-1">
-                            Live Metrics
+                {/* Stats Section */}
+                <div className={cn(
+                    "transition-all duration-300",
+                    collapsed ? "opacity-0 scale-95 h-0" : "opacity-100 scale-100"
+                )}>
+                    {!collapsed && (
+                        <div className="px-3 space-y-3">
+                            <div className="flex items-center gap-2 px-1 mb-2">
+                                <div className="h-1 w-1 bg-primary rounded-full animate-pulse" />
+                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                    Live Metrics
+                                </span>
+                            </div>
+                            <StatCard
+                                label="Avg Speed"
+                                value={42}
+                                unit="km/h"
+                                icon={Activity}
+                                trend={{ value: 8, isPositive: true }}
+                            />
+                            <StatCard
+                                label="Active Zones"
+                                value={12}
+                                icon={MapPin}
+                            />
                         </div>
-                        <StatCard
-                            label="Avg Speed"
-                            value={42}
-                            unit="km/h"
-                            icon={Activity}
-                            trend={{ value: 8, isPositive: true }}
-                        />
-                        <StatCard
-                            label="Active Zones"
-                            value={12}
-                            icon={MapPin}
-                        />
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
-            <div className="border-t p-4 bg-muted/30">
-                {!collapsed && (
-                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold p-1" suppressHydrationWarning>
-                        System Status: <span className="text-emerald-600 ml-1">Live</span>
-                        <span className="inline-block w-1.5 h-1.5 bg-emerald-600 rounded-full ml-1.5 animate-pulse" />
-                    </div>
-                )}
+            {/* Footer Status */}
+            <div className="border-t p-4 bg-muted/20">
+                <div className={cn(
+                    "transition-all duration-200",
+                    collapsed ? "opacity-0 h-0" : "opacity-100"
+                )}>
+                    {!collapsed && (
+                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold" suppressHydrationWarning>
+                            <span className="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-sm shadow-emerald-500/50" />
+                            <span>System Online</span>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )
@@ -86,18 +117,54 @@ interface NavItemProps {
 
 function NavItem({ icon: Icon, label, collapsed, active, onClick }: NavItemProps) {
     return (
-        <Button
-            variant={active ? "secondary" : "ghost"}
-            className={cn(
-                "justify-start transition-all duration-200 group relative",
-                collapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "px-4 h-11 w-full",
-                active && "bg-secondary/80 font-bold text-primary shadow-sm border-r-2 border-primary"
-            )}
+        <button
             onClick={onClick}
+            className={cn(
+                "relative group rounded-xl transition-all duration-200",
+                "hover:scale-[1.02] active:scale-[0.98]",
+                collapsed ? "h-12 w-12 mx-auto" : "h-12 w-full px-4",
+                active
+                    ? "bg-gradient-to-r from-primary/10 to-transparent shadow-sm"
+                    : "hover:bg-accent/50"
+            )}
         >
-            <Icon className={cn("h-5 w-5 shrink-0", !collapsed && "mr-3", active ? "text-primary" : "text-muted-foreground/70 group-hover:text-primary")} />
-            {!collapsed && <span className="text-sm font-semibold tracking-tight uppercase truncate">{label}</span>}
+            {/* Active indicator */}
+            {active && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+            )}
+
+            <div className={cn(
+                "flex items-center gap-3",
+                collapsed ? "justify-center" : "justify-start pl-3"
+            )}>
+                <div className={cn(
+                    "flex items-center justify-center rounded-lg transition-all",
+                    "w-8 h-8",
+                    active
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground group-hover:text-primary group-hover:bg-primary/5"
+                )}>
+                    <Icon className="h-4 w-4" />
+                </div>
+
+                {!collapsed && (
+                    <span className={cn(
+                        "text-sm font-semibold tracking-tight transition-colors",
+                        active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                    )}>
+                        {label}
+                    </span>
+                )}
+            </div>
+
             {collapsed && <span className="sr-only">{label}</span>}
-        </Button>
+
+            {/* Hover tooltip for collapsed state */}
+            {collapsed && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                    {label}
+                </div>
+            )}
+        </button>
     )
 }

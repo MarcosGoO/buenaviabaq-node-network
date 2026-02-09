@@ -80,3 +80,19 @@
     transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
+
+/* MapLibre Popup Styles */
+.maplibregl-popup-content {
+  @apply rounded-lg shadow-xl border bg-background text-foreground;
+  padding: 0 !important;
+}
+
+.maplibregl-popup-close-button {
+  @apply text-muted-foreground hover:text-foreground;
+  font-size: 20px;
+  padding: 4px 8px;
+}
+
+.maplibregl-popup-tip {
+  @apply border-background;
+}
