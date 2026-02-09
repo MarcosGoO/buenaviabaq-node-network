@@ -6,6 +6,7 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TimeTraveler } from "@/components/ui/time-traveler"
 import { AlertsPanel } from "@/components/panels/AlertsPanel"
+import { WeatherWidget } from "@/components/widgets/WeatherWidget"
 import { MapPin, Navigation2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -63,7 +64,7 @@ export function MapViewport() {
                 attributionControl={false}
                 reuseMaps
             >
-                <NavigationControl position="top-right" showCompass={false} />
+                <NavigationControl position="bottom-right" showCompass={false} visualizePitch={false} />
 
                 {/* Traffic Markers - Mock data */}
                 {MOCK_TRAFFIC_POINTS.map((point) => (
@@ -110,12 +111,13 @@ export function MapViewport() {
                 )}
             </Map>
 
-            {/* Recenter button */}
+            {/* Recenter button - repositioned above zoom controls */}
             <Button
                 size="icon"
                 variant="outline"
-                className="absolute top-4 right-4 h-10 w-10 rounded-full shadow-lg bg-background/90 backdrop-blur-md border-2 hover:scale-110 transition-all"
+                className="absolute bottom-32 right-4 h-10 w-10 rounded-full shadow-lg bg-background/90 backdrop-blur-md border-2 hover:scale-110 transition-all z-10"
                 onClick={recenterMap}
+                title="Recenter map"
             >
                 <Navigation2 className="h-4 w-4" />
             </Button>
@@ -126,6 +128,11 @@ export function MapViewport() {
 
             {/* Top Left Overlay for Alerts */}
             <AlertsPanel />
+
+            {/* Top Right Weather Widget */}
+            <div className="absolute top-4 right-4 pointer-events-auto">
+                <WeatherWidget />
+            </div>
 
             {/* Bottom right branding - fixed positioning */}
             <div className="absolute bottom-4 right-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none">

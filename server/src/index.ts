@@ -6,6 +6,8 @@ import rateLimit from 'express-rate-limit';
 import { config } from '@/config';
 import { logger } from '@/utils/logger';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
+import { testConnection } from '@/db';
+import geoRoutes from '@/routes/geoRoutes';
 
 const app: Application = express();
 
@@ -39,19 +41,21 @@ app.use((req, res, next) => {
 });
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  const dbConnected = await testConnection();
   res.json({
-    status: 'ok',
+    status: dbConnected ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: config.NODE_ENV,
+    database: dbConnected ? 'connected' : 'disconnected',
   });
 });
 
-// API Routes (to be added)
-// app.use(`/api/${config.API_VERSION}/geo`, geoRoutes);
-// app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes);
-// app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes);
+// API Routes
+app.use(`/api/${config.API_VERSION}/geo`, geoRoutes);
+// app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes); // Coming in Sprint 2
+// app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes); // Coming in Sprint 2
 
 // Error handling
 app.use(notFoundHandler);

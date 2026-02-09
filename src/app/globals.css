@@ -96,3 +96,56 @@
 .maplibregl-popup-tip {
   @apply border-background;
 }
+
+/* MapLibre Navigation Controls - Modern Design */
+.maplibregl-ctrl-group {
+  @apply rounded-xl shadow-lg border-2 overflow-hidden;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px);
+}
+
+.maplibregl-ctrl-group button {
+  @apply transition-all duration-200;
+  width: 36px !important;
+  height: 36px !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  @apply bg-accent;
+  transform: scale(1.05);
+}
+
+.maplibregl-ctrl-group button:active {
+  transform: scale(0.95);
+}
+
+.maplibregl-ctrl-group button + button {
+  @apply border-t border-border;
+}
+
+.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon,
+.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
+  background-image: none !important;
+}
+
+.maplibregl-ctrl-zoom-in::before {
+  content: '+';
+  @apply text-foreground font-bold text-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.maplibregl-ctrl-zoom-out::before {
+  content: '−';
+  @apply text-foreground font-bold text-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
