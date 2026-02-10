@@ -50,6 +50,27 @@ test_endpoint "Get Hospitals" "$API_URL/geo/pois?category=hospital"
 test_endpoint "Get Zones in Bounds" "$API_URL/geo/zones/bounds?sw_lng=-75.25&sw_lat=10.15&ne_lng=-74.55&ne_lat=11.15"
 echo ""
 
+# Weather Endpoints
+echo "Weather Endpoints"
+test_endpoint "Current Weather" "$API_URL/weather/current"
+test_endpoint "Weather Forecast" "$API_URL/weather/forecast"
+echo ""
+
+# Traffic Endpoints
+echo "Traffic Endpoints"
+test_endpoint "Real-time Traffic" "$API_URL/traffic/realtime"
+test_endpoint "Traffic Summary" "$API_URL/traffic/summary"
+test_endpoint "Traffic by Road ID" "$API_URL/traffic/road/1"
+echo ""
+
+# Events Endpoints
+echo "Events Endpoints"
+test_endpoint "Get All Events" "$API_URL/events"
+test_endpoint "Get Upcoming Events" "$API_URL/events/upcoming"
+test_endpoint "Get Events Near Location" "$API_URL/events/near?lat=10.9639&lng=-74.7964&radius=5000"
+test_endpoint "Get Event by ID" "$API_URL/events/1"
+echo ""
+
 # Test 404
 echo "Error Handling"
 test_endpoint "Non-existent Zone (404)" "$API_URL/geo/zones/9999"
@@ -61,4 +82,7 @@ echo -e "${YELLOW}Testing complete!${NC}"
 echo ""
 echo "To see detailed responses, run:"
 echo "   curl http://localhost:4000/api/v1/geo/zones | jq"
+echo "   curl http://localhost:4000/api/v1/weather/current | jq"
+echo "   curl http://localhost:4000/api/v1/traffic/realtime | jq"
+echo "   curl http://localhost:4000/api/v1/events/upcoming | jq"
 echo ""

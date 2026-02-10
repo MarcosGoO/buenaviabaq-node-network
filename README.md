@@ -76,8 +76,8 @@ Key endpoints:
 
 ## Development Status
 
-🟢 **Sprint 1:** Complete (Infrastructure + Core API)
-🟡 **Sprint 2:** In Progress (External APIs + Real-time data)
+**Sprint 1:** Complete (Infrastructure + Core API)
+**Sprint 2:** In Progress (External APIs + Real-time data)
 
 ## License
 
