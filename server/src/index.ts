@@ -6,8 +6,9 @@ import rateLimit from 'express-rate-limit';
 import { config } from '@/config';
 import { logger } from '@/utils/logger';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
-import { testConnection } from '@/db';
+import { testConnection} from '@/db';
 import geoRoutes from '@/routes/geoRoutes';
+import weatherRoutes from '@/routes/weatherRoutes';
 
 const app: Application = express();
 
@@ -54,8 +55,8 @@ app.get('/health', async (req, res) => {
 
 // API Routes
 app.use(`/api/${config.API_VERSION}/geo`, geoRoutes);
-// app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes); // Coming in Sprint 2
-// app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes); // Coming in Sprint 2
+app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes);
+// app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes); // Coming in Sprint 2.2
 
 // Error handling
 app.use(notFoundHandler);

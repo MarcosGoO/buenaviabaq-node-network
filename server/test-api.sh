@@ -6,7 +6,7 @@
 BASE_URL="http://localhost:4000"
 API_URL="$BASE_URL/api/v1"
 
-echo "🧪 Testing VíaBaq API Endpoints"
+echo "Testing VíaBaq API Endpoints"
 echo "================================"
 echo ""
 
@@ -33,12 +33,12 @@ test_endpoint() {
 }
 
 # Health Check
-echo "🏥 Health Check"
+echo "Health Check"
 test_endpoint "Server Health" "$BASE_URL/health"
 echo ""
 
 # Geo Endpoints
-echo "🗺️  Geo Endpoints"
+echo "Geo Endpoints"
 test_endpoint "Get All Zones" "$API_URL/geo/zones"
 test_endpoint "Get Zone by ID" "$API_URL/geo/zones/1"
 test_endpoint "Get Arroyo Zones" "$API_URL/geo/arroyos"
@@ -51,7 +51,7 @@ test_endpoint "Get Zones in Bounds" "$API_URL/geo/zones/bounds?sw_lng=-75.25&sw_
 echo ""
 
 # Test 404
-echo "❌ Error Handling"
+echo "Error Handling"
 test_endpoint "Non-existent Zone (404)" "$API_URL/geo/zones/9999"
 test_endpoint "Invalid Route (404)" "$API_URL/invalid"
 echo ""
@@ -59,6 +59,6 @@ echo ""
 echo "================================"
 echo -e "${YELLOW}Testing complete!${NC}"
 echo ""
-echo "💡 To see detailed responses, run:"
+echo "To see detailed responses, run:"
 echo "   curl http://localhost:4000/api/v1/geo/zones | jq"
 echo ""

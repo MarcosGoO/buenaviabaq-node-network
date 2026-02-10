@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 export function AlertsPanel() {
-    const [isOpen, setIsOpen] = React.useState(true)
+    const [isOpen, setIsOpen] = React.useState(false)
 
     return (
         <div className="absolute top-4 left-4 z-50 pointer-events-auto flex flex-col gap-3 transition-all duration-300 ease-in-out">
