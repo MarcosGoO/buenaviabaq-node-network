@@ -1,4 +1,4 @@
-# 📡 VíaBaq API Documentation
+# VíaBaq API Documentation
 
 ## Base URL
 ```
@@ -8,7 +8,7 @@ Production: TBD
 
 ---
 
-## 🗺️ Geo Endpoints
+## Geo Endpoints
 
 ### Get All Zones
 Returns all geographical zones in Barranquilla.
@@ -215,7 +215,7 @@ GET /api/v1/geo/pois?category=hospital
 
 ---
 
-## 🚀 Health Check
+## Health Check
 
 ### Server Health
 Check server and database status.
@@ -265,7 +265,7 @@ GET /health
 
 ---
 
-## 📝 Common Query Examples
+## Common Query Examples
 
 ### Get all critical arroyo zones
 ```bash
@@ -289,7 +289,7 @@ curl "http://localhost:4000/api/v1/geo/zones/bounds?sw_lng=-74.85&sw_lat=10.95&n
 
 ---
 
-## 🔄 Coming Soon (Sprint 2+)
+## Coming Soon (Sprint 2+)
 
 ### Traffic Endpoints
 - `GET /api/v1/traffic/realtime` - Current traffic conditions
@@ -308,7 +308,7 @@ curl "http://localhost:4000/api/v1/geo/zones/bounds?sw_lng=-74.85&sw_lat=10.95&n
 
 ---
 
-## 📊 Rate Limiting
+## Rate Limiting
 
 All endpoints are rate-limited:
 - **Window:** 15 minutes
@@ -323,7 +323,7 @@ X-RateLimit-Reset: 1234567890
 
 ---
 
-## 🔐 Authentication
+## Authentication
 
 Currently, all endpoints are public. Authentication will be added in future sprints if needed.
 
