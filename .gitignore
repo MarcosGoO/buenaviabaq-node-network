@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Documentation interna (no publicar en GitHub)
+BACKEND_PLAN.md
+CHANGELOG_DESIGN.md
+SPRINT_1_SUMMARY.md
+DESIGN_IMPROVEMENTS.md
