@@ -11,6 +11,7 @@ import geoRoutes from '@/routes/geoRoutes';
 import weatherRoutes from '@/routes/weatherRoutes';
 import trafficRoutes from '@/routes/trafficRoutes';
 import eventsRoutes from '@/routes/eventsRoutes';
+import analyticsRoutes from '@/routes/analyticsRoutes';
 
 const app: Application = express();
 
@@ -60,6 +61,7 @@ app.use(`/api/${config.API_VERSION}/geo`, geoRoutes);
 app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes);
 app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes);
 app.use(`/api/${config.API_VERSION}/events`, eventsRoutes);
+app.use(`/api/${config.API_VERSION}/analytics`, analyticsRoutes);
 
 // Error handling
 app.use(notFoundHandler);

@@ -71,6 +71,17 @@ test_endpoint "Get Events Near Location" "$API_URL/events/near?lat=10.9639&lng=-
 test_endpoint "Get Event by ID" "$API_URL/events/1"
 echo ""
 
+# Analytics Endpoints
+echo "Analytics Endpoints"
+test_endpoint "Traffic Patterns" "$API_URL/analytics/traffic-patterns?days=7"
+test_endpoint "Traffic Hotspots" "$API_URL/analytics/hotspots?limit=5"
+test_endpoint "Hourly Pattern" "$API_URL/analytics/hourly-pattern"
+test_endpoint "Weather Impact" "$API_URL/analytics/weather-impact"
+test_endpoint "Rush Hour Stats" "$API_URL/analytics/rush-hour"
+test_endpoint "Road History" "$API_URL/analytics/road-history/1"
+test_endpoint "Road Stats" "$API_URL/analytics/road-stats/1?days=7"
+echo ""
+
 # Test 404
 echo "Error Handling"
 test_endpoint "Non-existent Zone (404)" "$API_URL/geo/zones/9999"
@@ -85,4 +96,5 @@ echo "   curl http://localhost:4000/api/v1/geo/zones | jq"
 echo "   curl http://localhost:4000/api/v1/weather/current | jq"
 echo "   curl http://localhost:4000/api/v1/traffic/realtime | jq"
 echo "   curl http://localhost:4000/api/v1/events/upcoming | jq"
+echo "   curl http://localhost:4000/api/v1/analytics/hotspots | jq"
 echo ""
