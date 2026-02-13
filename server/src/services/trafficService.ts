@@ -1,5 +1,6 @@
-import { logger } from '@/utils/logger';
-import { config } from '@/config';
+import { logger } from '@/utils/logger.js';
+import { config } from '@/config/index.js';
+import { CacheService } from './cacheService.js';
 
 export interface TrafficData {
   road_id: number;
@@ -25,14 +26,24 @@ export class TrafficService {
   // For now, we generate mock data based on time of day and weather conditions
   static async getRealTimeTraffic(): Promise<TrafficData[]> {
     try {
-      // In production, integrate with traffic API
-      // const apiKey = config.TRAFFIC_API_KEY;
-      // if (apiKey) {
-      //   return await this.fetchFromTrafficAPI(apiKey);
-      // }
+      // Try to get from cache first (5 minute TTL)
+      return await CacheService.getOrSet(
+        'realtime-traffic',
+        async () => {
+          // In production, integrate with traffic API
+          // const apiKey = config.TRAFFIC_API_KEY;
+          // if (apiKey) {
+          //   return await this.fetchFromTrafficAPI(apiKey);
+          // }
 
-      logger.info('Generating mock traffic data');
-      return this.generateMockTrafficData();
+          logger.info('Generating mock traffic data');
+          return this.generateMockTrafficData();
+        },
+        {
+          ttl: CacheService.TTL.MEDIUM, // 5 minutes
+          namespace: CacheService.Namespaces.TRAFFIC,
+        }
+      );
     } catch (error) {
       logger.error('Error fetching traffic data:', error);
       throw error;

@@ -42,15 +42,16 @@ yarn-error.log*
 next-env.d.ts
 
 
-
 # Development documentation
 BACKEND_PLAN.md
 DESIGN_IMPROVEMENTS.md
 CHANGELOG_DESIGN.md
+IMPLEMENTATION_SUMMARY.md
 SPRINT_*.md
 *.log
 build.log
 lint.log
+
 
 # Server logs
 server/logs/

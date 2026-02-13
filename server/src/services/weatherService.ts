@@ -1,6 +1,7 @@
-import { config } from '@/config';
-import { logger } from '@/utils/logger';
-import { AppError } from '@/middleware/errorHandler';
+import { config } from '@/config/index.js';
+import { logger } from '@/utils/logger.js';
+import { AppError } from '@/middleware/errorHandler.js';
+import { CacheService } from './cacheService.js';
 
 // Barranquilla coordinates
 const BARRANQUILLA_LAT = 10.9639;
@@ -55,9 +56,12 @@ export class WeatherService {
 
   // Get current weather for Barranquilla
   static async getCurrentWeather(): Promise<WeatherData> {
-    const apiKey = config.OPENWEATHER_API_KEY;
+    return await CacheService.getOrSet(
+      'current-weather',
+      async () => {
+        const apiKey = config.OPENWEATHER_API_KEY;
 
-    if (!apiKey) {
+        if (!apiKey) {
       logger.warn('OpenWeather API key not configured, returning mock data');
       return this.getMockWeather();
     }
@@ -93,12 +97,18 @@ export class WeatherService {
         timestamp: new Date(data.dt * 1000),
       };
     } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
+        if (error instanceof AppError) {
+          throw error;
+        }
+        logger.error('Failed to fetch weather data', { error });
+        throw new AppError(503, 'Weather service unavailable');
       }
-      logger.error('Failed to fetch weather data', { error });
-      throw new AppError(503, 'Weather service unavailable');
+    },
+    {
+      ttl: CacheService.TTL.MEDIUM, // 5 minutes
+      namespace: CacheService.Namespaces.WEATHER,
     }
+    );
   }
 
   // Get weather forecast for next 5 days
