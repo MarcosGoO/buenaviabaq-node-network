@@ -41,7 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
 # Development documentation
 BACKEND_PLAN.md
 DESIGN_IMPROVEMENTS.md
@@ -54,6 +53,7 @@ SEED_FIX_SUMMARY.md
 TESTING_GUIDE.md
 WINDOWS_TESTING_GUIDE.md
 SPRINT_*.md
+FINAL_FIXES_SUMMARY.md
 *.log
 build.log
 lint.log

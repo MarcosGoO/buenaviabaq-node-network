@@ -136,9 +136,9 @@ export default function RealTimeUpdates() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-40">
+    <div className="fixed top-4 right-4 z-40" suppressHydrationWarning>
       {/* Connection Status */}
-      <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-background/95 backdrop-blur shadow-lg border">
+      <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-background/95 backdrop-blur shadow-lg border" suppressHydrationWarning>
         {isConnected ? (
           <>
             <Wifi className="h-4 w-4 text-green-500" />

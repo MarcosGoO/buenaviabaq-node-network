@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className, ...props }: SidebarProps) {
     const [collapsed, setCollapsed] = React.useState(false)
+    const pathname = usePathname()
 
     return (
         <div
@@ -55,8 +57,8 @@ export function Sidebar({ className, ...props }: SidebarProps) {
             {/* Navigation */}
             <div className="flex-1 py-6 flex flex-col gap-6 overflow-y-auto overflow-x-hidden">
                 <nav className="flex flex-col gap-2 px-3">
-                    <NavItem icon={TrendingUp} label="Traffic Flow" collapsed={collapsed} active href="/" />
-                    <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} href="/analytics" />
+                    <NavItem icon={TrendingUp} label="Traffic Flow" collapsed={collapsed} active={pathname === '/'} href="/" />
+                    <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} active={pathname === '/analytics'} href="/analytics" />
                     <NavItem icon={Settings} label="Settings" collapsed={collapsed} />
                 </nav>
 
