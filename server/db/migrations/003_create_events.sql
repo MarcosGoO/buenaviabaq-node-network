@@ -18,14 +18,14 @@ CREATE TABLE IF NOT EXISTS events (
 );
 
 -- Create indexes for common queries
-CREATE INDEX idx_events_start_time ON events(start_time);
-CREATE INDEX idx_events_end_time ON events(end_time);
-CREATE INDEX idx_events_status ON events(status);
-CREATE INDEX idx_events_traffic_impact ON events(traffic_impact);
-CREATE INDEX idx_events_location ON events USING GIST(location_point);
+CREATE INDEX IF NOT EXISTS idx_events_start_time ON events(start_time);
+CREATE INDEX IF NOT EXISTS idx_events_end_time ON events(end_time);
+CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
+CREATE INDEX IF NOT EXISTS idx_events_traffic_impact ON events(traffic_impact);
+CREATE INDEX IF NOT EXISTS idx_events_location ON events USING GIST(location_point);
 
 -- Create spatial index for location-based queries
-CREATE INDEX idx_events_location_gist ON events USING GIST(location_point);
+CREATE INDEX IF NOT EXISTS idx_events_location_gist ON events USING GIST(location_point);
 
 COMMENT ON TABLE events IS 'Urban events that affect traffic patterns in Barranquilla';
 COMMENT ON COLUMN events.event_type IS 'Type of event: concert, sports, maintenance, protest, accident, etc.';

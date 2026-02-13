@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS weather_history (
 );
 
 -- Create indexes for common queries
-CREATE INDEX idx_weather_history_time ON weather_history(time DESC);
-CREATE INDEX idx_weather_history_condition ON weather_history(condition);
-CREATE INDEX idx_weather_history_rain ON weather_history(rain_1h) WHERE rain_1h > 0;
+CREATE INDEX IF NOT EXISTS idx_weather_history_time ON weather_history(time DESC);
+CREATE INDEX IF NOT EXISTS idx_weather_history_condition ON weather_history(condition);
+CREATE INDEX IF NOT EXISTS idx_weather_history_rain ON weather_history(rain_1h) WHERE rain_1h > 0;
 
 COMMENT ON TABLE weather_history IS 'Historical weather data for Barranquilla - used for ML training and pattern analysis';
 COMMENT ON COLUMN weather_history.time IS 'Timestamp when the weather data was recorded';

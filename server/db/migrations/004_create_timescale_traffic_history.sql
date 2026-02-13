@@ -21,14 +21,14 @@ CREATE TABLE IF NOT EXISTS traffic_history (
 );
 
 -- Create indexes for common queries
-CREATE INDEX idx_traffic_history_time ON traffic_history(time DESC);
-CREATE INDEX idx_traffic_history_road_id ON traffic_history(road_id);
-CREATE INDEX idx_traffic_history_zone_id ON traffic_history(zone_id);
-CREATE INDEX idx_traffic_history_congestion ON traffic_history(congestion_level);
-CREATE INDEX idx_traffic_history_day_hour ON traffic_history(day_of_week, hour_of_day);
+CREATE INDEX IF NOT EXISTS idx_traffic_history_time ON traffic_history(time DESC);
+CREATE INDEX IF NOT EXISTS idx_traffic_history_road_id ON traffic_history(road_id);
+CREATE INDEX IF NOT EXISTS idx_traffic_history_zone_id ON traffic_history(zone_id);
+CREATE INDEX IF NOT EXISTS idx_traffic_history_congestion ON traffic_history(congestion_level);
+CREATE INDEX IF NOT EXISTS idx_traffic_history_day_hour ON traffic_history(day_of_week, hour_of_day);
 
 -- Create composite index for time-series queries
-CREATE INDEX idx_traffic_history_road_time ON traffic_history(road_id, time DESC);
+CREATE INDEX IF NOT EXISTS idx_traffic_history_road_time ON traffic_history(road_id, time DESC);
 
 COMMENT ON TABLE traffic_history IS 'Time-series data of traffic conditions for ML training and analytics';
 COMMENT ON COLUMN traffic_history.time IS 'Timestamp of the traffic snapshot';

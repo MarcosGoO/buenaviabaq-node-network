@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -54,8 +55,8 @@ export function Sidebar({ className, ...props }: SidebarProps) {
             {/* Navigation */}
             <div className="flex-1 py-6 flex flex-col gap-6 overflow-y-auto overflow-x-hidden">
                 <nav className="flex flex-col gap-2 px-3">
-                    <NavItem icon={TrendingUp} label="Traffic Flow" collapsed={collapsed} active />
-                    <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} />
+                    <NavItem icon={TrendingUp} label="Traffic Flow" collapsed={collapsed} active href="/" />
+                    <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} href="/analytics" />
                     <NavItem icon={Settings} label="Settings" collapsed={collapsed} />
                 </nav>
 
@@ -113,21 +114,12 @@ interface NavItemProps {
     collapsed?: boolean
     active?: boolean
     onClick?: () => void
+    href?: string
 }
 
-function NavItem({ icon: Icon, label, collapsed, active, onClick }: NavItemProps) {
-    return (
-        <button
-            onClick={onClick}
-            className={cn(
-                "relative group rounded-xl transition-all duration-200",
-                "hover:scale-[1.02] active:scale-[0.98]",
-                collapsed ? "h-12 w-12 mx-auto" : "h-12 w-full px-4",
-                active
-                    ? "bg-gradient-to-r from-primary/10 to-transparent shadow-sm"
-                    : "hover:bg-accent/50"
-            )}
-        >
+function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavItemProps) {
+    const content = (
+        <>
             {/* Active indicator */}
             {active && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
@@ -149,22 +141,36 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick }: NavItemProps
 
                 {!collapsed && (
                     <span className={cn(
-                        "text-sm font-semibold tracking-tight transition-colors",
-                        active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                        "font-semibold text-sm transition-colors",
+                        active ? "text-primary" : "text-foreground/80 group-hover:text-foreground"
                     )}>
                         {label}
                     </span>
                 )}
             </div>
+        </>
+    );
 
-            {collapsed && <span className="sr-only">{label}</span>}
+    const className = cn(
+        "relative group rounded-xl transition-all duration-200",
+        "hover:scale-[1.02] active:scale-[0.98]",
+        collapsed ? "h-12 w-12 mx-auto" : "h-12 w-full px-4",
+        active
+            ? "bg-gradient-to-r from-primary/10 to-transparent shadow-sm"
+            : "hover:bg-accent/50"
+    );
 
-            {/* Hover tooltip for collapsed state */}
-            {collapsed && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                    {label}
-                </div>
-            )}
+    if (href) {
+        return (
+            <Link href={href} className={className}>
+                {content}
+            </Link>
+        );
+    }
+
+    return (
+        <button onClick={onClick} className={className}>
+            {content}
         </button>
     )
 }

@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS geo.zones (
 );
 
 -- Index for spatial queries
-CREATE INDEX idx_zones_geometry ON geo.zones USING GIST(geometry);
-CREATE INDEX idx_zones_zone_type ON geo.zones(zone_type);
-CREATE INDEX idx_zones_parent_id ON geo.zones(parent_id);
+CREATE INDEX IF NOT EXISTS idx_zones_geometry ON geo.zones USING GIST(geometry);
+CREATE INDEX IF NOT EXISTS idx_zones_zone_type ON geo.zones(zone_type);
+CREATE INDEX IF NOT EXISTS idx_zones_parent_id ON geo.zones(parent_id);
 
 -- Main roads and streets of Barranquilla
 CREATE TABLE IF NOT EXISTS geo.roads (
@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS geo.roads (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_roads_geometry ON geo.roads USING GIST(geometry);
-CREATE INDEX idx_roads_road_type ON geo.roads(road_type);
-CREATE INDEX idx_roads_name ON geo.roads(name);
+CREATE INDEX IF NOT EXISTS idx_roads_geometry ON geo.roads USING GIST(geometry);
+CREATE INDEX IF NOT EXISTS idx_roads_road_type ON geo.roads(road_type);
+CREATE INDEX IF NOT EXISTS idx_roads_name ON geo.roads(name);
 
 -- Arroyo zones (flood-prone areas)
 CREATE TABLE IF NOT EXISTS geo.arroyo_zones (
@@ -51,9 +51,9 @@ CREATE TABLE IF NOT EXISTS geo.arroyo_zones (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_arroyo_geometry ON geo.arroyo_zones USING GIST(geometry);
-CREATE INDEX idx_arroyo_risk_level ON geo.arroyo_zones(risk_level);
-CREATE INDEX idx_arroyo_zone_id ON geo.arroyo_zones(zone_id);
+CREATE INDEX IF NOT EXISTS idx_arroyo_geometry ON geo.arroyo_zones USING GIST(geometry);
+CREATE INDEX IF NOT EXISTS idx_arroyo_risk_level ON geo.arroyo_zones(risk_level);
+CREATE INDEX IF NOT EXISTS idx_arroyo_zone_id ON geo.arroyo_zones(zone_id);
 
 -- Points of Interest (POIs)
 CREATE TABLE IF NOT EXISTS geo.pois (
@@ -69,9 +69,9 @@ CREATE TABLE IF NOT EXISTS geo.pois (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_pois_geometry ON geo.pois USING GIST(geometry);
-CREATE INDEX idx_pois_category ON geo.pois(category);
-CREATE INDEX idx_pois_zone_id ON geo.pois(zone_id);
+CREATE INDEX IF NOT EXISTS idx_pois_geometry ON geo.pois USING GIST(geometry);
+CREATE INDEX IF NOT EXISTS idx_pois_category ON geo.pois(category);
+CREATE INDEX IF NOT EXISTS idx_pois_zone_id ON geo.pois(zone_id);
 
 -- Traffic segments (for traffic analysis)
 CREATE TABLE IF NOT EXISTS traffic.segments (
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS traffic.segments (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_segments_geometry ON traffic.segments USING GIST(geometry);
-CREATE INDEX idx_segments_road_id ON traffic.segments(road_id);
+CREATE INDEX IF NOT EXISTS idx_segments_geometry ON traffic.segments USING GIST(geometry);
+CREATE INDEX IF NOT EXISTS idx_segments_road_id ON traffic.segments(road_id);
 
 -- Weather stations (real or virtual)
 CREATE TABLE IF NOT EXISTS weather.stations (
@@ -103,8 +103,8 @@ CREATE TABLE IF NOT EXISTS weather.stations (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_stations_geometry ON weather.stations USING GIST(geometry);
-CREATE INDEX idx_stations_zone_id ON weather.stations(zone_id);
+CREATE INDEX IF NOT EXISTS idx_stations_geometry ON weather.stations USING GIST(geometry);
+CREATE INDEX IF NOT EXISTS idx_stations_zone_id ON weather.stations(zone_id);
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -116,17 +116,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Add triggers to tables
+DROP TRIGGER IF EXISTS update_zones_updated_at ON geo.zones;
 CREATE TRIGGER update_zones_updated_at BEFORE UPDATE ON geo.zones
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_roads_updated_at ON geo.roads;
 CREATE TRIGGER update_roads_updated_at BEFORE UPDATE ON geo.roads
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_arroyo_zones_updated_at ON geo.arroyo_zones;
 CREATE TRIGGER update_arroyo_zones_updated_at BEFORE UPDATE ON geo.arroyo_zones
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_pois_updated_at ON geo.pois;
 CREATE TRIGGER update_pois_updated_at BEFORE UPDATE ON geo.pois
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_stations_updated_at ON weather.stations;
 CREATE TRIGGER update_stations_updated_at BEFORE UPDATE ON weather.stations
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
