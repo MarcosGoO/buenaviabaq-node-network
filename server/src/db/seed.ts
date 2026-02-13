@@ -1,8 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { pool } from './index';
-import { logger } from '@/utils/logger';
+import { fileURLToPath } from 'url';
+import { pool } from './index.js';
+import { logger } from '@/utils/logger.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const SEEDS_DIR = path.join(__dirname, '../../db/seeds');
 
 async function runSeeds() {
