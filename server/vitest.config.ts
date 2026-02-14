@@ -6,6 +6,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
+  // Isolate server config from parent project
+  root: __dirname,
+
+  // Disable CSS processing (backend doesn't need it)
+  css: false,
+
   test: {
     // Test environment
     environment: 'node',
