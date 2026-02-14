@@ -27,17 +27,19 @@ VíaBaq is a **production-ready** urban mobility platform that combines real-tim
 ### For End Users
 - Interactive map with real-time traffic visualization
 - Weather-based traffic predictions
+- **Smart Alert System** with 4 alert types (arroyo floods, congestion, weather impact, events)
 - Arroyo flood warnings integration
 - Event-based congestion alerts
+- **Real-time WebSocket notifications** 
 
 ### For Developers
-- 36+ RESTful API endpoints
+- **46+ RESTful API endpoints** (including 5 alert endpoints) 
 - TypeScript strict mode (100% type-safe)
 - Repository pattern architecture
 - Comprehensive error handling
 - Production-grade logging (Winston)
-- Real-time updates (Socket.IO)
-- Background job processing (BullMQ)
+- **Real-time updates (Socket.IO with Redis adapter)** 
+- **Background job processing (BullMQ) - alerts every 2 min** 
 
 ### For Data Scientists
 - 4,038 historical traffic records
@@ -186,7 +188,16 @@ viabaq-node-network/
 - `GET /api/v1/events/upcoming` - Upcoming events
 - `POST /api/v1/events` - Create event (admin)
 
+### Alerts NEW
+- `GET /api/v1/alerts/active` - All active alerts
+- `GET /api/v1/alerts/critical` - Critical alerts only
+- `GET /api/v1/alerts/summary` - Alert statistics
+- `GET /api/v1/alerts/by-severity/:severity` - Filter by severity
+- `GET /api/v1/alerts/by-type/:type` - Filter by type
+
 **[See full API docs →](./server/API_DOCUMENTATION.md)**
+**[WebSocket API →](./docs/WEBSOCKETS_API.md)**
+**[Alerts System →](./docs/ALERTS_SYSTEM.md)** 
 
 ---
 
