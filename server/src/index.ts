@@ -88,7 +88,7 @@ SocketService.initialize(httpServer);
 async function startBackgroundJobs() {
   try {
     // Import workers dynamically to avoid circular dependencies
-    const { dataCollectionWorker } = await import('@/jobs/workers/dataCollectionWorker.js');
+    await import('@/jobs/workers/dataCollectionWorker.js');
     const { JobScheduler } = await import('@/jobs/scheduler.js');
     const { setupJobEventHandlers } = await import('@/jobs/eventHandlers.js');
 

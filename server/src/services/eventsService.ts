@@ -79,7 +79,7 @@ export class EventsService {
         WHERE 1=1
       `;
 
-      const params: any[] = [];
+      const params: (string | number)[] = [];
       let paramIndex = 1;
 
       if (filters.status) {
@@ -289,7 +289,7 @@ export class EventsService {
   static async updateEvent(id: number, eventData: UpdateEventDTO): Promise<Event | null> {
     try {
       const fields: string[] = [];
-      const values: any[] = [];
+      const values: (string | number | Date | Record<string, unknown>)[] = [];
       let paramIndex = 1;
 
       if (eventData.title !== undefined) {

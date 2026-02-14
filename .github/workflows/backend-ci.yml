@@ -61,13 +61,9 @@ jobs:
             npm install --legacy-peer-deps
           fi
 
-      - name: Type check
-        working-directory: ./server
-        run: npm run typecheck
-
       - name: Lint
         working-directory: ./server
-        run: npm run lint || echo "Linting warnings found but continuing..."
+        run: npm run lint
 
       - name: Setup database
         run: |

@@ -62,31 +62,31 @@ export class SocketService {
 
       // Handle client subscribing to specific zones
       socket.on('subscribe:zone', (zoneId: number) => {
-        socket.join(`zone:${zoneId}`);
+        void socket.join(`zone:${zoneId}`);
         logger.debug(`Client ${socket.id} subscribed to zone:${zoneId}`);
       });
 
       // Handle client unsubscribing from zones
       socket.on('unsubscribe:zone', (zoneId: number) => {
-        socket.leave(`zone:${zoneId}`);
+        void socket.leave(`zone:${zoneId}`);
         logger.debug(`Client ${socket.id} unsubscribed from zone:${zoneId}`);
       });
 
       // Handle client subscribing to traffic updates
       socket.on('subscribe:traffic', () => {
-        socket.join('traffic');
+        void socket.join('traffic');
         logger.debug(`Client ${socket.id} subscribed to traffic updates`);
       });
 
       // Handle client subscribing to weather updates
       socket.on('subscribe:weather', () => {
-        socket.join('weather');
+        void socket.join('weather');
         logger.debug(`Client ${socket.id} subscribed to weather updates`);
       });
 
       // Handle client subscribing to event updates
       socket.on('subscribe:events', () => {
-        socket.join('events');
+        void socket.join('events');
         logger.debug(`Client ${socket.id} subscribed to event updates`);
       });
 
@@ -105,7 +105,7 @@ export class SocketService {
   /**
    * Emit traffic update to all subscribed clients
    */
-  static emitTrafficUpdate(data: any) {
+  static emitTrafficUpdate(data: Record<string, unknown>) {
     if (!this.io) {
       logger.warn('Socket.IO not initialized');
       return;
@@ -122,7 +122,7 @@ export class SocketService {
   /**
    * Emit weather update to all subscribed clients
    */
-  static emitWeatherUpdate(data: any) {
+  static emitWeatherUpdate(data: Record<string, unknown>) {
     if (!this.io) {
       logger.warn('Socket.IO not initialized');
       return;
@@ -139,7 +139,7 @@ export class SocketService {
   /**
    * Emit event notification to all subscribed clients
    */
-  static emitEventNotification(event: any) {
+  static emitEventNotification(event: Record<string, unknown>) {
     if (!this.io) {
       logger.warn('Socket.IO not initialized');
       return;
@@ -156,7 +156,7 @@ export class SocketService {
   /**
    * Emit zone-specific alert
    */
-  static emitZoneAlert(zoneId: number, alert: any) {
+  static emitZoneAlert(zoneId: number, alert: Record<string, unknown>) {
     if (!this.io) {
       logger.warn('Socket.IO not initialized');
       return;
@@ -174,7 +174,7 @@ export class SocketService {
   /**
    * Broadcast message to all connected clients
    */
-  static broadcast(event: string, data: any) {
+  static broadcast(event: string, data: Record<string, unknown>) {
     if (!this.io) {
       logger.warn('Socket.IO not initialized');
       return;
@@ -201,7 +201,7 @@ export class SocketService {
    */
   static async close() {
     if (this.io) {
-      this.io.close();
+      void this.io.close();
       this.io = null;
     }
 

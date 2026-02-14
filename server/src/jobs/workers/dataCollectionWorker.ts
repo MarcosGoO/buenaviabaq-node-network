@@ -2,7 +2,6 @@ import { Worker, Job } from 'bullmq';
 import { logger } from '@/utils/logger.js';
 import { config } from '@/config/index.js';
 import { TrafficHistoryService } from '@/services/trafficHistoryService.js';
-import { WeatherService } from '@/services/weatherService.js';
 import { WeatherHistoryService } from '@/services/weatherHistoryService.js';
 import { CacheService } from '@/services/cacheService.js';
 import { JobTypes, type JobType } from '../queues.js';

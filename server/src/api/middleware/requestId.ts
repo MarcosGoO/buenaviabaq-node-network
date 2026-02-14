@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 
+interface RequestWithId extends Request {
+  id?: string;
+}
+
 /**
  * Request ID Middleware
  * Adds a unique ID to each request for tracing
@@ -14,7 +18,7 @@ export const requestIdMiddleware = (
   const requestId = (req.headers['x-request-id'] as string) || randomUUID();
 
   // Attach to request object
-  (req as any).id = requestId;
+  (req as RequestWithId).id = requestId;
 
   // Add to response headers
   res.setHeader('X-Request-ID', requestId);

@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodSchema, ZodError } from 'zod';
-import { ValidationError } from '../../shared/errors/index.js';
+import { ZodSchema } from 'zod';
 
 /**
  * Request Validation Middleware Factory
  * Creates a middleware that validates request data against a Zod schema
  */
 export const validateRequest = (schema: ZodSchema) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     try {
       // Validate request data
       const validated = await schema.parseAsync({
@@ -34,7 +33,7 @@ export const validateRequest = (schema: ZodSchema) => {
  * Simpler validation for body-only requests
  */
 export const validateBody = (schema: ZodSchema) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     try {
       req.body = await schema.parseAsync(req.body);
       next();
@@ -49,7 +48,7 @@ export const validateBody = (schema: ZodSchema) => {
  * Simpler validation for query-only requests
  */
 export const validateQuery = (schema: ZodSchema) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     try {
       req.query = await schema.parseAsync(req.query);
       next();
@@ -64,7 +63,7 @@ export const validateQuery = (schema: ZodSchema) => {
  * Simpler validation for params-only requests
  */
 export const validateParams = (schema: ZodSchema) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
     try {
       req.params = await schema.parseAsync(req.params);
       next();

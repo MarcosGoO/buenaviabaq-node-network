@@ -17,7 +17,7 @@ export const errorHandler = (
   err: Error | AppError | ZodError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // Zod validation errors
   if (err instanceof ZodError) {

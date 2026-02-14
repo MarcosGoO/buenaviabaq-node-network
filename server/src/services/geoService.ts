@@ -42,7 +42,7 @@ export class GeoService {
       FROM geo.arroyo_zones
     `;
 
-    const params: any[] = [];
+    const params: string[] = [];
     if (riskLevel) {
       queryText += ' WHERE risk_level = $1';
       params.push(riskLevel);
@@ -65,7 +65,7 @@ export class GeoService {
       FROM geo.roads
     `;
 
-    const params: any[] = [];
+    const params: string[] = [];
     if (roadType) {
       queryText += ' WHERE road_type = $1';
       params.push(roadType);
@@ -88,7 +88,7 @@ export class GeoService {
       FROM geo.pois
     `;
 
-    const params: any[] = [];
+    const params: string[] = [];
     if (category) {
       queryText += ' WHERE category = $1';
       params.push(category);

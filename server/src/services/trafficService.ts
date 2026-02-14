@@ -1,5 +1,4 @@
 import { logger } from '@/utils/logger.js';
-import { config } from '@/config/index.js';
 import { CacheService } from './cacheService.js';
 
 export interface TrafficData {

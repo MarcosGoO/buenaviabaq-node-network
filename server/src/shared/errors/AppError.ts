@@ -96,9 +96,9 @@ export class ConflictError extends AppError {
  * Used for semantic validation errors
  */
 export class ValidationError extends AppError {
-  public readonly errors?: any[];
+  public readonly errors?: Array<Record<string, unknown>>;
 
-  constructor(message: string = 'Validation failed', errors?: any[]) {
+  constructor(message: string = 'Validation failed', errors?: Array<Record<string, unknown>>) {
     super(message, 422);
     this.errors = errors;
     Object.setPrototypeOf(this, ValidationError.prototype);

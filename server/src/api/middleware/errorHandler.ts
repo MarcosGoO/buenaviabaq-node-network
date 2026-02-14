@@ -1,11 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
-import { logger } from '../../shared/utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import {
   AppError,
-  DatabaseError,
-  ValidationError
+  DatabaseError
 } from '../../shared/errors/index.js';
+
+interface PostgresError extends Error {
+  code?: string;
+  detail?: string;
+  constraint?: string;
+}
+
+interface RequestWithId extends Request {
+  id?: string;
+}
 
 /**
  * Global Error Handler Middleware
@@ -15,7 +24,7 @@ export const errorHandler = (
   err: Error | AppError | ZodError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // Add request context to logger
   const requestContext = {
@@ -23,7 +32,7 @@ export const errorHandler = (
     path: req.path,
     ip: req.ip,
     userAgent: req.get('user-agent'),
-    requestId: (req as any).id || 'unknown'
+    requestId: (req as RequestWithId).id || 'unknown'
   };
 
   // Zod validation errors
@@ -72,12 +81,13 @@ export const errorHandler = (
   }
 
   // PostgreSQL errors
-  if ((err as any).code && (err as any).code.startsWith('23')) {
+  const pgError = err as PostgresError;
+  if (pgError.code && pgError.code.startsWith('23')) {
     logger.error('Database constraint violation', {
       ...requestContext,
-      code: (err as any).code,
-      detail: (err as any).detail,
-      constraint: (err as any).constraint
+      code: pgError.code,
+      detail: pgError.detail,
+      constraint: pgError.constraint
     });
 
     const dbError = new DatabaseError('Database constraint violation');
@@ -132,7 +142,9 @@ export const notFoundHandler = (req: Request, res: Response) => {
  * Async Error Wrapper
  * Wraps async route handlers to catch errors automatically
  */
-export const asyncHandler = (fn: Function) => {
+type AsyncRouteHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+
+export const asyncHandler = (fn: AsyncRouteHandler) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
@@ -157,9 +169,9 @@ export const setupProcessErrorHandlers = () => {
   });
 
   // Unhandled promise rejections
-  process.on('unhandledRejection', (reason: any) => {
+  process.on('unhandledRejection', (reason: unknown) => {
     logger.error('Unhandled Rejection', {
-      reason: reason instanceof Error ? reason.message : reason,
+      reason: reason instanceof Error ? reason.message : String(reason),
       stack: reason instanceof Error ? reason.stack : undefined
     });
 

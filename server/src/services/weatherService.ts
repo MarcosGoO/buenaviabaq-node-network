@@ -51,6 +51,40 @@ interface WeatherData {
   timestamp: Date;
 }
 
+interface ForecastItem {
+  dt: number;
+  main: {
+    temp: number;
+    humidity: number;
+  };
+  weather: Array<{
+    main: string;
+    description: string;
+  }>;
+  wind: {
+    speed: number;
+  };
+  clouds: {
+    all: number;
+  };
+  rain?: {
+    '1h': number;
+  };
+}
+
+interface ForecastData {
+  location: string;
+  forecast: Array<{
+    timestamp: Date;
+    temperature: number;
+    condition: string;
+    description: string;
+    rain_probability: number;
+    humidity: number;
+    wind_speed: number;
+  }>;
+}
+
 export class WeatherService {
   private static readonly OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
@@ -112,7 +146,7 @@ export class WeatherService {
   }
 
   // Get weather forecast for next 5 days
-  static async getForecast(): Promise<any> {
+  static async getForecast(): Promise<ForecastData | null> {
     const apiKey = config.OPENWEATHER_API_KEY;
 
     if (!apiKey) {
@@ -134,7 +168,7 @@ export class WeatherService {
       // Process and return simplified forecast
       return {
         location: 'Barranquilla',
-        forecast: data.list.map((item: any) => ({
+        forecast: data.list.map((item: ForecastItem) => ({
           timestamp: new Date(item.dt * 1000),
           temperature: Math.round(item.main.temp),
           condition: item.weather[0].main,
@@ -151,7 +185,7 @@ export class WeatherService {
   }
 
   // Calculate rain probability based on weather data
-  private static calculateRainProbability(data: any): number {
+  private static calculateRainProbability(data: ForecastItem): number {
     const condition = data.weather[0].main.toLowerCase();
     const cloudiness = data.clouds.all;
     const hasRain = data.rain && data.rain['1h'] > 0;
