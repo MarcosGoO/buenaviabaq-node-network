@@ -10,7 +10,11 @@ export default defineConfig({
   root: __dirname,
 
   // Disable CSS processing (backend doesn't need it)
-  css: false,
+  css: {
+    postcss: {
+      plugins: [],
+    },
+  },
 
   test: {
     // Test environment

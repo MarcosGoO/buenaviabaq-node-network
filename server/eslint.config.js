@@ -33,6 +33,7 @@ export default [
       'dist/**',
       'node_modules/**',
       'coverage/**',
+      'postcss.config.js',
       '**/*.js',
       '**/*.mjs',
       '**/*.cjs',
