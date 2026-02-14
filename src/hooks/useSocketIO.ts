@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useSyncExternalStore } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
@@ -12,15 +12,36 @@ interface UseSocketIOReturn {
   unsubscribe: (channel: string) => void;
 }
 
+// Store socket instance outside component
+let socketInstance: Socket | null = null;
+let subscribers = 0;
+
+const getSocket = () => socketInstance;
+
 export function useSocketIO(): UseSocketIOReturn {
-  const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
-    // Create socket connection only if it doesn't exist
-    if (socketRef.current) return;
+  // Use useSyncExternalStore to safely access socket
+  const socket = useSyncExternalStore(
+    () => {
+      // Subscribe to socket changes
+      subscribers++;
+      return () => {
+        subscribers--;
+      };
+    },
+    getSocket,
+    getSocket
+  );
 
-    const socketInstance = io(SOCKET_URL, {
+  useEffect(() => {
+    // Create socket connection only once
+    if (socketInstance) {
+      setIsConnected(socketInstance.connected);
+      return;
+    }
+
+    const newSocket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
@@ -28,41 +49,43 @@ export function useSocketIO(): UseSocketIOReturn {
     });
 
     // Connection events
-    socketInstance.on('connect', () => {
+    newSocket.on('connect', () => {
       console.log('✅ Socket.IO connected');
       setIsConnected(true);
     });
 
-    socketInstance.on('disconnect', (reason) => {
+    newSocket.on('disconnect', (reason) => {
       console.log('❌ Socket.IO disconnected:', reason);
       setIsConnected(false);
     });
 
-    socketInstance.on('connect_error', (error) => {
+    newSocket.on('connect_error', (error) => {
       console.error('Socket.IO connection error:', error);
     });
 
-    socketRef.current = socketInstance;
+    socketInstance = newSocket;
 
-    // Cleanup on unmount
+    // Cleanup only when no more subscribers
     return () => {
-      socketInstance.disconnect();
-      socketRef.current = null;
+      if (subscribers === 0 && socketInstance) {
+        socketInstance.disconnect();
+        socketInstance = null;
+      }
     };
   }, []);
 
   const subscribe = useCallback((channel: string) => {
-    if (!socketRef.current) return;
+    if (!socketInstance) return;
 
     switch (channel) {
       case 'traffic':
-        socketRef.current.emit('subscribe:traffic');
+        socketInstance.emit('subscribe:traffic');
         break;
       case 'weather':
-        socketRef.current.emit('subscribe:weather');
+        socketInstance.emit('subscribe:weather');
         break;
       case 'events':
-        socketRef.current.emit('subscribe:events');
+        socketInstance.emit('subscribe:events');
         break;
       default:
         console.warn(`Unknown channel: ${channel}`);
@@ -70,17 +93,17 @@ export function useSocketIO(): UseSocketIOReturn {
   }, []);
 
   const unsubscribe = useCallback((channel: string) => {
-    if (!socketRef.current) return;
+    if (!socketInstance) return;
 
     switch (channel) {
       case 'traffic':
-        socketRef.current.emit('unsubscribe:traffic');
+        socketInstance.emit('unsubscribe:traffic');
         break;
       case 'weather':
-        socketRef.current.emit('unsubscribe:weather');
+        socketInstance.emit('unsubscribe:weather');
         break;
       case 'events':
-        socketRef.current.emit('unsubscribe:events');
+        socketInstance.emit('unsubscribe:events');
         break;
       default:
         console.warn(`Unknown channel: ${channel}`);
@@ -88,7 +111,7 @@ export function useSocketIO(): UseSocketIOReturn {
   }, []);
 
   return {
-    socket: socketRef.current,
+    socket,
     isConnected,
     subscribe,
     unsubscribe,

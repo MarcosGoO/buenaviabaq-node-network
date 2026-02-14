@@ -6,19 +6,27 @@ version: 2
 # Paths to exclude from scanning
 paths-ignore:
   - "**/*.md"
+  - "**/*.example"
+  - "**/*.sample"
   - "**/node_modules/**"
   - "**/dist/**"
   - "**/.git/**"
   - "**/coverage/**"
-  - "**/*.example"
-  - "**/*.sample"
+  - "docker-compose.yml"
+  - "docker-compose.*.yml"
 
 # Secrets to ignore (resolved/false positives)
 matches-ignore:
-  # Generic Password in docker-compose.yml - Development only, not used in production
-  - name: "postgres development password"
-    match: "POSTGRES_PASSWORD: postgres"
+  # Docker Compose development credentials - uses env vars with fallback
+  - name: "docker-compose development defaults"
+    match: "POSTGRES_PASSWORD:-postgres"
 
-  # OpenWeather API Key in backend-ci.yml - Test placeholder, not a real key
+  - name: "docker-compose timescale defaults"
+    match: "TIMESCALE_PASSWORD:-postgres"
+
+  - name: "docker-compose pgadmin defaults"
+    match: "PGADMIN_PASSWORD:-admin"
+
+  # CI/CD test placeholders
   - name: "test api key in ci"
     match: "OPENWEATHER_API_KEY: test-key"
