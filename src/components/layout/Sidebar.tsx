@@ -7,6 +7,7 @@ import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/ui/stat-card"
+import { WeatherWidget } from "@/components/widgets/WeatherWidget"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -61,6 +62,24 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} active={pathname === '/analytics'} href="/analytics" />
                     <NavItem icon={Settings} label="Settings" collapsed={collapsed} />
                 </nav>
+
+                {/* Weather Widget */}
+                <div className={cn(
+                    "transition-all duration-300",
+                    collapsed ? "opacity-0 scale-95 h-0" : "opacity-100 scale-100"
+                )}>
+                    {!collapsed && (
+                        <div className="px-3">
+                            <div className="flex items-center gap-2 px-1 mb-2">
+                                <div className="h-1 w-1 bg-blue-500 rounded-full animate-pulse" />
+                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                    Weather
+                                </span>
+                            </div>
+                            <WeatherWidget compact />
+                        </div>
+                    )}
+                </div>
 
                 {/* Stats Section */}
                 <div className={cn(

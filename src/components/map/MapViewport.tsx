@@ -6,7 +6,6 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TimeTraveler } from "@/components/ui/time-traveler"
 import { AlertsPanel } from "@/components/panels/AlertsPanel"
-import { WeatherWidget } from "@/components/widgets/WeatherWidget"
 import { Navigation2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -67,12 +66,7 @@ export function MapViewport() {
             {/* Top Left Overlay for Alerts */}
             <AlertsPanel />
 
-            {/* Bottom Right Weather Widget */}
-            <div className="absolute bottom-4 right-4 pointer-events-auto">
-                <WeatherWidget />
-            </div>
-
-            {/* Bottom right branding - fixed positioning */}
+            {/* Bottom left branding - fixed positioning */}
             <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none">
                 BUENAVIA-BAQ © 2026
             </div>

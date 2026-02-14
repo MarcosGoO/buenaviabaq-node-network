@@ -1,0 +1,133 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+    paths:
+      - 'server/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'server/**'
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: viabaq_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Type check
+        working-directory: ./server
+        run: npm run typecheck
+
+      - name: Lint
+        working-directory: ./server
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./server
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/viabaq_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./server/coverage/lcov.info
+          flags: backend
+          name: backend-coverage
+
+      - name: Build
+        working-directory: ./server
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: server/dist/
+          retention-days: 7
+
+  lint-commit:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        run: |
+          git log --format=%s origin/${{ github.base_ref }}..HEAD | while read msg; do
+            if ! echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\(.+\))?!?:.+'; then
+              echo "❌ Invalid commit message: $msg"
+              echo "Commit messages must follow Conventional Commits format"
+              exit 1
+            fi
+          done
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run npm audit
+        working-directory: ./server
+        run: npm audit --audit-level=high
+
+      - name: Check for known vulnerabilities
+        working-directory: ./server
+        run: npx auditjs ossi --whitelist allow-list.json || true
