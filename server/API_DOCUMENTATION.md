@@ -237,7 +237,7 @@ GET /health
 
 ---
 
-## ❌ Error Responses
+## Error Responses (!!)
 
 ### 400 Bad Request
 ```json
@@ -286,26 +286,6 @@ curl "http://localhost:4000/api/v1/geo/pois?category=hospital"
 ```bash
 curl "http://localhost:4000/api/v1/geo/zones/bounds?sw_lng=-74.85&sw_lat=10.95&ne_lng=-74.75&ne_lat=11.05"
 ```
-
----
-
-## Coming Soon (Sprint 2+)
-
-### Traffic Endpoints
-- `GET /api/v1/traffic/realtime` - Current traffic conditions
-- `GET /api/v1/traffic/predictions` - ML-based predictions
-- `GET /api/v1/traffic/segments/:id` - Specific segment data
-
-### Weather Endpoints
-- `GET /api/v1/weather/current` - Current weather
-- `GET /api/v1/weather/forecast` - Weather forecast
-- `GET /api/v1/weather/stations` - Weather stations
-
-### Analytics Endpoints
-- `GET /api/v1/analytics/insights` - Traffic insights
-- `GET /api/v1/analytics/hotspots` - Congestion hotspots
-- `GET /api/v1/analytics/summary` - Executive summary
-
 ---
 
 ## Rate Limiting
