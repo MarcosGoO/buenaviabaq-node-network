@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, TrendingUp } from "lucide-react"
+import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, Gauge } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/ui/stat-card"
@@ -58,9 +58,9 @@ export function Sidebar({ className, ...props }: SidebarProps) {
             {/* Navigation */}
             <div className="flex-1 py-6 flex flex-col gap-6 overflow-y-auto overflow-x-hidden">
                 <nav className="flex flex-col gap-2 px-3">
-                    <NavItem icon={TrendingUp} label="Traffic Flow" collapsed={collapsed} active={pathname === '/'} href="/" />
+                    <NavItem icon={Gauge} label="Traffic Flow" collapsed={collapsed} active={pathname === '/'} href="/" />
                     <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} active={pathname === '/analytics'} href="/analytics" />
-                    <NavItem icon={Settings} label="Settings" collapsed={collapsed} />
+                    <NavItem icon={Settings} label="Settings" collapsed={collapsed} active={pathname === '/settings'} href="/settings" />
                 </nav>
 
                 {/* Weather Widget */}
@@ -147,22 +147,22 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavIte
             )}
 
             <div className={cn(
-                "flex items-center gap-3",
-                collapsed ? "justify-center" : "justify-start pl-3"
+                "flex items-center gap-3 w-full",
+                collapsed ? "justify-center" : "justify-start"
             )}>
                 <div className={cn(
-                    "flex items-center justify-center rounded-lg transition-all",
-                    "w-8 h-8",
+                    "flex items-center justify-center rounded-lg transition-all flex-shrink-0",
+                    "w-9 h-9",
                     active
                         ? "bg-primary/10 text-primary"
                         : "text-muted-foreground group-hover:text-primary group-hover:bg-primary/5"
                 )}>
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-5 w-5" />
                 </div>
 
                 {!collapsed && (
                     <span className={cn(
-                        "font-semibold text-sm transition-colors",
+                        "font-semibold text-sm transition-colors flex-1",
                         active ? "text-primary" : "text-foreground/80 group-hover:text-foreground"
                     )}>
                         {label}
@@ -173,9 +173,9 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavIte
     );
 
     const className = cn(
-        "relative group rounded-xl transition-all duration-200",
+        "relative group rounded-xl transition-all duration-200 flex items-center",
         "hover:scale-[1.02] active:scale-[0.98]",
-        collapsed ? "h-12 w-12 mx-auto" : "h-12 w-full px-4",
+        collapsed ? "h-12 w-12 mx-auto justify-center" : "h-12 w-full px-3",
         active
             ? "bg-gradient-to-r from-primary/10 to-transparent shadow-sm"
             : "hover:bg-accent/50"

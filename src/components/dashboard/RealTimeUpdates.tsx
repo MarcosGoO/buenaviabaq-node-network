@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSocketIO } from '@/hooks/useSocketIO';
-import { Bell, CheckCircle2, WifiOff, Wifi } from 'lucide-react';
+import { Bell, CheckCircle2, WifiOff, Wifi, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Update {
@@ -135,6 +135,10 @@ export default function RealTimeUpdates() {
     }
   };
 
+  const deleteUpdate = (id: string) => {
+    setUpdates((prev) => prev.filter((update) => update.id !== id));
+  };
+
   return (
     <div className="fixed top-4 right-4 z-40" suppressHydrationWarning>
       {/* Connection Status */}
@@ -175,7 +179,7 @@ export default function RealTimeUpdates() {
           {updates.map((update) => (
             <div
               key={update.id}
-              className="p-3 rounded-md bg-muted/50 border border-border/50 space-y-1"
+              className="group p-3 rounded-md bg-muted/50 border border-border/50 space-y-1 hover:bg-muted/70 transition-colors relative"
             >
               <div className="flex items-center gap-2">
                 <span
@@ -192,8 +196,15 @@ export default function RealTimeUpdates() {
                     minute: '2-digit',
                   })}
                 </span>
+                <button
+                  onClick={() => deleteUpdate(update.id)}
+                  className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
+                  title="Eliminar notificación"
+                >
+                  <X className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                </button>
               </div>
-              <p className="text-sm">{update.message}</p>
+              <p className="text-sm pr-6">{update.message}</p>
             </div>
           ))}
         </div>

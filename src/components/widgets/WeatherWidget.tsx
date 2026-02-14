@@ -36,7 +36,8 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
         }
 
         fetchWeather()
-        const interval = setInterval(fetchWeather, 5 * 60 * 1000)
+        // Refresh every 2 minutes = 720 calls/day (within 1,000 free limit)
+        const interval = setInterval(fetchWeather, 2 * 60 * 1000)
 
         return () => clearInterval(interval)
     }, [])
