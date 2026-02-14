@@ -15,6 +15,7 @@ import weatherRoutes from '@/routes/weatherRoutes.js';
 import trafficRoutes from '@/routes/trafficRoutes.js';
 import eventsRoutes from '@/routes/eventsRoutes.js';
 import analyticsRoutes from '@/routes/analyticsRoutes.js';
+import mlRoutes from '@/routes/mlRoutes.js';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -76,6 +77,7 @@ app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes);
 app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes);
 app.use(`/api/${config.API_VERSION}/events`, eventsRoutes);
 app.use(`/api/${config.API_VERSION}/analytics`, analyticsRoutes);
+app.use(`/api/${config.API_VERSION}/ml`, mlRoutes);
 
 // Error handling
 app.use(notFoundHandler);
