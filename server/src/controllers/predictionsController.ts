@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { MLPredictionService } from '@/services/mlPredictionService.js';
-import { logger } from '@/utils/logger.js';
 import { AppError } from '@/middleware/errorHandler.js';
 
 export class PredictionsController {
@@ -10,14 +9,20 @@ export class PredictionsController {
    */
   static async getPredictionForRoad(req: Request, res: Response, next: NextFunction) {
     try {
-      const roadId = parseInt(req.params.id, 10);
+      const idParam = req.params.id;
+      if (typeof idParam !== 'string') {
+        throw new AppError(400, 'Invalid road ID parameter');
+      }
+
+      const roadId = parseInt(idParam, 10);
 
       if (isNaN(roadId) || roadId <= 0) {
         throw new AppError(400, 'Invalid road ID');
       }
 
-      const timestamp = req.query.timestamp
-        ? new Date(req.query.timestamp as string)
+      const timestampParam = req.query.timestamp;
+      const timestamp = timestampParam && typeof timestampParam === 'string'
+        ? new Date(timestampParam)
         : undefined;
 
       // Check ML service health
@@ -100,8 +105,9 @@ export class PredictionsController {
    */
   static async getAllPredictions(req: Request, res: Response, next: NextFunction) {
     try {
-      const timestamp = req.query.timestamp
-        ? new Date(req.query.timestamp as string)
+      const timestampParam = req.query.timestamp;
+      const timestamp = timestampParam && typeof timestampParam === 'string'
+        ? new Date(timestampParam)
         : undefined;
 
       // Check ML service health

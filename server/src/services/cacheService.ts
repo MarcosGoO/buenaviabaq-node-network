@@ -181,6 +181,7 @@ export class CacheService {
     EVENTS: 'events',
     ANALYTICS: 'analytics',
     GEO: 'geo',
+    PREDICTIONS: 'predictions',
   } as const;
 
   /**
