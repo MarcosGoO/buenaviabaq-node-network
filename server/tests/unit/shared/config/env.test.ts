@@ -26,15 +26,26 @@ describe('Environment Configuration', () => {
   it('should have computed DATABASE_URL', async () => {
     const { config } = await import('../../../../src/shared/config/env.js');
 
+    // Validate DATABASE_URL format
     expect(config.DATABASE_URL).toContain('postgresql://');
-    expect(config.DATABASE_URL).toMatch(/postgres:\/\/.+@.+:\d+\/.+/);
+
+    // Validate it contains required components (credentials may be masked in CI)
+    expect(config.DATABASE_URL).toMatch(/postgresql:\/\/.+/);
+    expect(config.DATABASE_URL).toContain('localhost');
+    expect(config.DATABASE_URL).toContain(':5432');
+    expect(config.DATABASE_URL).toContain('viabaq');
   });
 
   it('should have computed REDIS_URL', async () => {
     const { config } = await import('../../../../src/shared/config/env.js');
 
+    // Validate REDIS_URL format
     expect(config.REDIS_URL).toContain('redis://');
+
+    // Validate it contains required components
     expect(config.REDIS_URL).toMatch(/redis:\/\/.+:\d+\/\d+/);
+    expect(config.REDIS_URL).toContain('localhost');
+    expect(config.REDIS_URL).toContain(':6379');
   });
 
   it('should set feature flags correctly', async () => {
