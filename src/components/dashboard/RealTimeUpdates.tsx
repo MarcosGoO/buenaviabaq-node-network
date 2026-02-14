@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSocketIO } from '@/hooks/useSocketIO';
-import { Bell, CheckCircle2, WifiOff, Wifi, X } from 'lucide-react';
+import { Bell, WifiOff, Wifi, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Update {
@@ -16,6 +16,60 @@ export default function RealTimeUpdates() {
   const { socket, isConnected, subscribe, unsubscribe } = useSocketIO();
   const [updates, setUpdates] = useState<Update[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const getUpdateTypeLabel = React.useCallback((type: string) => {
+    switch (type) {
+      case 'traffic':
+        return 'Actualización de Tráfico';
+      case 'weather':
+        return 'Actualización de Clima';
+      case 'event':
+        return 'Nuevo Evento';
+      default:
+        return 'Actualización';
+    }
+  }, []);
+
+  const showToast = React.useCallback((update: Update) => {
+    // Create a temporary toast element
+    const toast = document.createElement('div');
+    toast.className = cn(
+      'fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg',
+      'bg-background border-2 border-primary',
+      'transform transition-all duration-300',
+      'animate-in slide-in-from-bottom-5'
+    );
+    toast.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+        <div>
+          <p class="font-semibold text-sm">${getUpdateTypeLabel(update.type)}</p>
+          <p class="text-xs text-muted-foreground">${update.message}</p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Remove after 4 seconds
+    setTimeout(() => {
+      toast.classList.add('animate-out', 'slide-out-to-bottom-5');
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }, [getUpdateTypeLabel]);
+
+  const addUpdate = React.useCallback((update: Update) => {
+    setUpdates((prev) => [update, ...prev].slice(0, 10)); // Keep only last 10
+    setShowNotifications(true);
+
+    // Show toast notification
+    showToast(update);
+
+    // Auto-hide notification indicator after 3 seconds
+    setTimeout(() => {
+      setShowNotifications(false);
+    }, 3000);
+  }, [showToast]);
 
   useEffect(() => {
     if (!socket) return;
@@ -66,61 +120,7 @@ export default function RealTimeUpdates() {
       socket.off('weather:update');
       socket.off('event:notification');
     };
-  }, [socket, subscribe, unsubscribe]);
-
-  const addUpdate = (update: Update) => {
-    setUpdates((prev) => [update, ...prev].slice(0, 10)); // Keep only last 10
-    setShowNotifications(true);
-
-    // Show toast notification
-    showToast(update);
-
-    // Auto-hide notification indicator after 3 seconds
-    setTimeout(() => {
-      setShowNotifications(false);
-    }, 3000);
-  };
-
-  const showToast = (update: Update) => {
-    // Create a temporary toast element
-    const toast = document.createElement('div');
-    toast.className = cn(
-      'fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg',
-      'bg-background border-2 border-primary',
-      'transform transition-all duration-300',
-      'animate-in slide-in-from-bottom-5'
-    );
-    toast.innerHTML = `
-      <div class="flex items-center gap-3">
-        <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-        <div>
-          <p class="font-semibold text-sm">${getUpdateTypeLabel(update.type)}</p>
-          <p class="text-xs text-muted-foreground">${update.message}</p>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(toast);
-
-    // Remove after 4 seconds
-    setTimeout(() => {
-      toast.classList.add('animate-out', 'slide-out-to-bottom-5');
-      setTimeout(() => toast.remove(), 300);
-    }, 4000);
-  };
-
-  const getUpdateTypeLabel = (type: string) => {
-    switch (type) {
-      case 'traffic':
-        return 'Actualización de Tráfico';
-      case 'weather':
-        return 'Actualización de Clima';
-      case 'event':
-        return 'Nuevo Evento';
-      default:
-        return 'Actualización';
-    }
-  };
+  }, [socket, subscribe, unsubscribe, addUpdate]);
 
   const getUpdateTypeColor = (type: string) => {
     switch (type) {

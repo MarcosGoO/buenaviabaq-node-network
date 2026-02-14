@@ -30,6 +30,7 @@ const CardPrimitive = React.forwardRef<
         {...props}
     />
 ))
+CardPrimitive.displayName = "CardPrimitive"
 
 const CardHeader = React.forwardRef<
     HTMLDivElement,

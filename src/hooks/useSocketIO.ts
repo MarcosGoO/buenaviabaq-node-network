@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
@@ -13,11 +13,13 @@ interface UseSocketIOReturn {
 }
 
 export function useSocketIO(): UseSocketIOReturn {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Create socket connection
+    // Create socket connection only if it doesn't exist
+    if (socketRef.current) return;
+
     const socketInstance = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -40,52 +42,53 @@ export function useSocketIO(): UseSocketIOReturn {
       console.error('Socket.IO connection error:', error);
     });
 
-    setSocket(socketInstance);
+    socketRef.current = socketInstance;
 
     // Cleanup on unmount
     return () => {
       socketInstance.disconnect();
+      socketRef.current = null;
     };
   }, []);
 
   const subscribe = useCallback((channel: string) => {
-    if (!socket) return;
+    if (!socketRef.current) return;
 
     switch (channel) {
       case 'traffic':
-        socket.emit('subscribe:traffic');
+        socketRef.current.emit('subscribe:traffic');
         break;
       case 'weather':
-        socket.emit('subscribe:weather');
+        socketRef.current.emit('subscribe:weather');
         break;
       case 'events':
-        socket.emit('subscribe:events');
+        socketRef.current.emit('subscribe:events');
         break;
       default:
         console.warn(`Unknown channel: ${channel}`);
     }
-  }, [socket]);
+  }, []);
 
   const unsubscribe = useCallback((channel: string) => {
-    if (!socket) return;
+    if (!socketRef.current) return;
 
     switch (channel) {
       case 'traffic':
-        socket.emit('unsubscribe:traffic');
+        socketRef.current.emit('unsubscribe:traffic');
         break;
       case 'weather':
-        socket.emit('unsubscribe:weather');
+        socketRef.current.emit('unsubscribe:weather');
         break;
       case 'events':
-        socket.emit('unsubscribe:events');
+        socketRef.current.emit('unsubscribe:events');
         break;
       default:
         console.warn(`Unknown channel: ${channel}`);
     }
-  }, [socket]);
+  }, []);
 
   return {
-    socket,
+    socket: socketRef.current,
     isConnected,
     subscribe,
     unsubscribe,

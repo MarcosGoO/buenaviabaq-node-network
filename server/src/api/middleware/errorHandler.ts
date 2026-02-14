@@ -24,6 +24,7 @@ export const errorHandler = (
   err: Error | AppError | ZodError,
   req: Request,
   res: Response,
+   
   _next: NextFunction
 ) => {
   // Add request context to logger

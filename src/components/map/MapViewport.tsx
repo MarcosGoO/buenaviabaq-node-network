@@ -24,7 +24,7 @@ const ATLANTICO_BOUNDS: [number, number, number, number] = [
 
 export function MapViewport() {
     const [viewState, setViewState] = React.useState(BARRANQUILLA_COORDS)
-    const mapRef = React.useRef<any>(null)
+    const mapRef = React.useRef<maplibregl.Map | null>(null)
 
     const recenterMap = () => {
         setViewState(BARRANQUILLA_COORDS)
