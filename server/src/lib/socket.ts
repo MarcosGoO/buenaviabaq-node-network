@@ -90,6 +90,18 @@ export class SocketService {
         logger.debug(`Client ${socket.id} subscribed to event updates`);
       });
 
+      // Handle client subscribing to alert updates
+      socket.on('subscribe:alerts', () => {
+        void socket.join('alerts');
+        logger.debug(`Client ${socket.id} subscribed to alert updates`);
+      });
+
+      // Handle client subscribing to prediction updates
+      socket.on('subscribe:predictions', () => {
+        void socket.join('predictions');
+        logger.debug(`Client ${socket.id} subscribed to prediction updates`);
+      });
+
       // Handle disconnection
       socket.on('disconnect', (reason) => {
         logger.info(`Client disconnected: ${socket.id}, reason: ${reason}`);
@@ -169,6 +181,40 @@ export class SocketService {
     });
 
     logger.debug(`Emitted alert to zone:${zoneId}`);
+  }
+
+  /**
+   * Emit alert notification to all subscribed clients
+   */
+  static emitAlertNotification(alert: Record<string, unknown>) {
+    if (!this.io) {
+      logger.warn('Socket.IO not initialized');
+      return;
+    }
+
+    this.io.to('alerts').emit('alert:notification', {
+      timestamp: new Date().toISOString(),
+      alert,
+    });
+
+    logger.debug('Emitted alert notification to subscribers');
+  }
+
+  /**
+   * Emit prediction update to all subscribed clients
+   */
+  static emitPredictionUpdate(predictions: Record<string, unknown>) {
+    if (!this.io) {
+      logger.warn('Socket.IO not initialized');
+      return;
+    }
+
+    this.io.to('predictions').emit('prediction:update', {
+      timestamp: new Date().toISOString(),
+      predictions,
+    });
+
+    logger.debug('Emitted prediction update to subscribers');
   }
 
   /**

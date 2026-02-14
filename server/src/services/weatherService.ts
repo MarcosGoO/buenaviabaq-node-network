@@ -34,7 +34,7 @@ interface OpenWeatherResponse {
   name: string;
 }
 
-interface WeatherData {
+export interface WeatherData {
   temperature: number;
   feels_like: number;
   humidity: number;
@@ -45,6 +45,13 @@ interface WeatherData {
   icon: string;
   rain_probability: number;
   rain_1h?: number;
+  rain?: {
+    '1h': number;
+  };
+  weather?: Array<{
+    main: string;
+    description: string;
+  }>;
   pressure: number;
   cloudiness: number;
   location: string;

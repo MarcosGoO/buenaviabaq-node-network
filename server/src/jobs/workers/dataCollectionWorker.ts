@@ -3,6 +3,8 @@ import { logger } from '@/utils/logger.js';
 import { config } from '@/config/index.js';
 import { TrafficHistoryService } from '@/services/trafficHistoryService.js';
 import { WeatherHistoryService } from '@/services/weatherHistoryService.js';
+import { AlertService } from '@/services/alertService.js';
+import { SocketService } from '@/lib/socket.js';
 import { CacheService } from '@/services/cacheService.js';
 import { JobTypes, type JobType } from '../queues.js';
 
@@ -79,6 +81,42 @@ async function processWeatherCollection(): Promise<JobResult> {
 }
 
 /**
+ * Process alert detection
+ */
+async function processAlertDetection(): Promise<JobResult> {
+  try {
+    logger.info('Starting alert detection...');
+
+    // Detect all active alerts
+    const allAlerts = await AlertService.detectActiveAlerts();
+    const activeAlerts = AlertService.getActiveAlerts(allAlerts);
+
+    // Invalidate alerts cache
+    await CacheService.invalidateNamespace(CacheService.Namespaces.ALERTS);
+
+    // Emit alerts via Socket.IO
+    if (activeAlerts.length > 0) {
+      for (const alert of activeAlerts) {
+        SocketService.emitAlertNotification(alert as unknown as Record<string, unknown>);
+      }
+      logger.info(`Emitted ${activeAlerts.length} alert(s) via Socket.IO`);
+    }
+
+    logger.info('Alert detection completed successfully');
+
+    return {
+      success: true,
+      type: JobTypes.DETECT_ALERTS,
+      timestamp: new Date().toISOString(),
+      recordsProcessed: activeAlerts.length,
+    };
+  } catch (error) {
+    logger.error('Alert detection failed:', error);
+    throw error;
+  }
+}
+
+/**
  * Process all data collection tasks
  */
 async function processAllCollection(): Promise<JobResult> {
@@ -131,6 +169,9 @@ async function processJob(job: Job<JobData>): Promise<JobResult> {
 
     case JobTypes.COLLECT_ALL:
       return await processAllCollection();
+
+    case JobTypes.DETECT_ALERTS:
+      return await processAlertDetection();
 
     default:
       throw new Error(`Unknown job type: ${job.data.type}`);

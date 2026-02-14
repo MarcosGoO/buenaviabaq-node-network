@@ -61,6 +61,7 @@ export const JobTypes = {
   COLLECT_TRAFFIC: 'collect-traffic',
   COLLECT_WEATHER: 'collect-weather',
   COLLECT_ALL: 'collect-all',
+  DETECT_ALERTS: 'detect-alerts',
 } as const;
 
 export type JobType = (typeof JobTypes)[keyof typeof JobTypes];

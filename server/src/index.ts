@@ -17,6 +17,7 @@ import eventsRoutes from '@/routes/eventsRoutes.js';
 import analyticsRoutes from '@/routes/analyticsRoutes.js';
 import mlRoutes from '@/routes/mlRoutes.js';
 import predictionsRoutes from '@/routes/predictionsRoutes.js';
+import alertsRoutes from '@/routes/alertsRoutes.js';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -80,6 +81,7 @@ app.use(`/api/${config.API_VERSION}/events`, eventsRoutes);
 app.use(`/api/${config.API_VERSION}/analytics`, analyticsRoutes);
 app.use(`/api/${config.API_VERSION}/ml`, mlRoutes);
 app.use(`/api/${config.API_VERSION}/predictions`, predictionsRoutes);
+app.use(`/api/${config.API_VERSION}/alerts`, alertsRoutes);
 
 // Error handling
 app.use(notFoundHandler);

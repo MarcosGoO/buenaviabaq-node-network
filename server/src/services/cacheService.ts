@@ -22,7 +22,8 @@ export class CacheService {
   /**
    * Get value from cache
    */
-  static async get<T>(key: string, options: CacheOptions = {}): Promise<T | null> {
+  static async get<T>(key: string, namespace?: string): Promise<T | null> {
+    const options: CacheOptions = { namespace };
     try {
       const fullKey = this.buildKey(key, options.namespace);
       const cached = await redis.get(fullKey);
@@ -46,8 +47,10 @@ export class CacheService {
   static async set<T>(
     key: string,
     value: T,
-    options: CacheOptions = {}
+    ttl?: number,
+    namespace?: string
   ): Promise<boolean> {
+    const options: CacheOptions = { ttl, namespace };
     try {
       const fullKey = this.buildKey(key, options.namespace);
       const ttl = options.ttl || this.DEFAULT_TTL;
@@ -100,7 +103,7 @@ export class CacheService {
     options: CacheOptions = {}
   ): Promise<T> {
     // Try to get from cache first
-    const cached = await this.get<T>(key, options);
+    const cached = await this.get<T>(key, options.namespace);
     if (cached !== null) {
       return cached;
     }
@@ -109,7 +112,7 @@ export class CacheService {
     const data = await callback();
 
     // Cache the result
-    await this.set(key, data, options);
+    await this.set(key, data, options.ttl, options.namespace);
 
     return data;
   }
@@ -182,6 +185,7 @@ export class CacheService {
     ANALYTICS: 'analytics',
     GEO: 'geo',
     PREDICTIONS: 'predictions',
+    ALERTS: 'alerts',
   } as const;
 
   /**

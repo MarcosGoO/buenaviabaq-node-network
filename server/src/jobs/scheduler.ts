@@ -22,12 +22,23 @@ export class JobScheduler {
       }
     }, 5 * 60 * 1000); // 5 minutes
 
+    // Schedule alert detection every 2 minutes
+    const alertInterval = setInterval(async () => {
+      try {
+        await this.scheduleAlertDetection();
+      } catch (error) {
+        logger.error('Error scheduling alert detection:', error);
+      }
+    }, 2 * 60 * 1000); // 2 minutes
+
     this.intervals.push(collectionInterval);
+    this.intervals.push(alertInterval);
 
     // Run immediately on startup
     await this.scheduleDataCollection();
+    await this.scheduleAlertDetection();
 
-    logger.info('Job scheduler started - collecting data every 5 minutes');
+    logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes');
   }
 
   /**
@@ -98,6 +109,30 @@ export class JobScheduler {
       logger.info(`Scheduled weather collection job: ${job.id}`);
     } catch (error) {
       logger.error('Failed to schedule weather collection:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Schedule an alert detection job
+   */
+  static async scheduleAlertDetection(): Promise<void> {
+    try {
+      const job = await dataCollectionQueue.add(
+        JobTypes.DETECT_ALERTS,
+        {
+          type: JobTypes.DETECT_ALERTS,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          jobId: `detect-alerts-${Date.now()}`,
+          priority: 2, // High priority for alerts
+        }
+      );
+
+      logger.info(`Scheduled alert detection job: ${job.id}`);
+    } catch (error) {
+      logger.error('Failed to schedule alert detection:', error);
       throw error;
     }
   }

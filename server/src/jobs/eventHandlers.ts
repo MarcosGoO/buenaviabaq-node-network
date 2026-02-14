@@ -2,6 +2,7 @@ import { dataCollectionEvents } from './queues.js';
 import { SocketService } from '@/lib/socket.js';
 import { TrafficService } from '@/services/trafficService.js';
 import { WeatherService } from '@/services/weatherService.js';
+import { AlertService } from '@/services/alertService.js';
 import { logger } from '@/utils/logger.js';
 import { JobTypes, type JobType } from './queues.js';
 
@@ -46,6 +47,7 @@ export function setupJobEventHandlers() {
         case JobTypes.COLLECT_ALL:
           await emitTrafficUpdate();
           await emitWeatherUpdate();
+          await emitAlertUpdate(); // Check for new alerts after data collection
           break;
       }
     } catch (error) {
@@ -54,6 +56,27 @@ export function setupJobEventHandlers() {
   });
 
   logger.info('Job event handlers configured');
+}
+
+/**
+ * Emit alert update via Socket.IO
+ */
+async function emitAlertUpdate() {
+  try {
+    const alerts = await AlertService.detectActiveAlerts();
+    const activeAlerts = AlertService.getActiveAlerts(alerts);
+
+    // Emit all active alerts
+    if (activeAlerts.length > 0) {
+      for (const alert of activeAlerts) {
+        SocketService.emitAlertNotification(alert as unknown as Record<string, unknown>);
+      }
+
+      logger.debug(`Emitted ${activeAlerts.length} alert(s) via Socket.IO`);
+    }
+  } catch (error) {
+    logger.error('Error emitting alert update:', error);
+  }
 }
 
 /**
