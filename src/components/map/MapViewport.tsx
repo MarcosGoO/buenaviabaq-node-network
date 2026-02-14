@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import Map, { NavigationControl, type ViewStateChangeEvent } from 'react-map-gl/maplibre'
+import Map, { NavigationControl, type ViewStateChangeEvent, type MapRef } from 'react-map-gl/maplibre'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TimeTraveler } from "@/components/ui/time-traveler"
@@ -24,7 +24,7 @@ const ATLANTICO_BOUNDS: [number, number, number, number] = [
 
 export function MapViewport() {
     const [viewState, setViewState] = React.useState(BARRANQUILLA_COORDS)
-    const mapRef = React.useRef<maplibregl.Map | null>(null)
+    const mapRef = React.useRef<MapRef>(null)
 
     const recenterMap = () => {
         setViewState(BARRANQUILLA_COORDS)
