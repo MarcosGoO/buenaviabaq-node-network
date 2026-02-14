@@ -58,6 +58,33 @@ services:
       timeout: 5s
       retries: 5
 
+  # ML Service (Python FastAPI)
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: viabaq-ml-service
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/viabaq_db
+      ML_SERVICE_PORT: 8000
+      ML_SERVICE_HOST: 0.0.0.0
+      ENVIRONMENT: production
+    ports:
+      - "8000:8000"
+    networks:
+      - viabaq-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ml_models:/app/models
+
   # pgAdmin (optional - for database management UI)
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -81,6 +108,8 @@ volumes:
   timescale_data:
     driver: local
   redis_data:
+    driver: local
+  ml_models:
     driver: local
 
 networks:
