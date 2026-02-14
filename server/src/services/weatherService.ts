@@ -85,6 +85,10 @@ interface ForecastData {
   }>;
 }
 
+interface OpenWeatherForecastResponse {
+  list: ForecastItem[];
+}
+
 export class WeatherService {
   private static readonly OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
@@ -112,7 +116,7 @@ export class WeatherService {
         throw new AppError(response.status, `OpenWeather API error: ${response.statusText}`);
       }
 
-      const data: OpenWeatherResponse = await response.json();
+      const data = await response.json() as OpenWeatherResponse;
 
       return {
         temperature: Math.round(data.main.temp),
@@ -163,7 +167,7 @@ export class WeatherService {
         throw new AppError(response.status, 'Failed to fetch forecast');
       }
 
-      const data = await response.json();
+      const data = await response.json() as OpenWeatherForecastResponse;
 
       // Process and return simplified forecast
       return {

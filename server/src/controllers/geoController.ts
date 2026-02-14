@@ -26,7 +26,7 @@ export class GeoController {
   // GET /api/v1/geo/zones/:id
   static async getZoneById(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(String(req.params.id), 10);
 
       if (isNaN(id)) {
         throw new AppError(400, 'Invalid zone ID');

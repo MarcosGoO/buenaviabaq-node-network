@@ -43,7 +43,7 @@ export class TrafficController {
   // GET /api/v1/traffic/road/:id
   static async getTrafficByRoadId(req: Request, res: Response, next: NextFunction) {
     try {
-      const roadId = parseInt(req.params.id, 10);
+      const roadId = parseInt(String(req.params.id), 10);
 
       if (isNaN(roadId)) {
         return res.status(400).json({

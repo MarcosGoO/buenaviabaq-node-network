@@ -86,7 +86,7 @@ export class AnalyticsController {
   // GET /api/v1/analytics/compare/:road_id
   static async compareToHistorical(req: Request, res: Response, next: NextFunction) {
     try {
-      const roadId = parseInt(req.params.road_id, 10);
+      const roadId = parseInt(String(req.params.road_id), 10);
 
       if (isNaN(roadId)) {
         return res.status(400).json({
@@ -171,7 +171,7 @@ export class AnalyticsController {
   // GET /api/v1/analytics/road-history/:road_id?start=2026-02-01&end=2026-02-13
   static async getRoadHistory(req: Request, res: Response, next: NextFunction) {
     try {
-      const roadId = parseInt(req.params.road_id, 10);
+      const roadId = parseInt(String(req.params.road_id), 10);
       const startTime = req.query.start as string || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const endTime = req.query.end as string || new Date().toISOString();
 
@@ -201,7 +201,7 @@ export class AnalyticsController {
   // GET /api/v1/analytics/road-stats/:road_id?days=7
   static async getRoadStats(req: Request, res: Response, next: NextFunction) {
     try {
-      const roadId = parseInt(req.params.road_id, 10);
+      const roadId = parseInt(String(req.params.road_id), 10);
       const days = req.query.days ? parseInt(req.query.days as string, 10) : 7;
 
       if (isNaN(roadId)) {

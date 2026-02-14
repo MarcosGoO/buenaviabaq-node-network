@@ -3,7 +3,17 @@ import { SocketService } from '@/lib/socket.js';
 import { TrafficService } from '@/services/trafficService.js';
 import { WeatherService } from '@/services/weatherService.js';
 import { logger } from '@/utils/logger.js';
-import { JobTypes } from './queues.js';
+import { JobTypes, type JobType } from './queues.js';
+
+/**
+ * Job result interface
+ */
+interface JobResult {
+  success: boolean;
+  type: JobType;
+  timestamp: string;
+  recordsProcessed: number;
+}
 
 /**
  * Setup event handlers to emit Socket.IO events when jobs complete
@@ -12,14 +22,19 @@ export function setupJobEventHandlers() {
   // Handle job completion
   dataCollectionEvents.on('completed', async ({ jobId, returnvalue }) => {
     try {
-      if (!returnvalue || !returnvalue.success) {
+      // Parse the returnvalue (BullMQ serializes it as string)
+      const result: JobResult = typeof returnvalue === 'string'
+        ? JSON.parse(returnvalue)
+        : returnvalue as JobResult;
+
+      if (!result || !result.success) {
         return;
       }
 
       logger.info(`Job ${jobId} completed, emitting real-time updates...`);
 
       // Emit updates based on job type
-      switch (returnvalue.type) {
+      switch (result.type) {
         case JobTypes.COLLECT_TRAFFIC:
           await emitTrafficUpdate();
           break;
@@ -67,7 +82,7 @@ async function emitWeatherUpdate() {
   try {
     const weather = await WeatherService.getCurrentWeather();
 
-    SocketService.emitWeatherUpdate(weather);
+    SocketService.emitWeatherUpdate(weather as unknown as Record<string, unknown>);
 
     logger.debug('Emitted weather update via Socket.IO');
   } catch (error) {

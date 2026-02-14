@@ -81,7 +81,7 @@ export class EventsController {
   // GET /api/v1/events/:id
   static async getEventById(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(String(req.params.id), 10);
 
       if (isNaN(id)) {
         return res.status(400).json({
@@ -159,7 +159,7 @@ export class EventsController {
   // PUT /api/v1/events/:id
   static async updateEvent(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(String(req.params.id), 10);
 
       if (isNaN(id)) {
         return res.status(400).json({
@@ -196,7 +196,7 @@ export class EventsController {
   // DELETE /api/v1/events/:id
   static async deleteEvent(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(String(req.params.id), 10);
 
       if (isNaN(id)) {
         return res.status(400).json({
