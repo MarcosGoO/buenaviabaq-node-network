@@ -29,11 +29,13 @@ app.use(cors({
   credentials: true,
 }));
 
-// Rate limiting
+// Rate limiting - more permissive in development for hot-reload
 const limiter = rateLimit({
   windowMs: config.RATE_LIMIT_WINDOW_MS,
-  max: config.RATE_LIMIT_MAX_REQUESTS,
+  max: config.NODE_ENV === 'development' ? 500 : config.RATE_LIMIT_MAX_REQUESTS, // 500 in dev, 100 in prod
   message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use(`/api/${config.API_VERSION}`, limiter);
 

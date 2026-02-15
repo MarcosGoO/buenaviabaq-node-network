@@ -32,6 +32,12 @@ export function useZonesData(): UseZonesDataReturn {
         const response = await fetch(`${apiUrl}/geo/zones`);
 
         if (!response.ok) {
+          // If rate limited, just log and continue with empty state
+          if (response.status === 429) {
+            console.warn('Rate limited - zones will load on next retry');
+            setError('Rate limited - retrying soon');
+            return;
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 

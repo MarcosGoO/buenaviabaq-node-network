@@ -48,6 +48,13 @@ export function useTrafficData(): UseTrafficDataReturn {
       const response = await fetch(`${apiUrl}/traffic/realtime`);
 
       if (!response.ok) {
+        // If rate limited, just log and continue with existing state
+        if (response.status === 429) {
+          console.warn('Rate limited - traffic will load on next retry');
+          setError('Rate limited - retrying soon');
+          setIsLoading(false);
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -64,6 +71,8 @@ export function useTrafficData(): UseTrafficDataReturn {
         if (summaryData.success && summaryData.data) {
           setSummary(summaryData.data);
         }
+      } else if (summaryResponse.status === 429) {
+        console.warn('Rate limited on traffic summary');
       }
     } catch (err) {
       console.error('Failed to fetch traffic data:', err);
