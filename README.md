@@ -28,7 +28,7 @@ VíaBaq is a **production-ready** urban mobility platform that combines real-tim
 - Interactive map with real-time traffic visualization
 - Weather-based traffic predictions
 - **Smart Alert System** with 4 alert types (arroyo floods, congestion, weather impact, events)
-- Arroyo flood warnings integration
+- flood warnings integration
 - Event-based congestion alerts
 - **Real-time WebSocket notifications** 
 
