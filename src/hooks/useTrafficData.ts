@@ -60,7 +60,8 @@ export function useTrafficData(): UseTrafficDataReturn {
 
       const data = await response.json();
 
-      if (data.success && data.data) {
+      // Backend returns status: "success" not success: true
+      if ((data.success || data.status === 'success') && data.data) {
         setRoads(data.data);
       }
 
@@ -68,7 +69,7 @@ export function useTrafficData(): UseTrafficDataReturn {
       const summaryResponse = await fetch(`${apiUrl}/traffic/summary`);
       if (summaryResponse.ok) {
         const summaryData = await summaryResponse.json();
-        if (summaryData.success && summaryData.data) {
+        if ((summaryData.success || summaryData.status === 'success') && summaryData.data) {
           setSummary(summaryData.data);
         }
       } else if (summaryResponse.status === 429) {

@@ -46,7 +46,8 @@ export function useZonesData(): UseZonesDataReturn {
         const data = await response.json();
         console.log('📍 Raw API response:', data);
 
-        if (data.success && data.data) {
+        // Backend returns status: "success" not success: true
+        if ((data.success || data.status === 'success') && data.data) {
           console.log('✅ Successfully loaded zones:', data.data.length);
           setZones(data.data);
         } else {
