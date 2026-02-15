@@ -21,6 +21,7 @@ node_modules/
 .env.production.local
 .env*.local
 *.env
+NEXT_CHAT_START.md.bak
 
 # ============ BUILD OUTPUT ============
 # Frontend (Next.js)
