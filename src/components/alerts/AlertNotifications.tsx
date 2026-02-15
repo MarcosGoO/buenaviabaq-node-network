@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAlerts, type Alert } from '@/hooks/useAlerts';
-import { X, AlertTriangle, AlertCircle, Info } from 'lucide-react';
+import { X, AlertTriangle, AlertCircle, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AlertNotificationProps {
   maxVisible?: number;
@@ -10,16 +10,21 @@ interface AlertNotificationProps {
 }
 
 export function AlertNotifications({
-  maxVisible = 5,
+  maxVisible = 3,
   position = 'top-right'
 }: AlertNotificationProps) {
-  const { alerts, isConnected, dismissAlert } = useAlerts();
+  const { alerts, isConnected, dismissAlert, clearAll } = useAlerts();
   const [visibleAlerts, setVisibleAlerts] = useState<Alert[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
-    // Show only the most recent alerts up to maxVisible
-    setVisibleAlerts(alerts.slice(0, maxVisible));
-  }, [alerts, maxVisible]);
+    if (isExpanded) {
+      setVisibleAlerts(alerts);
+    } else {
+      setVisibleAlerts(alerts.slice(0, maxVisible));
+    }
+  }, [alerts, maxVisible, isExpanded]);
 
   // Auto-dismiss non-critical alerts after 10 seconds
   useEffect(() => {
@@ -83,79 +88,139 @@ export function AlertNotifications({
     }
   };
 
-  if (visibleAlerts.length === 0) {
+  if (alerts.length === 0 && isConnected) {
     return null;
+  }
+
+  if (isMinimized) {
+    return (
+      <div
+        className={`fixed ${getPositionStyles()} z-[9999] flex items-center gap-2`}
+        role="alert"
+        aria-live="polite"
+      >
+        <button
+          onClick={() => setIsMinimized(false)}
+          className="bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2 hover:bg-gray-700 transition-colors"
+        >
+          <AlertCircle className="w-4 h-4" />
+          {alerts.length} alerta{alerts.length !== 1 ? 's' : ''}
+          <ChevronUp className="w-4 h-4" />
+        </button>
+      </div>
+    );
   }
 
   return (
     <div
-      className={`fixed ${getPositionStyles()} z-50 flex flex-col gap-3 w-96 max-w-[calc(100vw-2rem)]`}
+      className={`fixed ${getPositionStyles()} z-[9999] flex flex-col gap-2 w-96 max-w-[calc(100vw-2rem)]`}
       role="alert"
       aria-live="polite"
     >
-      {/* Connection status indicator */}
-      {!isConnected && (
-        <div className="bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2">
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" />
-          Reconectando...
+      {/* Header */}
+      {alerts.length > 0 && (
+        <div className="bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            <span className="font-medium">
+              {alerts.length} alerta{alerts.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {alerts.length > maxVisible && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="hover:opacity-70 transition-opacity"
+                aria-label={isExpanded ? "Mostrar menos" : "Mostrar todas"}
+              >
+                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+            )}
+            <button
+              onClick={() => setIsMinimized(true)}
+              className="hover:opacity-70 transition-opacity"
+              aria-label="Minimizar alertas"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            <button
+              onClick={clearAll}
+              className="hover:opacity-70 transition-opacity"
+              aria-label="Cerrar todas"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Alert notifications */}
-      {visibleAlerts.map((alert) => (
-        <div
-          key={alert.id}
-          className={`
-            ${getSeverityStyles(alert.severity)}
-            border-l-4 rounded-lg shadow-lg p-4
-            transform transition-all duration-300 ease-in-out
-            hover:scale-[1.02] hover:shadow-xl
-          `}
-        >
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-0.5">
-              {getSeverityIcon(alert.severity)}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <h4 className="font-semibold text-sm">
-                  {alert.title}
-                </h4>
-                <button
-                  onClick={() => dismissAlert(alert.id)}
-                  className="flex-shrink-0 hover:opacity-70 transition-opacity"
-                  aria-label="Descartar alerta"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+      {/* Alert list with scroll */}
+      <div className={`flex flex-col gap-2 ${isExpanded ? 'max-h-[70vh] overflow-y-auto' : ''}`}>
+        {visibleAlerts.map((alert) => (
+          <div
+            key={alert.id}
+            className={`
+              ${getSeverityStyles(alert.severity)}
+              border-l-4 rounded-lg shadow-lg p-4
+              transform transition-all duration-300 ease-in-out
+              hover:scale-[1.02] hover:shadow-xl
+            `}
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                {getSeverityIcon(alert.severity)}
               </div>
 
-              <p className="text-sm mt-1 opacity-90">
-                {alert.description}
-              </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="font-semibold text-sm">
+                    {alert.title}
+                  </h4>
+                  <button
+                    onClick={() => dismissAlert(alert.id)}
+                    className="flex-shrink-0 hover:opacity-70 transition-opacity"
+                    aria-label="Descartar alerta"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
 
-              {/* Metadata */}
-              <div className="flex items-center gap-4 mt-2 text-xs opacity-75">
-                <span className="capitalize">
-                  {alert.severity}
-                </span>
-                {alert.affectedZones.length > 0 && (
-                  <span>
-                    {alert.affectedZones.length} zona{alert.affectedZones.length !== 1 ? 's' : ''} afectada{alert.affectedZones.length !== 1 ? 's' : ''}
+                <p className="text-sm mt-1 opacity-90">
+                  {alert.description}
+                </p>
+
+                {/* Metadata */}
+                <div className="flex items-center gap-4 mt-2 text-xs opacity-75">
+                  <span className="capitalize">
+                    {alert.severity}
                   </span>
-                )}
-                <span>
-                  {new Date(alert.timestamp).toLocaleTimeString('es-MX', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
+                  {alert.affectedZones.length > 0 && (
+                    <span>
+                      {alert.affectedZones.length} zona{alert.affectedZones.length !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                  <span>
+                    {new Date(alert.timestamp).toLocaleTimeString('es-MX', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      {/* Show more indicator */}
+      {!isExpanded && alerts.length > maxVisible && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          className="bg-gray-700 text-white px-4 py-2 rounded-lg shadow-lg text-xs hover:bg-gray-600 transition-colors text-center"
+        >
+          Ver {alerts.length - maxVisible} más
+        </button>
+      )}
     </div>
   );
 }
