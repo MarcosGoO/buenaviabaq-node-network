@@ -14,17 +14,11 @@ export function AlertNotifications({
   position = 'top-right'
 }: AlertNotificationProps) {
   const { alerts, isConnected, dismissAlert, clearAll } = useAlerts();
-  const [visibleAlerts, setVisibleAlerts] = useState<Alert[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
-  useEffect(() => {
-    if (isExpanded) {
-      setVisibleAlerts(alerts);
-    } else {
-      setVisibleAlerts(alerts.slice(0, maxVisible));
-    }
-  }, [alerts, maxVisible, isExpanded]);
+  // Derive visibleAlerts directly from alerts instead of using state
+  const visibleAlerts = isExpanded ? alerts : alerts.slice(0, maxVisible);
 
   // Auto-dismiss non-critical alerts after 10 seconds
   useEffect(() => {

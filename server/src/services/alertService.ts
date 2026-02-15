@@ -2,7 +2,8 @@ import { logger } from '@/utils/logger.js';
 import { WeatherService } from './weatherService.js';
 import { TrafficService } from './trafficService.js';
 import { GeoService } from './geoService.js';
-import { EventsService, type Event } from './eventsService.js';
+import { EventsService } from './eventsService.js';
+import type { Event } from './eventsService.js';
 
 export enum AlertType {
   ARROYO_FLOOD_RISK = 'arroyo_flood_risk',
