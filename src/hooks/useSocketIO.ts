@@ -8,8 +8,8 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000'
 interface UseSocketIOReturn {
   socket: Socket | null;
   isConnected: boolean;
-  subscribe: (channel: string) => void;
-  unsubscribe: (channel: string) => void;
+  subscribe: (channel: string, data?: unknown) => void;
+  unsubscribe: (channel: string, data?: unknown) => void;
 }
 
 // Store socket instance outside component
@@ -74,7 +74,7 @@ export function useSocketIO(): UseSocketIOReturn {
     };
   }, []);
 
-  const subscribe = useCallback((channel: string) => {
+  const subscribe = useCallback((channel: string, data?: unknown) => {
     if (!socketInstance) return;
 
     switch (channel) {
@@ -87,12 +87,23 @@ export function useSocketIO(): UseSocketIOReturn {
       case 'events':
         socketInstance.emit('subscribe:events');
         break;
+      case 'alerts':
+        socketInstance.emit('subscribe:alerts');
+        break;
+      case 'predictions':
+        socketInstance.emit('subscribe:predictions');
+        break;
+      case 'zone':
+        if (typeof data === 'number') {
+          socketInstance.emit('subscribe:zone', data);
+        }
+        break;
       default:
         console.warn(`Unknown channel: ${channel}`);
     }
   }, []);
 
-  const unsubscribe = useCallback((channel: string) => {
+  const unsubscribe = useCallback((channel: string, data?: unknown) => {
     if (!socketInstance) return;
 
     switch (channel) {
@@ -104,6 +115,17 @@ export function useSocketIO(): UseSocketIOReturn {
         break;
       case 'events':
         socketInstance.emit('unsubscribe:events');
+        break;
+      case 'alerts':
+        socketInstance.emit('unsubscribe:alerts');
+        break;
+      case 'predictions':
+        socketInstance.emit('unsubscribe:predictions');
+        break;
+      case 'zone':
+        if (typeof data === 'number') {
+          socketInstance.emit('unsubscribe:zone', data);
+        }
         break;
       default:
         console.warn(`Unknown channel: ${channel}`);
