@@ -89,7 +89,7 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                         onValueChange={handleSliderChange}
                         className="flex-1"
                     />
-                    <div className="flex justify-between text-[9px] text-muted-foreground/50 font-medium px-0.5">
+                    <div className="flex justify-between text-[9px] text-muted-foreground/50 font-medium px-0.5" suppressHydrationWarning>
                         <span>12 AM</span>
                         <span>6 AM</span>
                         <span>12 PM</span>
