@@ -288,6 +288,185 @@ curl "http://localhost:4000/api/v1/geo/zones/bounds?sw_lng=-74.85&sw_lat=10.95&n
 ```
 ---
 
+## Insights Endpoints (Sprint 6.1) 🆕
+
+### Get Executive Summary
+Returns comprehensive dashboard metrics for VíaBaq platform.
+
+```http
+GET /api/v1/insights/summary
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "system": {
+      "avg_speed_kmh": 42,
+      "overall_congestion_level": "moderate",
+      "total_active_roads": 20,
+      "monitored_zones": 12
+    },
+    "traffic": {
+      "current_avg_speed": 38,
+      "historical_avg_speed": 45,
+      "speed_change_percentage": -16,
+      "congestion_breakdown": {
+        "low": 5,
+        "moderate": 10,
+        "high": 4,
+        "severe": 1
+      },
+      "top_congested_roads": [
+        {
+          "road_id": 1,
+          "road_name": "Vía 40",
+          "speed_kmh": 25,
+          "congestion_level": "severe"
+        }
+      ]
+    },
+    "weather": {
+      "current_condition": "Clear",
+      "temperature_celsius": 30,
+      "rain_probability": 15,
+      "is_affecting_traffic": false,
+      "weather_impact_score": 25
+    },
+    "alerts": {
+      "total_active": 3,
+      "critical_count": 1,
+      "by_type": {
+        "arroyo_flood": 1,
+        "severe_congestion": 1,
+        "weather_traffic": 0,
+        "event_traffic": 1
+      },
+      "by_severity": {
+        "low": 0,
+        "medium": 1,
+        "high": 1,
+        "critical": 1
+      }
+    },
+    "arroyos": {
+      "total_zones": 8,
+      "high_risk_count": 3,
+      "medium_risk_count": 2,
+      "affected_zones": []
+    },
+    "predictions": {
+      "next_hour_trend": "stable",
+      "rush_hour_active": false,
+      "estimated_avg_travel_time_minutes": 18,
+      "confidence_score": 85
+    },
+    "generated_at": "2026-02-15T..."
+  },
+  "timestamp": "2026-02-15T...",
+  "cached": false
+}
+```
+
+**Cache:** 5 minutes
+
+---
+
+### Get Zone Insights
+Returns detailed insights for all zones or a specific zone.
+
+```http
+GET /api/v1/insights/zones
+GET /api/v1/insights/zones/:zone_id
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "zone_id": 1,
+      "zone_name": "Centro",
+      "avg_speed": 35,
+      "congestion_level": "moderate",
+      "total_roads": 15,
+      "active_alerts": 2,
+      "arroyo_risk_level": "high",
+      "travel_time_impact_percentage": 22
+    }
+  ],
+  "timestamp": "2026-02-15T..."
+}
+```
+
+**Cache:** 5 minutes
+
+---
+
+### Get Comparative Metrics
+Returns current vs historical performance metrics.
+
+```http
+GET /api/v1/insights/comparative?days=30
+```
+
+**Query Parameters:**
+- `days` (optional): Number of days for historical comparison (1-90, default: 30)
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "metric_name": "Average Speed (km/h)",
+      "current_value": 42,
+      "historical_value": 45,
+      "difference": -3,
+      "percentage_change": -7,
+      "trend": "down",
+      "is_favorable": false
+    },
+    {
+      "metric_name": "Average Travel Time (minutes)",
+      "current_value": 18,
+      "historical_value": 15,
+      "difference": 3,
+      "percentage_change": 20,
+      "trend": "up",
+      "is_favorable": false
+    }
+  ],
+  "timestamp": "2026-02-15T..."
+}
+```
+
+**Cache:** 10 minutes
+
+---
+
+### Clear Insights Cache
+Clears all cached insights data (useful for testing).
+
+```http
+POST /api/v1/insights/clear-cache
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "cleared": true
+  },
+  "timestamp": "2026-02-15T..."
+}
+```
+
+---
+
 ## Rate Limiting
 
 All endpoints are rate-limited:
@@ -309,6 +488,6 @@ Currently, all endpoints are public. Authentication will be added in future spri
 
 ---
 
-**Last Updated:** 2026-02-09
+**Last Updated:** 2026-02-15
 **API Version:** v1
-**Status:** ✅ Sprint 1.3 Complete
+**Status:** ✅ Sprint 6.1 - Dashboard Analytics Endpoints Added
