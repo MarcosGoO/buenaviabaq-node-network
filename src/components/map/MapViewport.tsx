@@ -6,6 +6,7 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TimeTraveler } from "@/components/ui/time-traveler"
 import { AlertsPanel } from "@/components/panels/AlertsPanel"
+import { TrafficLayer } from "@/components/map/TrafficLayer"
 import { Navigation2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -45,6 +46,7 @@ export function MapViewport() {
                 attributionControl={false}
                 reuseMaps
             >
+                <TrafficLayer />
                 <NavigationControl position="bottom-right" showCompass={false} visualizePitch={false} />
             </Map>
 

@@ -45,12 +45,13 @@ export function useSocketIO(): UseSocketIOReturn {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      timeout: 10000,
     });
 
     // Connection events
     newSocket.on('connect', () => {
-      console.log('✅ Socket.IO connected');
+      console.log('✅ Socket.IO connected to', SOCKET_URL);
       setIsConnected(true);
     });
 
@@ -60,7 +61,8 @@ export function useSocketIO(): UseSocketIOReturn {
     });
 
     newSocket.on('connect_error', (error) => {
-      console.error('Socket.IO connection error:', error);
+      console.error('❌ Socket.IO connection error:', error.message);
+      setIsConnected(false);
     });
 
     socketInstance = newSocket;
@@ -68,6 +70,7 @@ export function useSocketIO(): UseSocketIOReturn {
     // Cleanup only when no more subscribers
     return () => {
       if (subscribers === 0 && socketInstance) {
+        console.log('🔌 Closing socket connection');
         socketInstance.disconnect();
         socketInstance = null;
       }
