@@ -69,7 +69,7 @@ export function MapViewport() {
             <AlertsPanel />
 
             {/* Bottom left branding - fixed positioning */}
-            <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none">
+            <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none" suppressHydrationWarning>
                 BUENAVIA-BAQ © 2026
             </div>
         </div>

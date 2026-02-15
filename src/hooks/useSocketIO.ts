@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useSyncExternalStore } from 'react';
+import { useEffect, useCallback, useSyncExternalStore } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
@@ -12,15 +12,25 @@ interface UseSocketIOReturn {
   unsubscribe: (channel: string, data?: unknown) => void;
 }
 
-// Store socket instance outside component
+// Store socket instance and connection state outside component
 let socketInstance: Socket | null = null;
 let subscribers = 0;
+let isConnectedState = false;
+
+// Listeners for connection state changes
+const connectionListeners = new Set<() => void>();
 
 const getSocket = () => socketInstance;
+const getConnectionState = () => isConnectedState;
+
+const setConnectionState = (connected: boolean) => {
+  if (isConnectedState !== connected) {
+    isConnectedState = connected;
+    connectionListeners.forEach(listener => listener());
+  }
+};
 
 export function useSocketIO(): UseSocketIOReturn {
-  const [isConnected, setIsConnected] = useState(false);
-
   // Use useSyncExternalStore to safely access socket
   const socket = useSyncExternalStore(
     () => {
@@ -34,10 +44,22 @@ export function useSocketIO(): UseSocketIOReturn {
     getSocket
   );
 
+  // Use useSyncExternalStore for connection state
+  const isConnected = useSyncExternalStore(
+    (callback) => {
+      connectionListeners.add(callback);
+      return () => {
+        connectionListeners.delete(callback);
+      };
+    },
+    getConnectionState,
+    getConnectionState
+  );
+
   useEffect(() => {
     // Create socket connection only once
     if (socketInstance) {
-      setIsConnected(socketInstance.connected);
+      setConnectionState(socketInstance.connected);
       return;
     }
 
@@ -52,17 +74,17 @@ export function useSocketIO(): UseSocketIOReturn {
     // Connection events
     newSocket.on('connect', () => {
       console.log('✅ Socket.IO connected to', SOCKET_URL);
-      setIsConnected(true);
+      setConnectionState(true);
     });
 
     newSocket.on('disconnect', (reason) => {
       console.log('❌ Socket.IO disconnected:', reason);
-      setIsConnected(false);
+      setConnectionState(false);
     });
 
     newSocket.on('connect_error', (error) => {
       console.error('❌ Socket.IO connection error:', error.message);
-      setIsConnected(false);
+      setConnectionState(false);
     });
 
     socketInstance = newSocket;
@@ -73,6 +95,7 @@ export function useSocketIO(): UseSocketIOReturn {
         console.log('🔌 Closing socket connection');
         socketInstance.disconnect();
         socketInstance = null;
+        setConnectionState(false);
       }
     };
   }, []);

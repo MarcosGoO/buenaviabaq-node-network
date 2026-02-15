@@ -37,11 +37,12 @@ export function ConnectionStatus({
       className={`fixed ${getPositionStyles()} z-[9998] transition-all duration-300`}
       role="status"
       aria-live="polite"
+      suppressHydrationWarning
     >
-      <div className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg bg-red-50 text-red-700 border border-red-200">
+      <div className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg bg-red-50 text-red-700 border border-red-200" suppressHydrationWarning>
         <WifiOff className="w-4 h-4 animate-pulse" />
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+        <div className="flex items-center gap-2" suppressHydrationWarning>
+          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" suppressHydrationWarning />
           <span className="font-medium text-sm">Reconectando...</span>
         </div>
       </div>

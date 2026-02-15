@@ -39,7 +39,12 @@ export function useAlerts(): UseAlertsReturn {
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      console.log('⚠️ Socket not available for alerts');
+      return;
+    }
+
+    console.log('🚨 Setting up alerts subscription');
 
     // Subscribe to alerts channel
     subscribe('alerts');
@@ -47,13 +52,23 @@ export function useAlerts(): UseAlertsReturn {
     // Handle alert notifications
     const handleAlertNotification = (data: AlertNotification) => {
       console.log('🚨 Alert received:', data.alert);
+      console.log('🚨 Alert details:', {
+        id: data.alert.id,
+        title: data.alert.title,
+        severity: data.alert.severity,
+        timestamp: data.alert.timestamp
+      });
 
       setAlerts((prev) => {
         // Check if alert already exists
         const exists = prev.some(a => a.id === data.alert.id);
-        if (exists) return prev;
+        if (exists) {
+          console.log('ℹ️ Alert already exists, skipping');
+          return prev;
+        }
 
         // Add new alert at the beginning
+        console.log('✅ Adding new alert to list. Total alerts:', prev.length + 1);
         return [data.alert, ...prev];
       });
     };
@@ -62,15 +77,21 @@ export function useAlerts(): UseAlertsReturn {
 
     // Fetch initial alerts from REST API
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    console.log('🚨 Fetching initial alerts from:', `${apiUrl}/alerts/active`);
+
     fetch(`${apiUrl}/alerts/active`)
       .then(res => res.json())
       .then(data => {
+        console.log('🚨 Initial alerts response:', data);
         if (data.success && data.alerts) {
+          console.log('✅ Loaded', data.alerts.length, 'active alerts');
           setAlerts(data.alerts);
+        } else {
+          console.log('ℹ️ No active alerts found');
         }
       })
       .catch(error => {
-        console.error('Failed to fetch initial alerts:', error);
+        console.error('❌ Failed to fetch initial alerts:', error);
       });
 
     return () => {

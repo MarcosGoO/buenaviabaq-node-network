@@ -13,7 +13,7 @@ export function AlertNotifications({
   maxVisible = 3,
   position = 'top-right'
 }: AlertNotificationProps) {
-  const { alerts, isConnected, dismissAlert, clearAll } = useAlerts();
+  const { alerts, dismissAlert, clearAll } = useAlerts();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
@@ -82,7 +82,8 @@ export function AlertNotifications({
     }
   };
 
-  if (alerts.length === 0 && isConnected) {
+  // Only hide if there are no alerts - don't wait for connection
+  if (alerts.length === 0) {
     return null;
   }
 
@@ -110,6 +111,7 @@ export function AlertNotifications({
       className={`fixed ${getPositionStyles()} z-[9999] flex flex-col gap-2 w-96 max-w-[calc(100vw-2rem)]`}
       role="alert"
       aria-live="polite"
+      suppressHydrationWarning
     >
       {/* Header */}
       {alerts.length > 0 && (
@@ -149,7 +151,7 @@ export function AlertNotifications({
       )}
 
       {/* Alert list with scroll */}
-      <div className={`flex flex-col gap-2 ${isExpanded ? 'max-h-[70vh] overflow-y-auto' : ''}`}>
+      <div className={`flex flex-col gap-2 ${isExpanded ? 'max-h-[70vh] overflow-y-auto' : ''}`} suppressHydrationWarning>
         {visibleAlerts.map((alert) => (
           <div
             key={alert.id}

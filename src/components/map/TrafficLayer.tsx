@@ -6,14 +6,23 @@ import { useZonesData } from '@/hooks/useZonesData';
 import { useTrafficData } from '@/hooks/useTrafficData';
 
 export function TrafficLayer() {
-  const { zones, isLoading: zonesLoading } = useZonesData();
+  const { zones, isLoading: zonesLoading, error: zonesError } = useZonesData();
   const { roads, isLoading: trafficLoading } = useTrafficData();
 
   useEffect(() => {
-    if (!zonesLoading && zones.length > 0) {
-      console.log('📍 Loaded zones:', zones.length);
+    if (!zonesLoading) {
+      if (zones.length > 0) {
+        console.log('📍 Loaded zones:', zones.length);
+        console.log('📍 First zone:', zones[0]);
+        console.log('📍 First zone geometry:', JSON.stringify(zones[0]?.geometry, null, 2));
+      } else {
+        console.warn('⚠️ No zones loaded');
+      }
     }
-  }, [zones, zonesLoading]);
+    if (zonesError) {
+      console.error('❌ Error loading zones:', zonesError);
+    }
+  }, [zones, zonesLoading, zonesError]);
 
   useEffect(() => {
     if (!trafficLoading && roads.length > 0) {
@@ -21,7 +30,14 @@ export function TrafficLayer() {
     }
   }, [roads, trafficLoading]);
 
-  if (zonesLoading || zones.length === 0) {
+  // Don't block rendering - show what we can
+  if (zonesLoading) {
+    console.log('⏳ Zones still loading...');
+    return null;
+  }
+
+  if (zones.length === 0) {
+    console.warn('⚠️ No zones to render');
     return null;
   }
 
@@ -37,6 +53,8 @@ export function TrafficLayer() {
       geometry: zone.geometry as GeoJSON.Geometry,
     })),
   };
+
+  console.log('🗺️ Rendering zones GeoJSON:', JSON.stringify(zonesGeoJSON, null, 2).substring(0, 500) + '...');
 
   return (
     <>
