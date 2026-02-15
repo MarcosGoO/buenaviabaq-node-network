@@ -69,7 +69,15 @@ async function emitAlertUpdate() {
     // Emit all active alerts
     if (activeAlerts.length > 0) {
       for (const alert of activeAlerts) {
+        // Emit global alert notification
         SocketService.emitAlertNotification(alert as unknown as Record<string, unknown>);
+
+        // Also emit zone-specific alerts
+        if (alert.affectedZones && alert.affectedZones.length > 0) {
+          for (const zoneId of alert.affectedZones) {
+            SocketService.emitZoneAlert(zoneId, alert as unknown as Record<string, unknown>);
+          }
+        }
       }
 
       logger.debug(`Emitted ${activeAlerts.length} alert(s) via Socket.IO`);

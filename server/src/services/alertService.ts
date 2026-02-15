@@ -1,6 +1,7 @@
 import { logger } from '@/utils/logger.js';
 import { WeatherService } from './weatherService.js';
 import { TrafficService } from './trafficService.js';
+import { GeoService } from './geoService.js';
 import { EventsService, type Event } from './eventsService.js';
 
 export enum AlertType {
@@ -77,10 +78,6 @@ export class AlertService {
     try {
       const weather = await WeatherService.getCurrentWeather();
 
-      // Get arroyos from GeoService (assuming it has a method to get arroyos)
-      // For now, we'll skip this check if the method doesn't exist
-      // TODO: Implement GeoService.getArroyos() method
-
       const alerts: Alert[] = [];
 
       // Check if there's significant rainfall
@@ -92,9 +89,10 @@ export class AlertService {
         return alerts;
       }
 
-      // For now, create alert without specific arroyo zones
-      // TODO: Filter high-risk arroyos when GeoService.getArroyos() is implemented
-      if (isRaining) {
+      // Get high-risk arroyo zones
+      const highRiskArroyos = await GeoService.getArroyos('high');
+
+      if (highRiskArroyos.length > 0) {
         const severity = isHeavyRain ? AlertSeverity.CRITICAL : AlertSeverity.HIGH;
 
         const alert: Alert = {
@@ -102,18 +100,21 @@ export class AlertService {
           type: AlertType.ARROYO_FLOOD_RISK,
           severity,
           title: isHeavyRain ? 'CRITICAL: High Flood Risk in Arroyo Zones' : 'Flood Risk Warning',
-          description: `Heavy rainfall detected (${rainIntensity.toFixed(1)}mm/h). Arroyo zones may be affected. Avoid travel in flood-prone areas.`,
-          affectedZones: [],
+          description: `Heavy rainfall detected (${rainIntensity.toFixed(1)}mm/h). ${highRiskArroyos.length} high-risk arroyo zone(s) affected: ${highRiskArroyos.map(a => a.name).join(', ')}. Avoid travel in these areas.`,
+          affectedZones: highRiskArroyos.map(a => a.zone_id).filter((id): id is number => id !== null),
           timestamp: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours
           metadata: {
             weatherCondition: weather.weather?.[0]?.main || weather.condition,
             rainfall: rainIntensity,
+            affectedArroyoCount: highRiskArroyos.length,
+            arroyoNames: highRiskArroyos.map(a => a.name).join(', '),
+            arroyoIds: highRiskArroyos.map(a => a.id),
           },
         };
 
         alerts.push(alert);
-        logger.info(`Arroyo flood risk alert created: ${alert.id} (severity: ${severity})`);
+        logger.info(`Arroyo flood risk alert created: ${alert.id} (severity: ${severity}, ${highRiskArroyos.length} zones)`);
       }
 
       return alerts;
@@ -135,25 +136,37 @@ export class AlertService {
       const severeRoads = traffic.filter((road) => road.congestion_level === 'severe');
 
       if (severeRoads.length > 0) {
+        // Get affected zones by mapping roads to zones
+        const roadIds = severeRoads.map(r => r.road_id);
+        const roadZoneMap = await GeoService.getRoadsZones(roadIds);
+
+        // Collect all unique zone IDs
+        const affectedZones = Array.from(
+          new Set(
+            Array.from(roadZoneMap.values()).flat()
+          )
+        );
+
         const alert: Alert = {
           id: `congestion-severe-${Date.now()}`,
           type: AlertType.SEVERE_CONGESTION,
           severity: AlertSeverity.HIGH,
           title: 'Severe Traffic Congestion',
-          description: `${severeRoads.length} road(s) experiencing severe congestion. Consider alternate routes.`,
-          affectedZones: [], // Would need to map roads to zones
-          affectedRoads: severeRoads.map((r) => r.road_id),
+          description: `${severeRoads.length} road(s) experiencing severe congestion. ${affectedZones.length > 0 ? `Affecting ${affectedZones.length} zone(s).` : ''} Consider alternate routes.`,
+          affectedZones,
+          affectedRoads: roadIds,
           timestamp: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
           metadata: {
             congestionLevel: 'severe',
             affectedRoadCount: severeRoads.length,
             roadNames: severeRoads.map((r) => r.road_name).join(', '),
+            affectedZoneCount: affectedZones.length,
           },
         };
 
         alerts.push(alert);
-        logger.info(`Severe congestion alert created: ${alert.id}`);
+        logger.info(`Severe congestion alert created: ${alert.id} (${severeRoads.length} roads, ${affectedZones.length} zones)`);
       }
 
       return alerts;

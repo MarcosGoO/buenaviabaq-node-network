@@ -122,4 +122,37 @@ export class GeoService {
     `, [swLng, swLat, neLng, neLat]);
     return result.rows;
   }
+
+  // Alias for getArroyoZones (convenience method)
+  static async getArroyos(riskLevel?: string): Promise<ArroyoZone[]> {
+    return this.getArroyoZones(riskLevel);
+  }
+
+  // Get zone IDs that a road intersects with
+  static async getRoadZones(roadId: number): Promise<number[]> {
+    const result = await query(`
+      SELECT DISTINCT z.id
+      FROM geo.zones z
+      INNER JOIN geo.roads r ON ST_Intersects(z.geometry, r.geometry)
+      WHERE r.id = $1
+    `, [roadId]);
+    return result.rows.map(row => row.id);
+  }
+
+  // Get zones for multiple roads (batch operation)
+  static async getRoadsZones(roadIds: number[]): Promise<Map<number, number[]>> {
+    if (roadIds.length === 0) return new Map();
+
+    // Get zones for each road in parallel
+    const results = await Promise.all(
+      roadIds.map(roadId => this.getRoadZones(roadId))
+    );
+
+    const roadZoneMap = new Map<number, number[]>();
+    roadIds.forEach((roadId, index) => {
+      roadZoneMap.set(roadId, results[index]);
+    });
+
+    return roadZoneMap;
+  }
 }
