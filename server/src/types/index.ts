@@ -69,6 +69,7 @@ export interface ApiResponse<T> {
   data?: T;
   message?: string;
   timestamp: string;
+  cached?: boolean; // Indicates if response came from cache
 }
 
 // ML Feature Store Types
