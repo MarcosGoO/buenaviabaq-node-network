@@ -28,7 +28,8 @@ export function useZonesData(): UseZonesDataReturn {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/geo/zones`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+        const response = await fetch(`${apiUrl}/geo/zones`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

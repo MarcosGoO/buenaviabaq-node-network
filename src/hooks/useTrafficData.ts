@@ -44,7 +44,8 @@ export function useTrafficData(): UseTrafficDataReturn {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/traffic/realtime`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const response = await fetch(`${apiUrl}/traffic/realtime`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -57,7 +58,7 @@ export function useTrafficData(): UseTrafficDataReturn {
       }
 
       // Fetch summary
-      const summaryResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/traffic/summary`);
+      const summaryResponse = await fetch(`${apiUrl}/traffic/summary`);
       if (summaryResponse.ok) {
         const summaryData = await summaryResponse.json();
         if (summaryData.success && summaryData.data) {

@@ -61,7 +61,8 @@ export function useAlerts(): UseAlertsReturn {
     socket.on('alert:notification', handleAlertNotification);
 
     // Fetch initial alerts from REST API
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/v1/alerts/active`)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    fetch(`${apiUrl}/alerts/active`)
       .then(res => res.json())
       .then(data => {
         if (data.success && data.alerts) {
