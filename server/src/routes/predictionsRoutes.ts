@@ -14,6 +14,9 @@ router.get('/health', PredictionsController.checkMLServiceHealth);
 // GET /api/v1/predictions/all - Get predictions for all roads
 router.get('/all', PredictionsController.getAllPredictions);
 
+// GET /api/v1/predictions/road/:id/timeline - Get timeline for specific road
+router.get('/road/:id/timeline', PredictionsController.getPredictionTimelineForRoad);
+
 // GET /api/v1/predictions/road/:id - Get prediction for specific road
 router.get('/road/:id', PredictionsController.getPredictionForRoad);
 

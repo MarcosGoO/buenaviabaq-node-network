@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # Prediction Settings
     prediction_cache_ttl: int = 900  # 15 minutes
 
+    # MLflow Tracking
+    mlflow_tracking_uri: str = "http://localhost:5000"
+    mlflow_experiment_name: str = "viabaq_traffic_prediction"
+
     # Logging
     log_level: str = "INFO"
 

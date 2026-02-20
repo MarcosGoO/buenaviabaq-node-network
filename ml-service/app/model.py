@@ -12,6 +12,8 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 import lightgbm as lgb
 import xgboost as xgb
+import mlflow
+import mlflow.sklearn
 
 from .config import settings
 from .preprocessing import preprocessor
@@ -69,6 +71,11 @@ class TrafficPredictionModel:
             default_params.update(params)
             self.model = xgb.XGBRegressor(**default_params)
 
+        elif self.model_type == 'prophet':
+            # Prophet does not use 'default_params' in the same way as other models
+            # It expects its own specific parameters
+            self.model = Prophet(**params)
+            default_params = params # For logging purposes
         else:
             raise ValueError(f"Unsupported model type: {self.model_type}")
 
@@ -106,10 +113,64 @@ class TrafficPredictionModel:
 
         # Create and train model
         self._create_model(hyperparameters)
-        self.model.fit(X_train, y_train)
-
-        # Evaluate
-        y_pred = self.model.predict(X_test)
+        
+        # Train model
+        if self.model_type == 'prophet':
+            # Prophet requires a dataframe with 'ds' and 'y' columns
+            # For this simple integration, we'll use a dummy datetime column for training
+            # In a real scenario, 'ds' would come from actual timestamp features in X
+            # For now, we'll train Prophet on the full dataset (X, y) as it's not a typical
+            # sklearn-style train/test split model for its internal validation.
+            # We'll then use the last part of the data for evaluation.
+            
+            # Create a DataFrame for Prophet
+            # Assuming X has a timestamp column or we can synthesize one for demonstration
+            # For a proper Prophet integration, X should contain the 'ds' column.
+            # Here, we'll create a dummy 'ds' for the entire dataset for simplicity.
+            # A more robust solution would involve extracting 'ds' from X if available.
+            
+            # For demonstration, let's assume the last column of X_train is a timestamp or index
+            # If X is purely features, we need to generate a time series index.
+            # This is a placeholder and needs proper timestamp handling in a real application.
+            
+            # For now, let's use the full X, y for Prophet training and then predict on a future period
+            # or simulate a test set prediction.
+            
+            # To align with the existing evaluation structure, we'll train Prophet on X_train, y_train
+            # and then predict on X_test. This requires X_test to also have 'ds' column.
+            # Since X is np.ndarray, we need to convert it to pd.DataFrame with 'ds' and 'y'.
+            
+            # This is a simplified approach for the requested change.
+            # A proper Prophet integration would involve a different data preparation step
+            # where 'ds' (datetime) and 'y' (target) are explicitly provided.
+            
+            # Let's assume X_train and X_test are already prepared with a 'ds' column
+            # or we can generate one. For this example, we'll generate a dummy 'ds'.
+            
+            # Create DataFrames for Prophet
+            # This part is highly dependent on how 'ds' (timestamp) is derived from X.
+            # For a generic numpy array X, we'll create a dummy time index.
+            # In a real application, you'd extract the actual timestamp from your features.
+            
+            # For training:
+            df_train = pd.DataFrame({'y': y_train})
+            # Generate a dummy 'ds' column. This needs to be replaced with actual timestamps.
+            df_train['ds'] = pd.to_datetime(pd.date_range(start='2020-01-01', periods=len(df_train), freq='h'))
+            
+            self.model.fit(df_train)
+            
+            # For prediction on test set:
+            df_test = pd.DataFrame({'y': y_test}) # y_test is not used by predict, but kept for consistency
+            df_test['ds'] = pd.to_datetime(pd.date_range(start=df_train['ds'].iloc[-1] + pd.Timedelta(hours=1), periods=len(df_test), freq='h'))
+            
+            forecast = self.model.predict(df_test)
+            y_pred = forecast['yhat'].values
+            
+        else:
+            self.model.fit(X_train, y_train)
+            
+            # Evaluate on test set
+            y_pred = self.model.predict(X_test)
 
         mae = mean_absolute_error(y_test, y_pred)
         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -126,6 +187,14 @@ class TrafficPredictionModel:
         }
 
         self.trained_at = datetime.now()
+
+        # MLflow Tracking
+        mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+        mlflow.set_experiment(settings.mlflow_experiment_name)
+        with mlflow.start_run(run_name=f"{self.model_type}_training"):
+            mlflow.log_params(hyperparameters or {})
+            mlflow.log_metrics(self.metrics)
+            mlflow.sklearn.log_model(self.model, "model")
 
         logger.info(f"Model trained successfully. Metrics: {self.metrics}")
 
@@ -163,6 +232,26 @@ class TrafficPredictionModel:
             return dict(zip(feature_names, importances.tolist()))
 
         return {}
+
+    def get_explanation(self, X: np.ndarray) -> Dict[str, float]:
+        """Get SHAP explanations for a single prediction"""
+        if self.model is None:
+            return {}
+            
+        try:
+            import shap
+            # For tree models
+            explainer = shap.TreeExplainer(self.model)
+            shap_values = explainer.shap_values(X)
+            
+            feature_names = preprocessor.get_feature_names()
+            # If multiple samples, take the first one
+            shap_array = shap_values[0] if len(np.array(shap_values).shape) > 1 else shap_values
+            
+            return dict(zip(feature_names, np.array(shap_array).tolist()))
+        except Exception as e:
+            logger.error(f"SHAP explanation failed: {e}")
+            return {}
 
     def save(self, model_path: Optional[str] = None):
         """Save model to disk"""
@@ -281,15 +370,16 @@ class ModelManager:
         """Get current model"""
         return self.current_model
 
-    def predict(self, features: Dict[str, Any]) -> Tuple[float, str]:
+    def predict(self, features: Dict[str, Any], explain: bool = False) -> Tuple[float, str, Optional[Dict[str, float]]]:
         """
         Make prediction using current model
 
         Args:
             features: Feature dictionary
+            explain: Whether to return SHAP explanations
 
         Returns:
-            Tuple of (predicted_speed, congestion_level)
+            Tuple of (predicted_speed, congestion_level, explanation)
         """
         if not self.current_model:
             raise ValueError("No model loaded")
@@ -304,7 +394,11 @@ class ModelManager:
         max_speed = features.get('max_speed_kmh', 60)
         congestion_level = preprocessor.encode_congestion_level(speed_pred, max_speed)
 
-        return speed_pred, congestion_level
+        explanation = None
+        if explain:
+            explanation = self.current_model.get_explanation(X)
+
+        return speed_pred, congestion_level, explanation
 
 
 # Global model manager instance

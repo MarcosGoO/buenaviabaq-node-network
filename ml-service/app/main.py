@@ -182,14 +182,24 @@ async def predict_traffic(request: PredictionRequest):
         features_dict = request.features.model_dump()
 
         # Make prediction
-        predicted_speed, congestion_level = model_manager.predict(features_dict)
+        predicted_speed, congestion_level, explanation = model_manager.predict(features_dict, explain=request.explain)
+        
+        horizon = features_dict.get('horizon_minutes', 0)
+        # Simplified error margin based on horizon: +/- 5% per 15 mins
+        margin_factor = 1.0 + (horizon / 15.0) * 0.05
+        lower = max(0, predicted_speed / margin_factor)
+        upper = predicted_speed * margin_factor
+        confidence = max(0, 100 - horizon * 0.4)
 
         return PredictionResponse(
             road_id=request.features.road_id,
             timestamp=request.features.timestamp or datetime.now(),
             predicted_speed_kmh=predicted_speed,
+            predicted_speed_lower=lower,
+            predicted_speed_upper=upper,
             predicted_congestion_level=congestion_level,
-            confidence_score=None,  # TODO: Implement confidence estimation
+            confidence_score=confidence,
+            shap_values=explanation,
             model_version=model.model_version
         )
 
@@ -219,14 +229,24 @@ async def predict_batch(request: BatchPredictionRequest):
 
         for features in request.features_list:
             features_dict = features.model_dump()
-            predicted_speed, congestion_level = model_manager.predict(features_dict)
+            predicted_speed, congestion_level, explanation = model_manager.predict(features_dict, explain=False) # Skip batch explain to save time
+
+            horizon = features_dict.get('horizon_minutes', 0)
+            margin_factor = 1.0 + (horizon / 15.0) * 0.05
+            lower = max(0, predicted_speed / margin_factor)
+            upper = predicted_speed * margin_factor
+            confidence = max(0, 100 - horizon * 0.4)
 
             predictions.append(
                 PredictionResponse(
                     road_id=features.road_id,
                     timestamp=features.timestamp or datetime.now(),
                     predicted_speed_kmh=predicted_speed,
+                    predicted_speed_lower=lower,
+                    predicted_speed_upper=upper,
                     predicted_congestion_level=congestion_level,
+                    confidence_score=confidence,
+                    shap_values=explanation,
                     model_version=model.model_version
                 )
             )

@@ -59,9 +59,10 @@ export class MLPredictionService {
    */
   static async predictTraffic(
     roadId: number,
-    timestamp?: Date
+    timestamp?: Date,
+    horizon?: number
   ): Promise<PredictionResponse | null> {
-    const cacheKey = `ml-prediction:${roadId}:${timestamp?.toISOString() || 'now'}`;
+    const cacheKey = `ml-prediction:${roadId}:${timestamp?.toISOString() || 'now'}:h${horizon || 0}`;
 
     return await CacheService.getOrSet(
       cacheKey,
@@ -75,6 +76,9 @@ export class MLPredictionService {
 
           // Convert to flat structure expected by ML service
           const features = this.flattenFeatures(featureVector);
+          if (horizon !== undefined) {
+            features.horizon_minutes = horizon;
+          }
 
           // Call ML service
           const response = await fetch(`${this.config.baseUrl}/predict`, {

@@ -48,10 +48,14 @@ class FeatureVector(BaseModel):
     arroyo_risk_level_encoded: Optional[float] = Field(None, ge=0, le=1)
     arroyo_distance_km: Optional[float] = None
 
+    # Temporal prediction
+    horizon_minutes: Optional[int] = 0
+
 
 class PredictionRequest(BaseModel):
     """Request for traffic prediction"""
     features: FeatureVector
+    explain: bool = False
 
 
 class BatchPredictionRequest(BaseModel):
@@ -64,8 +68,11 @@ class PredictionResponse(BaseModel):
     road_id: int
     timestamp: datetime
     predicted_speed_kmh: float
+    predicted_speed_lower: Optional[float] = None
+    predicted_speed_upper: Optional[float] = None
     predicted_congestion_level: str
     confidence_score: Optional[float] = None
+    shap_values: Optional[Dict[str, float]] = None
     model_version: str
 
 
