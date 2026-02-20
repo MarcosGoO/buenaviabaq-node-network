@@ -95,12 +95,7 @@ GitGuardian/Secrets:
  .gitguardian.yaml configurado
  API keys antiguas REVOCADAS
  NO commitear server/.env
- API Keys Actuales (Válidas):
-
-# En server/.env (NO en git)
-OPENWEATHER_API_KEY=1de2732527d2aeecb3d63cb28b3ebb0d
-GOOGLE_MAPS_API_KEY=AIzaSyDlvyQXD_w3Hj1C9jl2EI6HRY1PAsn8NxM
-TOMTOM_API_KEY=6GxgJBCF4dqohg7QYSCxnZCLOIFW7nPH
+ Las API keys van EXCLUSIVAMENTE en server/.env (ver server/.env.example para las variables necesarias)
  Stack Tecnológico:
 Frontend:
 

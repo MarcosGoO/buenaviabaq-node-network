@@ -5,7 +5,6 @@ version: 2
 
 # Paths to exclude from scanning
 paths-ignore:
-  - "**/*.md"
   - "**/*.example"
   - "**/*.sample"
   - "**/node_modules/**"
