@@ -52,23 +52,23 @@ VíaBaq is a **production-ready** urban mobility platform that combines real-tim
 ## Architecture
 
 ```
-┌─────────────────┐
-│   Next.js       │ ← Frontend (MapLibre GL + Recharts)
-│   Frontend      │
-└────────┬────────┘
-         │ HTTP/WebSocket
-         ↓
-┌─────────────────┐
-│   Express API   │ ← Backend (TypeScript + Express)
-│   + Socket.IO   │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ↓         ↓
-┌────────┐ ┌─────────┐
-│ Postgres│ │  Redis  │ ← Cache + Jobs
-│ PostGIS │ │ BullMQ  │
-└─────────┘ └─────────┘
+
+ Next.js ← Frontend (MapLibre GL + Recharts)
+ Frontend 
+
+ HTTP/WebSocket
+ ↓
+
+ Express API ← Backend (TypeScript + Express)
+ + Socket.IO 
+
+ 
+ 
+ ↓ ↓
+ 
+ Postgres Redis ← Cache + Jobs
+ PostGIS BullMQ 
+ 
 ```
 
 **Tech Stack:**
@@ -106,13 +106,13 @@ docker-compose up -d
 # Setup backend
 cd server
 npm install
-npm run db:migrate  # Run migrations
-npm run db:seed     # Seed database
-npm run dev         # Start backend (port 4000)
+npm run db:migrate # Run migrations
+npm run db:seed # Seed database
+npm run dev # Start backend (port 4000)
 
 # In another terminal - Setup frontend
 cd ..
-npm run dev         # Start frontend (port 3000)
+npm run dev # Start frontend (port 3000)
 ```
 
 ### Verify Installation
@@ -131,32 +131,32 @@ Open browser → `http://localhost:3000`
 
 ```
 viabaq-node-network/
-├── .github/              # CI/CD workflows
-├── docs/                 # 📚 All documentation
-│   ├── architecture/     # System design
-│   ├── guides/          # Setup & testing guides
-│   ├── sprints/         # Sprint summaries
-│   ├── planning/        # Roadmap & plans
-│   └── changelogs/      # Change history
-├── data/                # 📊 External data files
-│   └── raw/            # Raw data (not in git)
-├── scripts/            # 🔧 Utility scripts
-│   ├── test-api.sh
-│   └── setup.sh
-├── server/             # 🖥️ Backend API
-│   ├── src/
-│   │   ├── api/           # Controllers, routes, middleware
-│   │   ├── core/          # Services, repositories
-│   │   ├── infrastructure/ # DB, cache, jobs
-│   │   └── shared/        # Config, types, utils
-│   ├── tests/          # Unit, integration, e2e tests
-│   └── db/            # Migrations & seeds
-├── src/               # 🎨 Frontend (Next.js)
-│   ├── app/          # Pages & layouts
-│   ├── components/   # React components
-│   └── hooks/        # Custom hooks
-├── docker-compose.yml
-└── README.md          # This file
+ .github/ # CI/CD workflows
+ docs/ # All documentation
+ architecture/ # System design
+ guides/ # Setup & testing guides
+ sprints/ # Sprint summaries
+ planning/ # Roadmap & plans
+ changelogs/ # Change history
+ data/ # External data files
+ raw/ # Raw data (not in git)
+ scripts/ # Utility scripts
+ test-api.sh
+ setup.sh
+ server/ # Backend API
+ src/
+ api/ # Controllers, routes, middleware
+ core/ # Services, repositories
+ infrastructure/ # DB, cache, jobs
+ shared/ # Config, types, utils
+ tests/ # Unit, integration, e2e tests
+ db/ # Migrations & seeds
+ src/ # Frontend (Next.js)
+ app/ # Pages & layouts
+ components/ # React components
+ hooks/ # Custom hooks
+ docker-compose.yml
+ README.md # This file
 ```
 
 ---
@@ -206,8 +206,8 @@ viabaq-node-network/
 ```bash
 # Backend tests
 cd server
-npm test              # Run all tests
-npm run test:watch    # Watch mode
+npm test # Run all tests
+npm run test:watch # Watch mode
 npm run test:coverage # Coverage report
 
 # Frontend tests
@@ -222,7 +222,7 @@ bash scripts/test-api.sh
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -247,7 +247,7 @@ NODE_ENV=development
 PORT=4000
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/viabaq_db
 REDIS_URL=redis://localhost:6379
-OPENWEATHER_API_KEY=your_api_key_here  # Optional
+OPENWEATHER_API_KEY=your_api_key_here # Optional
 ```
 
 ### Frontend (`.env.local`)
@@ -257,13 +257,13 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
 ```
 ---
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](./LICENSE) file for details
 
 ---
 
-## 👨‍💻 Author
+## ‍ Author
 
 **Marcos GoO** - [GitHub](https://github.com/MarcosGoO)
 

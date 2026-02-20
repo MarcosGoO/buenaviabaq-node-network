@@ -65,11 +65,11 @@ docker run -p 8000:8000 --env-file .env viabaq-ml-service
 
 ```bash
 curl -X POST "http://localhost:8000/train" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model_type": "lightgbm",
-    "force_retrain": true
-  }'
+ -H "Content-Type: application/json" \
+ -d '{
+ "model_type": "lightgbm",
+ "force_retrain": true
+ }'
 ```
 
 ### Available model types:
@@ -81,46 +81,46 @@ curl -X POST "http://localhost:8000/train" \
 
 ```bash
 curl -X POST "http://localhost:8000/predict" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "features": {
-      "road_id": 1,
-      "hour_of_day": 17,
-      "day_of_week": 5,
-      "day_of_month": 14,
-      "month": 2,
-      "is_rush_hour": true,
-      "is_weekend": false,
-      "temperature": 32,
-      "humidity": 75,
-      "wind_speed": 20,
-      "rain_probability": 30,
-      "weather_condition_encoded": 1,
-      "is_raining": false,
-      "event_nearby": false,
-      "arroyo_nearby": false
-    }
-  }'
+ -H "Content-Type: application/json" \
+ -d '{
+ "features": {
+ "road_id": 1,
+ "hour_of_day": 17,
+ "day_of_week": 5,
+ "day_of_month": 14,
+ "month": 2,
+ "is_rush_hour": true,
+ "is_weekend": false,
+ "temperature": 32,
+ "humidity": 75,
+ "wind_speed": 20,
+ "rain_probability": 30,
+ "weather_condition_encoded": 1,
+ "is_raining": false,
+ "event_nearby": false,
+ "arroyo_nearby": false
+ }
+ }'
 ```
 
 ## Project Structure
 
 ```
 ml-service/
-├── app/
-│   ├── __init__.py
-│   ├── main.py              # FastAPI application
-│   ├── config.py            # Configuration management
-│   ├── database.py          # Database connection
-│   ├── model.py             # ML model training/prediction
-│   ├── preprocessing.py     # Feature preprocessing
-│   └── schemas.py           # Pydantic schemas
-├── models/                  # Saved models (generated)
-├── data/                    # Training data cache (optional)
-├── tests/                   # Unit tests
-├── requirements.txt         # Python dependencies
-├── Dockerfile              # Docker configuration
-└── README.md
+ app/
+ __init__.py
+ main.py # FastAPI application
+ config.py # Configuration management
+ database.py # Database connection
+ model.py # ML model training/prediction
+ preprocessing.py # Feature preprocessing
+ schemas.py # Pydantic schemas
+ models/ # Saved models (generated)
+ data/ # Training data cache (optional)
+ tests/ # Unit tests
+ requirements.txt # Python dependencies
+ Dockerfile # Docker configuration
+ README.md
 ```
 
 ## Model Metrics

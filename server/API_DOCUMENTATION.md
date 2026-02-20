@@ -20,22 +20,22 @@ GET /api/v1/geo/zones
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "name": "Centro",
-      "zone_type": "locality",
-      "parent_id": null,
-      "geometry": { "type": "MultiPolygon", "coordinates": [...] },
-      "population": 45000,
-      "area_km2": 2.5,
-      "metadata": { "description": "Historic downtown area" },
-      "created_at": "2026-02-09T...",
-      "updated_at": "2026-02-09T..."
-    }
-  ],
-  "timestamp": "2026-02-09T..."
+ "status": "success",
+ "data": [
+ {
+ "id": 1,
+ "name": "Centro",
+ "zone_type": "locality",
+ "parent_id": null,
+ "geometry": { "type": "MultiPolygon", "coordinates": [...] },
+ "population": 45000,
+ "area_km2": 2.5,
+ "metadata": { "description": "Historic downtown area" },
+ "created_at": "2026-02-09T...",
+ "updated_at": "2026-02-09T..."
+ }
+ ],
+ "timestamp": "2026-02-09T..."
 }
 ```
 
@@ -59,21 +59,21 @@ curl http://localhost:4000/api/v1/geo/zones/1
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "id": 1,
-    "name": "Centro",
-    ...
-  },
-  "timestamp": "2026-02-09T..."
+ "status": "success",
+ "data": {
+ "id": 1,
+ "name": "Centro",
+ ...
+ },
+ "timestamp": "2026-02-09T..."
 }
 ```
 
 **Error Response (404):**
 ```json
 {
-  "status": "error",
-  "message": "Zone with ID 999 not found"
+ "status": "error",
+ "message": "Zone with ID 999 not found"
 }
 ```
 
@@ -113,26 +113,26 @@ GET /api/v1/geo/arroyos?risk_level=critical
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "name": "Arroyo Don Juan",
-      "zone_id": 1,
-      "geometry": { "type": "MultiPolygon", "coordinates": [...] },
-      "risk_level": "critical",
-      "drainage_capacity_m3": 1200.0,
-      "last_incident_date": "2023-10-15T...",
-      "avg_flood_depth_cm": 45.0,
-      "metadata": {
-        "historical_incidents": 15,
-        "last_major_flood": "2023-10-15"
-      },
-      "created_at": "2026-02-09T...",
-      "updated_at": "2026-02-09T..."
-    }
-  ],
-  "timestamp": "2026-02-09T..."
+ "status": "success",
+ "data": [
+ {
+ "id": 1,
+ "name": "Arroyo Don Juan",
+ "zone_id": 1,
+ "geometry": { "type": "MultiPolygon", "coordinates": [...] },
+ "risk_level": "critical",
+ "drainage_capacity_m3": 1200.0,
+ "last_incident_date": "2023-10-15T...",
+ "avg_flood_depth_cm": 45.0,
+ "metadata": {
+ "historical_incidents": 15,
+ "last_major_flood": "2023-10-15"
+ },
+ "created_at": "2026-02-09T...",
+ "updated_at": "2026-02-09T..."
+ }
+ ],
+ "timestamp": "2026-02-09T..."
 }
 ```
 
@@ -152,26 +152,26 @@ GET /api/v1/geo/roads?type=highway
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "name": "Vía 40 (Circunvalar)",
-      "road_type": "highway",
-      "geometry": { "type": "LineString", "coordinates": [...] },
-      "lanes": 6,
-      "max_speed_kmh": 80,
-      "length_km": 8.5,
-      "one_way": false,
-      "metadata": {
-        "importance": "high",
-        "transmilenio_route": false
-      },
-      "created_at": "2026-02-09T...",
-      "updated_at": "2026-02-09T..."
-    }
-  ],
-  "timestamp": "2026-02-09T..."
+ "status": "success",
+ "data": [
+ {
+ "id": 1,
+ "name": "Vía 40 (Circunvalar)",
+ "road_type": "highway",
+ "geometry": { "type": "LineString", "coordinates": [...] },
+ "lanes": 6,
+ "max_speed_kmh": 80,
+ "length_km": 8.5,
+ "one_way": false,
+ "metadata": {
+ "importance": "high",
+ "transmilenio_route": false
+ },
+ "created_at": "2026-02-09T...",
+ "updated_at": "2026-02-09T..."
+ }
+ ],
+ "timestamp": "2026-02-09T..."
 }
 ```
 
@@ -191,25 +191,25 @@ GET /api/v1/geo/pois?category=hospital
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "name": "Centro Comercial Buenavista",
-      "category": "mall",
-      "geometry": { "type": "Point", "coordinates": [-74.7950, 11.0050] },
-      "zone_id": 2,
-      "address": "Calle 98 con Carrera 53",
-      "capacity": 5000,
-      "metadata": {
-        "parking_spots": 1200,
-        "floors": 3
-      },
-      "created_at": "2026-02-09T...",
-      "updated_at": "2026-02-09T..."
-    }
-  ],
-  "timestamp": "2026-02-09T..."
+ "status": "success",
+ "data": [
+ {
+ "id": 1,
+ "name": "Centro Comercial Buenavista",
+ "category": "mall",
+ "geometry": { "type": "Point", "coordinates": [-74.7950, 11.0050] },
+ "zone_id": 2,
+ "address": "Calle 98 con Carrera 53",
+ "capacity": 5000,
+ "metadata": {
+ "parking_spots": 1200,
+ "floors": 3
+ },
+ "created_at": "2026-02-09T...",
+ "updated_at": "2026-02-09T..."
+ }
+ ],
+ "timestamp": "2026-02-09T..."
 }
 ```
 
@@ -227,11 +227,11 @@ GET /health
 **Response:**
 ```json
 {
-  "status": "ok",
-  "timestamp": "2026-02-09T14:23:45.123Z",
-  "uptime": 3625.45,
-  "environment": "development",
-  "database": "connected"
+ "status": "ok",
+ "timestamp": "2026-02-09T14:23:45.123Z",
+ "uptime": 3625.45,
+ "environment": "development",
+ "database": "connected"
 }
 ```
 
@@ -242,24 +242,24 @@ GET /health
 ### 400 Bad Request
 ```json
 {
-  "status": "error",
-  "message": "Invalid zone ID"
+ "status": "error",
+ "message": "Invalid zone ID"
 }
 ```
 
 ### 404 Not Found
 ```json
 {
-  "status": "error",
-  "message": "Zone with ID 999 not found"
+ "status": "error",
+ "message": "Zone with ID 999 not found"
 }
 ```
 
 ### 500 Internal Server Error
 ```json
 {
-  "status": "error",
-  "message": "Internal server error"
+ "status": "error",
+ "message": "Internal server error"
 }
 ```
 
@@ -288,7 +288,7 @@ curl "http://localhost:4000/api/v1/geo/zones/bounds?sw_lng=-74.85&sw_lat=10.95&n
 ```
 ---
 
-## Insights Endpoints (Sprint 6.1) 🆕
+## Insights Endpoints (Sprint 6.1) 
 
 ### Get Executive Summary
 Returns comprehensive dashboard metrics for VíaBaq platform.
@@ -300,72 +300,72 @@ GET /api/v1/insights/summary
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "system": {
-      "avg_speed_kmh": 42,
-      "overall_congestion_level": "moderate",
-      "total_active_roads": 20,
-      "monitored_zones": 12
-    },
-    "traffic": {
-      "current_avg_speed": 38,
-      "historical_avg_speed": 45,
-      "speed_change_percentage": -16,
-      "congestion_breakdown": {
-        "low": 5,
-        "moderate": 10,
-        "high": 4,
-        "severe": 1
-      },
-      "top_congested_roads": [
-        {
-          "road_id": 1,
-          "road_name": "Vía 40",
-          "speed_kmh": 25,
-          "congestion_level": "severe"
-        }
-      ]
-    },
-    "weather": {
-      "current_condition": "Clear",
-      "temperature_celsius": 30,
-      "rain_probability": 15,
-      "is_affecting_traffic": false,
-      "weather_impact_score": 25
-    },
-    "alerts": {
-      "total_active": 3,
-      "critical_count": 1,
-      "by_type": {
-        "arroyo_flood": 1,
-        "severe_congestion": 1,
-        "weather_traffic": 0,
-        "event_traffic": 1
-      },
-      "by_severity": {
-        "low": 0,
-        "medium": 1,
-        "high": 1,
-        "critical": 1
-      }
-    },
-    "arroyos": {
-      "total_zones": 8,
-      "high_risk_count": 3,
-      "medium_risk_count": 2,
-      "affected_zones": []
-    },
-    "predictions": {
-      "next_hour_trend": "stable",
-      "rush_hour_active": false,
-      "estimated_avg_travel_time_minutes": 18,
-      "confidence_score": 85
-    },
-    "generated_at": "2026-02-15T..."
-  },
-  "timestamp": "2026-02-15T...",
-  "cached": false
+ "status": "success",
+ "data": {
+ "system": {
+ "avg_speed_kmh": 42,
+ "overall_congestion_level": "moderate",
+ "total_active_roads": 20,
+ "monitored_zones": 12
+ },
+ "traffic": {
+ "current_avg_speed": 38,
+ "historical_avg_speed": 45,
+ "speed_change_percentage": -16,
+ "congestion_breakdown": {
+ "low": 5,
+ "moderate": 10,
+ "high": 4,
+ "severe": 1
+ },
+ "top_congested_roads": [
+ {
+ "road_id": 1,
+ "road_name": "Vía 40",
+ "speed_kmh": 25,
+ "congestion_level": "severe"
+ }
+ ]
+ },
+ "weather": {
+ "current_condition": "Clear",
+ "temperature_celsius": 30,
+ "rain_probability": 15,
+ "is_affecting_traffic": false,
+ "weather_impact_score": 25
+ },
+ "alerts": {
+ "total_active": 3,
+ "critical_count": 1,
+ "by_type": {
+ "arroyo_flood": 1,
+ "severe_congestion": 1,
+ "weather_traffic": 0,
+ "event_traffic": 1
+ },
+ "by_severity": {
+ "low": 0,
+ "medium": 1,
+ "high": 1,
+ "critical": 1
+ }
+ },
+ "arroyos": {
+ "total_zones": 8,
+ "high_risk_count": 3,
+ "medium_risk_count": 2,
+ "affected_zones": []
+ },
+ "predictions": {
+ "next_hour_trend": "stable",
+ "rush_hour_active": false,
+ "estimated_avg_travel_time_minutes": 18,
+ "confidence_score": 85
+ },
+ "generated_at": "2026-02-15T..."
+ },
+ "timestamp": "2026-02-15T...",
+ "cached": false
 }
 ```
 
@@ -384,20 +384,20 @@ GET /api/v1/insights/zones/:zone_id
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": [
-    {
-      "zone_id": 1,
-      "zone_name": "Centro",
-      "avg_speed": 35,
-      "congestion_level": "moderate",
-      "total_roads": 15,
-      "active_alerts": 2,
-      "arroyo_risk_level": "high",
-      "travel_time_impact_percentage": 22
-    }
-  ],
-  "timestamp": "2026-02-15T..."
+ "status": "success",
+ "data": [
+ {
+ "zone_id": 1,
+ "zone_name": "Centro",
+ "avg_speed": 35,
+ "congestion_level": "moderate",
+ "total_roads": 15,
+ "active_alerts": 2,
+ "arroyo_risk_level": "high",
+ "travel_time_impact_percentage": 22
+ }
+ ],
+ "timestamp": "2026-02-15T..."
 }
 ```
 
@@ -418,28 +418,28 @@ GET /api/v1/insights/comparative?days=30
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": [
-    {
-      "metric_name": "Average Speed (km/h)",
-      "current_value": 42,
-      "historical_value": 45,
-      "difference": -3,
-      "percentage_change": -7,
-      "trend": "down",
-      "is_favorable": false
-    },
-    {
-      "metric_name": "Average Travel Time (minutes)",
-      "current_value": 18,
-      "historical_value": 15,
-      "difference": 3,
-      "percentage_change": 20,
-      "trend": "up",
-      "is_favorable": false
-    }
-  ],
-  "timestamp": "2026-02-15T..."
+ "status": "success",
+ "data": [
+ {
+ "metric_name": "Average Speed (km/h)",
+ "current_value": 42,
+ "historical_value": 45,
+ "difference": -3,
+ "percentage_change": -7,
+ "trend": "down",
+ "is_favorable": false
+ },
+ {
+ "metric_name": "Average Travel Time (minutes)",
+ "current_value": 18,
+ "historical_value": 15,
+ "difference": 3,
+ "percentage_change": 20,
+ "trend": "up",
+ "is_favorable": false
+ }
+ ],
+ "timestamp": "2026-02-15T..."
 }
 ```
 
@@ -457,11 +457,11 @@ POST /api/v1/insights/clear-cache
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "cleared": true
-  },
-  "timestamp": "2026-02-15T..."
+ "status": "success",
+ "data": {
+ "cleared": true
+ },
+ "timestamp": "2026-02-15T..."
 }
 ```
 
@@ -490,4 +490,4 @@ Currently, all endpoints are public. Authentication will be added in future spri
 
 **Last Updated:** 2026-02-15
 **API Version:** v1
-**Status:** ✅ Sprint 6.1 - Dashboard Analytics Endpoints Added
+**Status:** Sprint 6.1 - Dashboard Analytics Endpoints Added

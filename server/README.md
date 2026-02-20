@@ -1,4 +1,4 @@
-# 🖥️ VíaBaq Backend API
+# VíaBaq Backend API
 
 > Production-ready RESTful API for Barranquilla's urban mobility platform
 
@@ -9,19 +9,19 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
 Enterprise-grade backend API providing:
-- 🗺️ **36+ RESTful endpoints** for traffic, weather, and geospatial data
-- ⚡ **Redis caching** with intelligent TTL management
-- 🔄 **Background jobs** with BullMQ
-- 📡 **Real-time updates** via Socket.IO
-- 🧪 **80%+ test coverage** target
-- 🔒 **Production-ready** error handling and security
+- **36+ RESTful endpoints** for traffic, weather, and geospatial data
+- **Redis caching** with intelligent TTL management
+- **Background jobs** with BullMQ
+- **Real-time updates** via Socket.IO
+- **80%+ test coverage** target
+- **Production-ready** error handling and security
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 22+ (LTS recommended)
@@ -55,50 +55,50 @@ npm run dev
 
 ---
 
-## 🗂️ Project Structure (Refactored)
+## Project Structure (Refactored)
 
 ```
 server/
-├── src/
-│   ├── api/                    # API layer
-│   │   ├── controllers/        # Request handlers
-│   │   ├── routes/            # Route definitions
-│   │   └── middleware/        # Express middleware
-│   │       ├── errorHandler.ts    # Global error handler
-│   │       ├── validateRequest.ts # Zod validation
-│   │       └── requestId.ts       # Request tracing
-│   │
-│   ├── core/                   # Business logic
-│   │   ├── services/          # Business services
-│   │   └── repositories/      # Data access layer (planned)
-│   │
-│   ├── infrastructure/        # External dependencies
-│   │   ├── database/         # DB migrations, seeds, connection
-│   │   ├── cache/            # Redis client
-│   │   ├── jobs/             # BullMQ workers
-│   │   └── socket/           # Socket.IO server
-│   │
-│   └── shared/               # Shared utilities
-│       ├── config/           # Environment configuration
-│       ├── errors/           # Custom error classes
-│       ├── types/            # TypeScript types
-│       ├── utils/            # Utility functions
-│       └── validators/       # Zod schemas (planned)
-│
-├── tests/                     # Testing
-│   ├── unit/                 # Unit tests
-│   ├── integration/          # Integration tests
-│   ├── e2e/                  # End-to-end tests
-│   └── fixtures/             # Test data
-│
-└── db/                       # Database
-    ├── migrations/           # SQL migrations
-    └── seeds/                # Seed data
+ src/
+ api/ # API layer
+ controllers/ # Request handlers
+ routes/ # Route definitions
+ middleware/ # Express middleware
+ errorHandler.ts # Global error handler
+ validateRequest.ts # Zod validation
+ requestId.ts # Request tracing
+ 
+ core/ # Business logic
+ services/ # Business services
+ repositories/ # Data access layer (planned)
+ 
+ infrastructure/ # External dependencies
+ database/ # DB migrations, seeds, connection
+ cache/ # Redis client
+ jobs/ # BullMQ workers
+ socket/ # Socket.IO server
+ 
+ shared/ # Shared utilities
+ config/ # Environment configuration
+ errors/ # Custom error classes
+ types/ # TypeScript types
+ utils/ # Utility functions
+ validators/ # Zod schemas (planned)
+
+ tests/ # Testing
+ unit/ # Unit tests
+ integration/ # Integration tests
+ e2e/ # End-to-end tests
+ fixtures/ # Test data
+
+ db/ # Database
+ migrations/ # SQL migrations
+ seeds/ # Seed data
 ```
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### **Health & System**
 - `GET /health` - System health check
@@ -143,36 +143,36 @@ server/
 
 ---
 
-## 🛠️ Development Commands
+## Development Commands
 
 ```bash
 # Development
-npm run dev              # Start with hot-reload (tsx watch)
-npm run build           # Build for production
-npm start               # Start production server
+npm run dev # Start with hot-reload (tsx watch)
+npm run build # Build for production
+npm start # Start production server
 
 # Code Quality
-npm run typecheck       # TypeScript type checking
-npm run lint            # ESLint
-npm run lint:fix        # ESLint with auto-fix
+npm run typecheck # TypeScript type checking
+npm run lint # ESLint
+npm run lint:fix # ESLint with auto-fix
 
 # Database
-npm run db:migrate      # Run migrations
-npm run db:seed         # Seed database
+npm run db:migrate # Run migrations
+npm run db:seed # Seed database
 
 # Testing
-npm test                # Run all tests
-npm run test:watch      # Watch mode
-npm run test:coverage   # With coverage report
-npm run test:ui         # Visual UI mode
-npm run test:unit       # Unit tests only
+npm test # Run all tests
+npm run test:watch # Watch mode
+npm run test:coverage # With coverage report
+npm run test:ui # Visual UI mode
+npm run test:unit # Unit tests only
 npm run test:integration # Integration tests only
-npm run test:e2e        # E2E tests only
+npm run test:e2e # E2E tests only
 ```
 
 ---
 
-## 🧪 Testing
+## Testing
 
 **Framework:** Vitest v2.1.0
 
@@ -193,21 +193,21 @@ npm run test:ui
 **Coverage Target:** >80% for all metrics
 
 **Current Status:**
-- ✅ Testing framework configured
-- ✅ Example tests created
-- 🔄 Expanding test suite (Sprint 4)
+- Testing framework configured
+- Example tests created
+- Expanding test suite (Sprint 4)
 
 ---
 
-## 🔐 Security Features
+## Security Features
 
 ### **Implemented:**
-- ✅ **Helmet.js** - Security headers
-- ✅ **CORS** - Configured for frontend origin
-- ✅ **Rate Limiting** - 100 req/15min (configurable)
-- ✅ **Input Validation** - Zod schemas
-- ✅ **SQL Injection Prevention** - Parameterized queries
-- ✅ **Custom Error Classes** - Secure error messages
+- **Helmet.js** - Security headers
+- **CORS** - Configured for frontend origin
+- **Rate Limiting** - 100 req/15min (configurable)
+- **Input Validation** - Zod schemas
+- **SQL Injection Prevention** - Parameterized queries
+- **Custom Error Classes** - Secure error messages
 
 ### **Environment-based:**
 - Production: Minimal error details
@@ -215,7 +215,7 @@ npm run test:ui
 
 ---
 
-## 📝 Environment Variables
+## Environment Variables
 
 **Key Variables:**
 
@@ -239,16 +239,16 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 
 # Cache TTL (seconds)
-CACHE_TTL_TRAFFIC=300       # 5 min
-CACHE_TTL_WEATHER=300       # 5 min
-CACHE_TTL_ANALYTICS=900     # 15 min
-CACHE_TTL_GEO=3600          # 1 hour
+CACHE_TTL_TRAFFIC=300 # 5 min
+CACHE_TTL_WEATHER=300 # 5 min
+CACHE_TTL_ANALYTICS=900 # 15 min
+CACHE_TTL_GEO=3600 # 1 hour
 
 # External APIs
 OPENWEATHER_API_KEY=your_key_here
 
 # Security
-RATE_LIMIT_WINDOW_MS=900000  # 15 min
+RATE_LIMIT_WINDOW_MS=900000 # 15 min
 RATE_LIMIT_MAX_REQUESTS=100
 
 # Logging
@@ -259,7 +259,7 @@ LOG_LEVEL=info
 
 ---
 
-## 🗄️ Database
+## Database
 
 ### **Technology:**
 - PostgreSQL 15 + PostGIS 3.4
@@ -267,13 +267,13 @@ LOG_LEVEL=info
 
 ### **Tables:**
 ```
-zones              # 7 zones
-roads              # 6 major roads
-arroyos            # 4 flood-prone areas
-pois               # 8 points of interest
-events             # Urban events
-traffic_history    # 4,038+ records (7 days)
-weather_history    # Weather snapshots
+zones # 7 zones
+roads # 6 major roads
+arroyos # 4 flood-prone areas
+pois # 8 points of interest
+events # Urban events
+traffic_history # 4,038+ records (7 days)
+weather_history # Weather snapshots
 ```
 
 ### **Database Management:**
@@ -283,9 +283,9 @@ weather_history    # Weather snapshots
 docker exec -it viabaq-postgres psql -U postgres -d viabaq_db
 
 # Useful commands
-\dt                 # List tables
-\d+ zones          # Describe zones table
-\df                # List functions
+\dt # List tables
+\d+ zones # Describe zones table
+\df # List functions
 
 # Manual queries
 SELECT COUNT(*) FROM traffic_history;
@@ -294,7 +294,7 @@ SELECT * FROM zones LIMIT 5;
 
 ---
 
-## 📊 Performance
+## Performance
 
 **Current Metrics:**
 - API Response Time: <200ms (p95)
@@ -310,14 +310,14 @@ SELECT * FROM zones LIMIT 5;
 
 ---
 
-## 🏗️ Architecture Highlights
+## Architecture Highlights
 
 ### **Separation of Concerns:**
 ```
-api/          → HTTP layer (controllers, routes, middleware)
-core/         → Business logic (services, repositories)
+api/ → HTTP layer (controllers, routes, middleware)
+core/ → Business logic (services, repositories)
 infrastructure/ → External systems (DB, cache, jobs, socket)
-shared/       → Common utilities (config, errors, validators)
+shared/ → Common utilities (config, errors, validators)
 ```
 
 ### **Error Handling:**
@@ -332,8 +332,8 @@ throw new ServiceUnavailableError('Weather API');
 ```typescript
 // Zod-based request validation
 router.get('/users/:id',
-  validateParams(userIdSchema),
-  getUser
+ validateParams(userIdSchema),
+ getUser
 );
 ```
 
@@ -341,15 +341,15 @@ router.get('/users/:id',
 ```typescript
 // Automatic error catching
 export const getUser = asyncHandler(async (req, res) => {
-  // Errors automatically caught and passed to error handler
+ // Errors automatically caught and passed to error handler
 });
 ```
 
 ---
 
-## 🚧 Current Status
+## Current Status
 
-### **Sprints 1-3: ✅ Complete**
+### **Sprints 1-3: Complete**
 - [x] Infrastructure & foundation
 - [x] External API integrations
 - [x] Historical data & analytics
@@ -358,7 +358,7 @@ export const getUser = asyncHandler(async (req, res) => {
 - [x] Socket.IO real-time
 - [x] Frontend integration
 
-### **Sprint 4: 🔄 In Progress**
+### **Sprint 4: In Progress**
 - [ ] Repository Pattern
 - [ ] Comprehensive tests (>80%)
 - [ ] ML feature engineering
@@ -366,7 +366,7 @@ export const getUser = asyncHandler(async (req, res) => {
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference
 - **[Project Docs](../docs/README.md)** - Full documentation index
@@ -375,7 +375,7 @@ export const getUser = asyncHandler(async (req, res) => {
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Follow Conventional Commits
 2. Write tests for new features
@@ -392,13 +392,13 @@ test: add unit tests for service
 
 ---
 
-## 📄 License
+## License
 
 MIT License - See [LICENSE](../LICENSE) for details
 
 ---
 
-## 👨‍💻 Developer
+## ‍ Developer
 
 **Marcos GoO** - [GitHub](https://github.com/MarcosGoO)
 

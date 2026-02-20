@@ -135,15 +135,29 @@ out/
 next-env.d.ts
 
 # ============ DOCUMENTATION ============
-# Only keep README.md in root, exclude all other .md files
-*.md
-!README.md
-!LICENSE.md
-
-# Docs folder is for local reference only (not in repo)
-docs/
+# Only keep README.md and service READMEs in root/service dirs
+# Exclude session/temp markdown from root
+DEBUG.md
+HANDOFF.md
+NEXT_CHAT_START.md
+QUICK_START.md
+RESTART_INSTRUCTIONS.md
+STARTUP_GUIDE.md
+FINAL_SPRINT5.md
+SPRINT5_FIXES_SUMMARY.md
+WEBSOCKET_TROUBLESHOOTING.md
 REORGANIZATION_COMPLETE.md
 NEXT_STEPS.md
+*.md.bak
+
+# ============ JUNK FILES ============
+conflicts.txt
+postcss.config.js
+
+# ============ INTERNAL DOCS (not for public repo) ============
+# Sprint history and internal planning docs
+docs/sprints/
+docs/planning/BACKEND_PLAN.md
 
 # ============ DATA FILES ============
 # Large data files should not be in git

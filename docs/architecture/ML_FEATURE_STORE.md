@@ -103,7 +103,7 @@ Proximity to flood-prone areas:
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 Base URL: `http://localhost:4000/api/v1/ml`
 
@@ -116,39 +116,39 @@ Extract features for a specific road at a given timestamp without storing them.
 **Request Body:**
 ```json
 {
-  "road_id": 1,
-  "timestamp": "2026-02-14T10:00:00Z"  // optional, defaults to now
+ "road_id": 1,
+ "timestamp": "2026-02-14T10:00:00Z" // optional, defaults to now
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "road_id": 1,
-    "timestamp": "2026-02-14T10:00:00Z",
-    "features": {
-      "temporal": {
-        "hour_of_day": 10,
-        "day_of_week": 6,
-        "day_of_month": 14,
-        "month": 2,
-        "is_rush_hour": false,
-        "is_weekend": true
-      },
-      "traffic": {
-        "avg_speed_historical": 55.5,
-        "avg_congestion_encoded": 0.14,
-        "std_deviation": 10.5
-      },
-      "weather": { /* ... */ },
-      "events": { /* ... */ },
-      "geography": { /* ... */ },
-      "arroyo": { /* ... */ }
-    }
-  },
-  "timestamp": "2026-02-14T10:00:05Z"
+ "status": "success",
+ "data": {
+ "road_id": 1,
+ "timestamp": "2026-02-14T10:00:00Z",
+ "features": {
+ "temporal": {
+ "hour_of_day": 10,
+ "day_of_week": 6,
+ "day_of_month": 14,
+ "month": 2,
+ "is_rush_hour": false,
+ "is_weekend": true
+ },
+ "traffic": {
+ "avg_speed_historical": 55.5,
+ "avg_congestion_encoded": 0.14,
+ "std_deviation": 10.5
+ },
+ "weather": { /* ... */ },
+ "events": { /* ... */ },
+ "geography": { /* ... */ },
+ "arroyo": { /* ... */ }
+ }
+ },
+ "timestamp": "2026-02-14T10:00:05Z"
 }
 ```
 
@@ -161,23 +161,23 @@ Extract and store features for training purposes.
 **Request Body:**
 ```json
 {
-  "road_id": 1,
-  "timestamp": "2026-02-14T10:00:00Z",  // optional
-  "target_speed": 45,                    // optional - actual speed
-  "target_congestion": "moderate"        // optional - actual congestion
+ "road_id": 1,
+ "timestamp": "2026-02-14T10:00:00Z", // optional
+ "target_speed": 45, // optional - actual speed
+ "target_congestion": "moderate" // optional - actual congestion
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "message": "Features stored successfully",
-  "data": {
-    "road_id": 1,
-    "timestamp": "2026-02-14T10:00:00Z"
-  },
-  "timestamp": "2026-02-14T10:00:05Z"
+ "status": "success",
+ "message": "Features stored successfully",
+ "data": {
+ "road_id": 1,
+ "timestamp": "2026-02-14T10:00:00Z"
+ },
+ "timestamp": "2026-02-14T10:00:05Z"
 }
 ```
 
@@ -201,24 +201,24 @@ GET /ml/features?road_id=1&limit=100
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "count": 100,
-    "features": [
-      {
-        "id": 1,
-        "road_id": 1,
-        "timestamp": "2026-02-14T10:00:00Z",
-        "hour_of_day": 10,
-        "day_of_week": 6,
-        /* all features */,
-        "target_speed_kmh": 45,
-        "target_congestion_level": "moderate",
-        "created_at": "2026-02-14T10:00:05Z"
-      }
-    ]
-  },
-  "timestamp": "2026-02-14T10:00:10Z"
+ "status": "success",
+ "data": {
+ "count": 100,
+ "features": [
+ {
+ "id": 1,
+ "road_id": 1,
+ "timestamp": "2026-02-14T10:00:00Z",
+ "hour_of_day": 10,
+ "day_of_week": 6,
+ /* all features */,
+ "target_speed_kmh": 45,
+ "target_congestion_level": "moderate",
+ "created_at": "2026-02-14T10:00:05Z"
+ }
+ ]
+ },
+ "timestamp": "2026-02-14T10:00:10Z"
 }
 ```
 
@@ -231,20 +231,20 @@ Get aggregated statistics about the feature store.
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "total_records": 1500,
-    "unique_roads": 6,
-    "earliest_record": "2026-02-01T00:00:00Z",
-    "latest_record": "2026-02-14T10:00:00Z",
-    "labeled_records": 1200,
-    "labeling_percentage": "80.00",
-    "avg_speed": "52.34",
-    "rainy_records": 150,
-    "event_records": 80,
-    "arroyo_records": 450
-  },
-  "timestamp": "2026-02-14T10:00:10Z"
+ "status": "success",
+ "data": {
+ "total_records": 1500,
+ "unique_roads": 6,
+ "earliest_record": "2026-02-01T00:00:00Z",
+ "latest_record": "2026-02-14T10:00:00Z",
+ "labeled_records": 1200,
+ "labeling_percentage": "80.00",
+ "avg_speed": "52.34",
+ "rainy_records": 150,
+ "event_records": 80,
+ "arroyo_records": 450
+ },
+ "timestamp": "2026-02-14T10:00:10Z"
 }
 ```
 
@@ -257,19 +257,19 @@ Extract and store features for ALL roads at once (async operation).
 **Request Body:**
 ```json
 {
-  "timestamp": "2026-02-14T10:00:00Z"  // optional, defaults to now
+ "timestamp": "2026-02-14T10:00:00Z" // optional, defaults to now
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "message": "Batch feature extraction started",
-  "data": {
-    "timestamp": "2026-02-14T10:00:00Z"
-  },
-  "timestamp": "2026-02-14T10:00:05Z"
+ "status": "success",
+ "message": "Batch feature extraction started",
+ "data": {
+ "timestamp": "2026-02-14T10:00:00Z"
+ },
+ "timestamp": "2026-02-14T10:00:05Z"
 }
 ```
 
@@ -292,8 +292,8 @@ Extract features for prediction without storing:
 
 ```bash
 curl -X POST http://localhost:4000/api/v1/ml/features/extract \
-  -H "Content-Type: application/json" \
-  -d '{"road_id": 1}'
+ -H "Content-Type: application/json" \
+ -d '{"road_id": 1}'
 ```
 
 ### Example 3: Export Training Dataset
@@ -336,10 +336,10 @@ const normalizedTemp = normalize(32, 20, 40); // 0.6
 import { normalizeFeatures } from '@/utils/featureNormalization';
 
 const features = {
-  hour_of_day: 14,
-  temperature: 32,
-  humidity: 75,
-  is_rush_hour: false
+ hour_of_day: 14,
+ temperature: 32,
+ humidity: 75,
+ is_rush_hour: false
 };
 
 const normalized = normalizeFeatures(features);
@@ -364,21 +364,21 @@ const array = featuresToArray(normalized, featureOrder);
 
 ```sql
 CREATE TABLE ml_features (
-  id SERIAL PRIMARY KEY,
-  road_id INTEGER NOT NULL,
-  timestamp TIMESTAMPTZ NOT NULL,
+ id SERIAL PRIMARY KEY,
+ road_id INTEGER NOT NULL,
+ timestamp TIMESTAMPTZ NOT NULL,
 
-  -- Temporal features
-  hour_of_day INTEGER NOT NULL,
-  day_of_week INTEGER NOT NULL,
-  -- ... (see migration file)
+ -- Temporal features
+ hour_of_day INTEGER NOT NULL,
+ day_of_week INTEGER NOT NULL,
+ -- ... (see migration file)
 
-  -- Target variables
-  target_speed_kmh INTEGER,
-  target_congestion_level VARCHAR(20),
+ -- Target variables
+ target_speed_kmh INTEGER,
+ target_congestion_level VARCHAR(20),
 
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(road_id, timestamp)
+ created_at TIMESTAMPTZ DEFAULT NOW(),
+ UNIQUE(road_id, timestamp)
 );
 ```
 
