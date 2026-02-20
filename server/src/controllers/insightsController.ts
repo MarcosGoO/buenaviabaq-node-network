@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { InsightsService } from '@/services/insightsService.js';
+import { InsightsService, ExecutiveSummary, ZoneInsights, ComparativeMetrics } from '@/services/insightsService.js';
 import { CacheService } from '@/services/cacheService.js';
 import { logger } from '@/utils/logger.js';
 import type { ApiResponse } from '@/types';
@@ -20,10 +20,10 @@ export class InsightsController {
       const cacheKey = 'insights:executive-summary';
 
       // Try to get from cache first
-      const cached = await CacheService.get<any>(cacheKey);
+      const cached = await CacheService.get<ExecutiveSummary>(cacheKey);
       if (cached) {
         logger.info('Executive summary retrieved from cache');
-        const response: ApiResponse<typeof cached> = {
+        const response: ApiResponse<ExecutiveSummary> = {
           status: 'success',
           data: cached,
           timestamp: new Date().toISOString(),
@@ -79,10 +79,10 @@ export class InsightsController {
         : 'insights:zones:all';
 
       // Try to get from cache first
-      const cached = await CacheService.get<any>(cacheKey);
+      const cached = await CacheService.get<ZoneInsights[]>(cacheKey);
       if (cached) {
         logger.info(`Zone insights retrieved from cache (zone_id: ${zoneId || 'all'})`);
-        const response: ApiResponse<typeof cached> = {
+        const response: ApiResponse<ZoneInsights[]> = {
           status: 'success',
           data: cached,
           timestamp: new Date().toISOString(),
@@ -131,10 +131,10 @@ export class InsightsController {
       const cacheKey = `insights:comparative:days-${days}`;
 
       // Try to get from cache first
-      const cached = await CacheService.get<any>(cacheKey);
+      const cached = await CacheService.get<ComparativeMetrics[]>(cacheKey);
       if (cached) {
         logger.info(`Comparative metrics retrieved from cache (days: ${days})`);
-        const response: ApiResponse<typeof cached> = {
+        const response: ApiResponse<ComparativeMetrics[]> = {
           status: 'success',
           data: cached,
           timestamp: new Date().toISOString(),

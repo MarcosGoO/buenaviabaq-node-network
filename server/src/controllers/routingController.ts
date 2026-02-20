@@ -39,11 +39,13 @@ export class RoutingController {
       // Generate cache key based on coordinates
       const cacheKey = `routes:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
 
-      // Check cache
-      const cached = await CacheService.get<any>(cacheKey, 'routes');
+      // Calculate routes (used to type the cache hit as well)
+      type RouteList = Awaited<ReturnType<typeof RoutingService.calculateRoutes>>;
+
+      const cached = await CacheService.get<RouteList>(cacheKey, 'routes');
       if (cached) {
         logger.info('Routes retrieved from cache');
-        const response: ApiResponse<typeof cached> = {
+        const response: ApiResponse<RouteList> = {
           status: 'success',
           data: cached,
           timestamp: new Date().toISOString(),
@@ -110,10 +112,11 @@ export class RoutingController {
       const cacheKey = `route:optimal:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
 
       // Check cache
-      const cached = await CacheService.get<any>(cacheKey, 'routes');
+      type OptimalRoute = Awaited<ReturnType<typeof RoutingService.getOptimalRoute>>;
+      const cached = await CacheService.get<OptimalRoute>(cacheKey, 'routes');
       if (cached) {
         logger.info('Optimal route retrieved from cache');
-        const response: ApiResponse<typeof cached> = {
+        const response: ApiResponse<OptimalRoute> = {
           status: 'success',
           data: cached,
           timestamp: new Date().toISOString(),

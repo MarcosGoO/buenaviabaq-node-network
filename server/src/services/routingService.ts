@@ -1,8 +1,32 @@
 import { pool } from '@/db';
 import { logger } from '@/utils/logger';
-import { WeatherService } from './weatherService.js';
+import { WeatherService, WeatherData } from './weatherService.js';
 import { GeoService } from './geoService.js';
-import { EventsService } from './eventsService.js';
+import { EventsService, Event } from './eventsService.js';
+import type { ArroyoZone } from '@/types';
+
+/**
+ * GeoJSON geometry type for road segments
+ */
+interface GeoJSONGeometry {
+  type: string;
+  coordinates: number[] | number[][] | number[][][];
+}
+
+/**
+ * Raw road row returned from DB query
+ */
+interface RoadRow {
+  road_id: number;
+  road_name: string;
+  road_type: string;
+  lanes: number | null;
+  max_speed_kmh: number | null;
+  length_km: number | null;
+  geometry: GeoJSONGeometry;
+  current_speed: number;
+  congestion_level: string;
+}
 
 /**
  * Route segment interface
@@ -15,7 +39,7 @@ export interface RouteSegment {
   estimated_time_minutes: number;
   current_speed_kmh: number;
   congestion_level: string;
-  geometry: any;
+  geometry: GeoJSONGeometry;
 }
 
 /**
@@ -163,7 +187,7 @@ export class RoutingService {
   private static async getRoadsInArea(
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number }
-  ) {
+  ): Promise<RoadRow[]> {
     try {
       // Create bounding box with some buffer (0.01 degrees ~ 1km)
       const buffer = 0.01;
@@ -216,7 +240,7 @@ export class RoutingService {
   private static async generateRouteAlternatives(
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number },
-    roads: any[],
+    roads: RoadRow[],
     maxRoutes: number
   ): Promise<Route[]> {
     const routes: Route[] = [];
@@ -266,8 +290,8 @@ export class RoutingService {
    * Create a single route from a prioritized list of roads
    */
   private static createRoute(
-    priorityRoads: any[],
-    allRoads: any[],
+    priorityRoads: RoadRow[],
+    allRoads: RoadRow[],
     strategy: string,
     _origin: { lat: number; lng: number },
     _destination: { lat: number; lng: number }
@@ -348,9 +372,9 @@ export class RoutingService {
    */
   private static async scoreRoute(
     route: Route,
-    weather: any,
-    events: any[],
-    arroyos: any[],
+    weather: WeatherData,
+    events: Event[],
+    arroyos: ArroyoZone[],
     preferences?: RouteRequest['preferences']
   ): Promise<Route> {
     // Traffic Score (0-100, higher is better)
@@ -431,7 +455,7 @@ export class RoutingService {
    * Calculate weather score (0-100)
    * Higher score = better weather conditions
    */
-  private static calculateWeatherScore(route: Route, weather: any): number {
+  private static calculateWeatherScore(route: Route, weather: WeatherData): number {
     let score = 100;
 
     // Rain probability impact
@@ -462,7 +486,7 @@ export class RoutingService {
    * Calculate safety score (0-100)
    * Higher score = safer route (fewer arroyos and events)
    */
-  private static calculateSafetyScore(route: Route, arroyos: any[], events: any[]): number {
+  private static calculateSafetyScore(route: Route, arroyos: ArroyoZone[], events: Event[]): number {
     let score = 100;
 
     // Penalize if high-risk arroyos nearby (simplified check)
@@ -500,9 +524,9 @@ export class RoutingService {
    */
   private static generateWarnings(
     route: Route,
-    weather: any,
-    arroyos: any[],
-    events: any[]
+    weather: WeatherData,
+    arroyos: ArroyoZone[],
+    events: Event[]
   ): string[] {
     const warnings: string[] = [];
 
