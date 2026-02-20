@@ -3,6 +3,21 @@ import { logger } from '@/utils/logger';
 import { WeatherService } from './weatherService.js';
 import { GeoService } from './geoService.js';
 import { EventsService } from './eventsService.js';
+import type { WeatherData } from './weatherService.js';
+import type { Event } from './eventsService.js';
+import type { ArroyoZone } from '@/types';
+
+export interface RoadData {
+  road_id: number;
+  road_name: string;
+  road_type: string;
+  lanes: number;
+  max_speed_kmh: number;
+  length_km: number;
+  geometry: Record<string, unknown>;
+  current_speed: number;
+  congestion_level: string;
+}
 
 /**
  * Route segment interface
@@ -15,7 +30,7 @@ export interface RouteSegment {
   estimated_time_minutes: number;
   current_speed_kmh: number;
   congestion_level: string;
-  geometry: any;
+  geometry: Record<string, unknown>;
 }
 
 /**
@@ -216,7 +231,7 @@ export class RoutingService {
   private static async generateRouteAlternatives(
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number },
-    roads: any[],
+    roads: RoadData[],
     maxRoutes: number
   ): Promise<Route[]> {
     const routes: Route[] = [];
@@ -225,9 +240,7 @@ export class RoutingService {
     const fastestRoute = this.createRoute(
       roads.filter(r => r.road_type === 'highway' || r.current_speed > 50),
       roads,
-      'fastest',
-      origin,
-      destination
+      'fastest'
     );
     if (fastestRoute) routes.push(fastestRoute);
 
@@ -235,9 +248,7 @@ export class RoutingService {
     const shortestRoute = this.createRoute(
       roads.sort((a, b) => a.length_km - b.length_km),
       roads,
-      'shortest',
-      origin,
-      destination
+      'shortest'
     );
     if (shortestRoute && !this.isDuplicateRoute(shortestRoute, routes)) {
       routes.push(shortestRoute);
@@ -250,9 +261,7 @@ export class RoutingService {
     const avoidCongestionRoute = this.createRoute(
       lowCongestionRoads,
       roads,
-      'avoid-congestion',
-      origin,
-      destination
+      'avoid-congestion'
     );
     if (avoidCongestionRoute && !this.isDuplicateRoute(avoidCongestionRoute, routes)) {
       routes.push(avoidCongestionRoute);
@@ -266,11 +275,9 @@ export class RoutingService {
    * Create a single route from a prioritized list of roads
    */
   private static createRoute(
-    priorityRoads: any[],
-    allRoads: any[],
-    strategy: string,
-    _origin: { lat: number; lng: number },
-    _destination: { lat: number; lng: number }
+    priorityRoads: RoadData[],
+    allRoads: RoadData[],
+    strategy: string
   ): Route | null {
     if (priorityRoads.length === 0 && allRoads.length === 0) {
       return null;
@@ -348,9 +355,9 @@ export class RoutingService {
    */
   private static async scoreRoute(
     route: Route,
-    weather: any,
-    events: any[],
-    arroyos: any[],
+    weather: WeatherData,
+    events: Event[],
+    arroyos: ArroyoZone[],
     preferences?: RouteRequest['preferences']
   ): Promise<Route> {
     // Traffic Score (0-100, higher is better)
@@ -431,7 +438,7 @@ export class RoutingService {
    * Calculate weather score (0-100)
    * Higher score = better weather conditions
    */
-  private static calculateWeatherScore(route: Route, weather: any): number {
+  private static calculateWeatherScore(route: Route, weather: WeatherData): number {
     let score = 100;
 
     // Rain probability impact
@@ -462,7 +469,7 @@ export class RoutingService {
    * Calculate safety score (0-100)
    * Higher score = safer route (fewer arroyos and events)
    */
-  private static calculateSafetyScore(route: Route, arroyos: any[], events: any[]): number {
+  private static calculateSafetyScore(route: Route, arroyos: ArroyoZone[], events: Event[]): number {
     let score = 100;
 
     // Penalize if high-risk arroyos nearby (simplified check)
@@ -500,9 +507,9 @@ export class RoutingService {
    */
   private static generateWarnings(
     route: Route,
-    weather: any,
-    arroyos: any[],
-    events: any[]
+    weather: WeatherData,
+    arroyos: ArroyoZone[],
+    events: Event[]
   ): string[] {
     const warnings: string[] = [];
 

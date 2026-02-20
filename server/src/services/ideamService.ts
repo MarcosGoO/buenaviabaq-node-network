@@ -1,6 +1,5 @@
 import { logger } from '@/utils/logger.js';
 import { CacheService } from './cacheService.js';
-import { AppError } from '@/middleware/errorHandler.js';
 
 export interface IdeamData {
   station: string;

@@ -28,7 +28,7 @@ export class RoutingController {
       }
 
       if (!routeRequest.origin.lat || !routeRequest.origin.lng ||
-          !routeRequest.destination.lat || !routeRequest.destination.lng) {
+        !routeRequest.destination.lat || !routeRequest.destination.lng) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid coordinates. lat and lng are required for origin and destination',
@@ -40,7 +40,7 @@ export class RoutingController {
       const cacheKey = `routes:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
 
       // Check cache
-      const cached = await CacheService.get<any>(cacheKey, 'routes');
+      const cached = await CacheService.get<unknown>(cacheKey, 'routes');
       if (cached) {
         logger.info('Routes retrieved from cache');
         const response: ApiResponse<typeof cached> = {
@@ -98,7 +98,7 @@ export class RoutingController {
       }
 
       if (!routeRequest.origin.lat || !routeRequest.origin.lng ||
-          !routeRequest.destination.lat || !routeRequest.destination.lng) {
+        !routeRequest.destination.lat || !routeRequest.destination.lng) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid coordinates. lat and lng are required for origin and destination',
@@ -110,7 +110,7 @@ export class RoutingController {
       const cacheKey = `route:optimal:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
 
       // Check cache
-      const cached = await CacheService.get<any>(cacheKey, 'routes');
+      const cached = await CacheService.get<unknown>(cacheKey, 'routes');
       if (cached) {
         logger.info('Optimal route retrieved from cache');
         const response: ApiResponse<typeof cached> = {
