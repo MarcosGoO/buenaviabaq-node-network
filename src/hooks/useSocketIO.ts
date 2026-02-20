@@ -65,6 +65,7 @@ export function useSocketIO(): UseSocketIOReturn {
 
     const newSocket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
+      auth: { token: 'viabaq-auth-token' },
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 10,

@@ -188,7 +188,7 @@ export class RoutingService {
           SELECT speed_kmh, congestion_level
           FROM traffic_history
           WHERE road_id = r.id
-            AND time >= NOW() - INTERVAL '30 minutes'
+            AND time >= NOW() - INTERVAL '15 minutes'
           ORDER BY time DESC
           LIMIT 1
         ) th ON true

@@ -25,6 +25,20 @@ export class SocketService {
       transports: ['websocket', 'polling'],
     });
 
+    // Add authentication middleware
+    this.io.use((socket, next) => {
+      const token = socket.handshake.auth.token || socket.handshake.headers['authorization'];
+
+      // In a production app, verify real JWT here.
+      // For this project, a simple API token check is sufficient.
+      if (!token || (token !== 'viabaq-auth-token' && !String(token).includes('viabaq-auth-token'))) {
+        logger.warn(`Connection rejected: Invalid or missing token for socket ${socket.id}`);
+        return next(new Error('Authentication error'));
+      }
+
+      next();
+    });
+
     // Setup Redis adapter for scalability (optional but recommended)
     this.setupRedisAdapter();
 

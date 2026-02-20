@@ -1,5 +1,7 @@
 import { logger } from '@/utils/logger.js';
 import { CacheService } from './cacheService.js';
+import { WeatherService } from './weatherService.js';
+import { EventsService } from './eventsService.js';
 
 export interface TrafficData {
   road_id: number;
@@ -35,8 +37,8 @@ export class TrafficService {
           //   return await this.fetchFromTrafficAPI(apiKey);
           // }
 
-          logger.info('Generating mock traffic data');
-          return this.generateMockTrafficData();
+          logger.info('Generating advanced mock traffic data');
+          return await this.generateMockTrafficData();
         },
         {
           ttl: CacheService.TTL.MEDIUM, // 5 minutes
@@ -80,11 +82,22 @@ export class TrafficService {
     return trafficData.find((road) => road.road_id === roadId) || null;
   }
 
-  // Mock data generator based on time of day
-  private static generateMockTrafficData(): TrafficData[] {
+  // Advanced mock data generator based on time, weather, and events
+  private static async generateMockTrafficData(): Promise<TrafficData[]> {
     const currentHour = new Date().getHours();
     const isPeakHour =
       (currentHour >= 6 && currentHour <= 9) || (currentHour >= 17 && currentHour <= 20);
+
+    // Fetch context data in parallel
+    const [weather, upcomingEvents] = await Promise.all([
+      WeatherService.getCurrentWeather().catch(() => null),
+      EventsService.getUpcomingEvents().catch(() => []),
+    ]);
+
+    const rainIntensity = weather?.rain?.['1h'] || weather?.rain_1h || 0;
+    const isRaining = rainIntensity > 0;
+    const isHeavyRain = rainIntensity > 5;
+    const hasEvents = upcomingEvents.length > 0;
 
     const roads = [
       { id: 1, name: 'Vía 40' },
@@ -96,9 +109,25 @@ export class TrafficService {
     ];
 
     return roads.map((road) => {
-      const baseSpeed = isPeakHour ? 20 : 45;
-      const speedVariation = Math.random() * 20;
-      const speed = Math.round(baseSpeed + speedVariation);
+      let baseSpeed = isPeakHour ? 20 : 45;
+
+      // Apply weather impact
+      if (isHeavyRain) {
+        baseSpeed *= 0.6; // 40% speed reduction in heavy rain
+      } else if (isRaining) {
+        baseSpeed *= 0.8; // 20% speed reduction in light rain
+      }
+
+      // Apply event impact (simulated generically for all roads)
+      if (hasEvents) {
+        // Randomly affect some roads more if there are events
+        if (Math.random() > 0.5) {
+          baseSpeed *= 0.7;
+        }
+      }
+
+      const speedVariation = Math.random() * (isPeakHour ? 10 : 20);
+      const speed = Math.max(5, Math.round(baseSpeed + speedVariation - 10)); // Ensure speed >= 5
 
       let congestionLevel: 'low' | 'moderate' | 'high' | 'severe';
       if (speed > 50) congestionLevel = 'low';

@@ -8,7 +8,8 @@ import { config } from '@/config/index.js';
 import { logger } from '@/utils/logger.js';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler.js';
 import { testConnection } from '@/db/index.js';
-import { RedisClient } from '@/lib/redis.js';
+import { RedisStore } from 'rate-limit-redis';
+import { RedisClient, redis } from '@/lib/redis.js';
 import { SocketService } from '@/lib/socket.js';
 import geoRoutes from '@/routes/geoRoutes.js';
 import weatherRoutes from '@/routes/weatherRoutes.js';
@@ -38,13 +39,44 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  store: new RedisStore({
+    // @ts-expect-error - ioredis and rate-limit-redis type mismatch
+    sendCommand: (...args: string[]) => redis.call(...args),
+  }),
 });
 app.use(`/api/${config.API_VERSION}`, limiter);
+
+// Granular limiters
+const routingLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30, // 30 req/min
+  message: 'Too many routing requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: new RedisStore({
+    // @ts-expect-error - ioredis and rate-limit-redis type mismatch
+    sendCommand: (...args: string[]) => redis.call(...args),
+  }),
+});
+
+const analyticsLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60, // 60 req/min
+  message: 'Too many analytics requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: new RedisStore({
+    // @ts-expect-error - ioredis and rate-limit-redis type mismatch
+    sendCommand: (...args: string[]) => redis.call(...args),
+  }),
+});
 
 // Body parsing & compression
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(compression());
+app.use(compression({
+  threshold: 1024, // 1kb explicit threshold
+}));
 
 // Request logging
 app.use((req, res, next) => {
@@ -82,12 +114,12 @@ app.use(`/api/${config.API_VERSION}/geo`, geoRoutes);
 app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes);
 app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes);
 app.use(`/api/${config.API_VERSION}/events`, eventsRoutes);
-app.use(`/api/${config.API_VERSION}/analytics`, analyticsRoutes);
+app.use(`/api/${config.API_VERSION}/analytics`, analyticsLimiter, analyticsRoutes);
 app.use(`/api/${config.API_VERSION}/ml`, mlRoutes);
 app.use(`/api/${config.API_VERSION}/predictions`, predictionsRoutes);
 app.use(`/api/${config.API_VERSION}/alerts`, alertsRoutes);
 app.use(`/api/${config.API_VERSION}/insights`, insightsRoutes);
-app.use(`/api/${config.API_VERSION}/routes`, routingRoutes);
+app.use(`/api/${config.API_VERSION}/routes`, routingLimiter, routingRoutes);
 
 // Error handling
 app.use(notFoundHandler);
