@@ -48,10 +48,14 @@ class FeatureVector(BaseModel):
     arroyo_risk_level_encoded: Optional[float] = Field(None, ge=0, le=1)
     arroyo_distance_km: Optional[float] = None
 
+    # Temporal prediction
+    horizon_minutes: Optional[int] = 0
+
 
 class PredictionRequest(BaseModel):
     """Request for traffic prediction"""
     features: FeatureVector
+    explain: bool = False
 
 
 class BatchPredictionRequest(BaseModel):
@@ -64,8 +68,11 @@ class PredictionResponse(BaseModel):
     road_id: int
     timestamp: datetime
     predicted_speed_kmh: float
+    predicted_speed_lower: Optional[float] = None
+    predicted_speed_upper: Optional[float] = None
     predicted_congestion_level: str
     confidence_score: Optional[float] = None
+    shap_values: Optional[Dict[str, float]] = None
     model_version: str
 
 
@@ -129,3 +136,142 @@ class ModelInfoResponse(BaseModel):
     training_samples: int
     metrics: Optional[ModelMetrics] = None
     feature_importance: Optional[List[FeatureImportance]] = None
+
+
+# ── Sprint 7.1.1 — Model Experimentation ────────────────────────────────────
+
+class ExperimentRequest(BaseModel):
+    """Request to run a model experiment"""
+    model_type: str = Field(
+        "xgboost",
+        description="Model to experiment with: 'xgboost', 'prophet', 'lstm'",
+    )
+    hyperparameters: Optional[Dict[str, Any]] = None
+    data_limit: Optional[int] = Field(
+        None, description="Limit training rows (default: all)"
+    )
+
+
+class ExperimentMetrics(BaseModel):
+    mae: float
+    rmse: float
+    r2: float
+    mape: float
+    training_samples: int
+    test_samples: int
+
+
+class ExperimentResult(BaseModel):
+    model_type: str
+    metrics: ExperimentMetrics
+    params: Dict[str, Any]
+    trained_at: str
+    note: Optional[str] = None
+
+
+class CompareModelsRequest(BaseModel):
+    """Request to compare multiple models"""
+    model_types: List[str] = Field(
+        default=["xgboost", "lightgbm"],
+        description="Models to compare. Options: 'xgboost', 'lightgbm', 'randomforest', 'prophet', 'lstm'",
+    )
+    hyperparameters: Optional[Dict[str, Dict[str, Any]]] = Field(
+        None, description="Per-model hyperparameters, keyed by model_type"
+    )
+    data_limit: Optional[int] = None
+
+
+class ModelComparisonEntry(BaseModel):
+    model_type: str
+    mae: float
+    rmse: float
+    r2: float
+    mape: float
+    training_samples: int
+    test_samples: int
+    trained_at: Optional[str] = None
+
+
+class CompareModelsResponse(BaseModel):
+    models: List[ModelComparisonEntry]
+    best_model_by_mae: Optional[str] = None
+    compared_at: str
+
+
+# ── Sprint 7.1.2 — Hyperparameter Tuning ────────────────────────────────────
+
+class TuningRequest(BaseModel):
+    """Request to run hyperparameter tuning"""
+    method: str = Field(
+        "optuna",
+        description="Tuning method: 'grid_search' or 'optuna'",
+    )
+    model_type: str = Field(
+        "xgboost",
+        description="Model to tune: 'xgboost' or 'lightgbm'",
+    )
+    n_trials: int = Field(
+        20, ge=5, le=200, description="Number of Optuna trials (ignored for grid_search)"
+    )
+    cv_folds: int = Field(3, ge=2, le=10)
+    data_limit: Optional[int] = None
+
+
+class TuningResponse(BaseModel):
+    method: str
+    model_type: str
+    best_params: Dict[str, Any]
+    best_mae: float
+    cv_folds: int
+    n_trials: Optional[int] = None
+    n_combinations: Optional[int] = None
+    timestamp: str
+    params_saved_to: str = "./models/best_params.json"
+
+
+# ── Sprint 7.1.3 — Temporal Cross-Validation ────────────────────────────────
+
+class CrossValidationRequest(BaseModel):
+    """Request to run TimeSeriesSplit cross-validation"""
+    model_type: str = Field(
+        "xgboost",
+        description="Model type: 'xgboost', 'lightgbm', 'randomforest'",
+    )
+    n_splits: int = Field(5, ge=2, le=10)
+    hyperparameters: Optional[Dict[str, Any]] = None
+    data_limit: Optional[int] = None
+
+
+class FoldMetrics(BaseModel):
+    fold: int
+    mae: Optional[float] = None
+    rmse: Optional[float] = None
+    r2: Optional[float] = None
+    mape: Optional[float] = None
+    train_size: int
+    test_size: int
+    error: Optional[str] = None
+
+
+class AggregatedMetric(BaseModel):
+    mean: float
+    std: float
+    min: float
+    max: float
+
+
+class AggregatedMetrics(BaseModel):
+    mae: Optional[AggregatedMetric] = None
+    rmse: Optional[AggregatedMetric] = None
+    r2: Optional[AggregatedMetric] = None
+    mape: Optional[AggregatedMetric] = None
+    successful_folds: int
+
+
+class CrossValidationResponse(BaseModel):
+    model_type: str
+    n_splits: int
+    folds: List[FoldMetrics]
+    aggregated: AggregatedMetrics
+    total_samples: int
+    validated_at: str

@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://postgres:password@localhost:5432/viabaq_db"
 
     # Model Settings
-    model_type: Literal["lightgbm", "randomforest", "xgboost"] = "lightgbm"
+    model_type: Literal["lightgbm", "randomforest", "xgboost", "prophet", "lstm"] = "lightgbm"
     model_path: str = "./models/traffic_model.pkl"
     feature_scaler_path: str = "./models/scaler.pkl"
 
@@ -29,6 +29,10 @@ class Settings(BaseSettings):
 
     # Prediction Settings
     prediction_cache_ttl: int = 900  # 15 minutes
+
+    # MLflow Tracking
+    mlflow_tracking_uri: str = "http://localhost:5000"
+    mlflow_experiment_name: str = "viabaq_traffic_prediction"
 
     # Logging
     log_level: str = "INFO"

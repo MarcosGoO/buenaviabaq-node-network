@@ -25,13 +25,18 @@ export class PredictionsController {
         ? new Date(timestampParam)
         : undefined;
 
+      const horizonParam = req.query.horizon;
+      const horizon = horizonParam && typeof horizonParam === 'string'
+        ? parseInt(horizonParam, 10)
+        : undefined;
+
       // Check ML service health
       const isHealthy = await MLPredictionService.healthCheck();
       if (!isHealthy) {
         throw new AppError(503, 'ML service is unavailable');
       }
 
-      const prediction = await MLPredictionService.predictTraffic(roadId, timestamp);
+      const prediction = await MLPredictionService.predictTraffic(roadId, timestamp, horizon);
 
       if (!prediction) {
         throw new AppError(500, 'Failed to generate prediction');
@@ -40,6 +45,56 @@ export class PredictionsController {
       res.json({
         status: 'success',
         data: prediction,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/predictions/road/:id/timeline
+   * Get traffic prediction timeline for a specific road at different horizons
+   */
+  static async getPredictionTimelineForRoad(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idParam = req.params.id;
+      if (typeof idParam !== 'string') {
+        throw new AppError(400, 'Invalid road ID parameter');
+      }
+
+      const roadId = parseInt(idParam, 10);
+
+      if (isNaN(roadId) || roadId <= 0) {
+        throw new AppError(400, 'Invalid road ID');
+      }
+
+      const timestampParam = req.query.timestamp;
+      const timestamp = timestampParam && typeof timestampParam === 'string'
+        ? new Date(timestampParam)
+        : undefined;
+
+      // Check ML service health
+      const isHealthy = await MLPredictionService.healthCheck();
+      if (!isHealthy) {
+        throw new AppError(503, 'ML service is unavailable');
+      }
+
+      const horizons = [15, 30, 60, 120];
+      const promises = horizons.map(h => MLPredictionService.predictTraffic(roadId, timestamp, h));
+      const results = await Promise.all(promises);
+
+      const timeline = horizons.map((h, index) => ({
+        horizon_minutes: h,
+        prediction: results[index]
+      }));
+
+      res.json({
+        status: 'success',
+        data: {
+          road_id: roadId,
+          timeline
+        },
         timestamp: new Date().toISOString(),
       });
     } catch (error) {

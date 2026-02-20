@@ -42,6 +42,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.pyc
 
 # Log directories
 logs/
@@ -212,3 +213,5 @@ Temporary Items
 !docker-compose.yml
 !README.md
 !LICENSE
+ml-service/models/best_params.json
+ml-service/models/cv_results.json
