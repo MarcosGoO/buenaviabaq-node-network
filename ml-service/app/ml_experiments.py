@@ -210,7 +210,8 @@ class _LSTMNet:
         with torch.no_grad():
             X_t = torch.tensor(X, dtype=torch.float32).unsqueeze(1).to(self.device)
             preds = self.model(X_t).cpu().numpy()
-        return preds
+        # Speed cannot be negative
+        return np.maximum(preds, 0)
 
 
 def train_lstm_experiment(
