@@ -28,7 +28,7 @@ export class RoutingController {
       }
 
       if (!routeRequest.origin.lat || !routeRequest.origin.lng ||
-          !routeRequest.destination.lat || !routeRequest.destination.lng) {
+        !routeRequest.destination.lat || !routeRequest.destination.lng) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid coordinates. lat and lng are required for origin and destination',
@@ -39,10 +39,15 @@ export class RoutingController {
       // Generate cache key based on coordinates
       const cacheKey = `routes:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
 
+<<<<<<< HEAD
       // Calculate routes (used to type the cache hit as well)
       type RouteList = Awaited<ReturnType<typeof RoutingService.calculateRoutes>>;
 
       const cached = await CacheService.get<RouteList>(cacheKey, 'routes');
+=======
+      // Check cache
+      const cached = await CacheService.get<unknown>(cacheKey, 'routes');
+>>>>>>> develop
       if (cached) {
         logger.info('Routes retrieved from cache');
         const response: ApiResponse<RouteList> = {
@@ -100,7 +105,7 @@ export class RoutingController {
       }
 
       if (!routeRequest.origin.lat || !routeRequest.origin.lng ||
-          !routeRequest.destination.lat || !routeRequest.destination.lng) {
+        !routeRequest.destination.lat || !routeRequest.destination.lng) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid coordinates. lat and lng are required for origin and destination',
@@ -112,8 +117,12 @@ export class RoutingController {
       const cacheKey = `route:optimal:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
 
       // Check cache
+<<<<<<< HEAD
       type OptimalRoute = Awaited<ReturnType<typeof RoutingService.getOptimalRoute>>;
       const cached = await CacheService.get<OptimalRoute>(cacheKey, 'routes');
+=======
+      const cached = await CacheService.get<unknown>(cacheKey, 'routes');
+>>>>>>> develop
       if (cached) {
         logger.info('Optimal route retrieved from cache');
         const response: ApiResponse<OptimalRoute> = {

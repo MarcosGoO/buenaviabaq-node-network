@@ -1,29 +1,19 @@
 import { pool } from '@/db';
 import { logger } from '@/utils/logger';
-import { WeatherService, WeatherData } from './weatherService.js';
+import { WeatherService, type WeatherData } from './weatherService.js';
 import { GeoService } from './geoService.js';
-import { EventsService, Event } from './eventsService.js';
+import { EventsService } from './eventsService.js';
+import type { Event } from './eventsService.js';
 import type { ArroyoZone } from '@/types';
 
-/**
- * GeoJSON geometry type for road segments
- */
-interface GeoJSONGeometry {
-  type: string;
-  coordinates: number[] | number[][] | number[][][];
-}
-
-/**
- * Raw road row returned from DB query
- */
-interface RoadRow {
+export interface RoadData {
   road_id: number;
   road_name: string;
   road_type: string;
-  lanes: number | null;
-  max_speed_kmh: number | null;
-  length_km: number | null;
-  geometry: GeoJSONGeometry;
+  lanes: number;
+  max_speed_kmh: number;
+  length_km: number;
+  geometry: Record<string, unknown>;
   current_speed: number;
   congestion_level: string;
 }
@@ -39,7 +29,7 @@ export interface RouteSegment {
   estimated_time_minutes: number;
   current_speed_kmh: number;
   congestion_level: string;
-  geometry: GeoJSONGeometry;
+  geometry: Record<string, unknown>;
 }
 
 /**
@@ -187,7 +177,7 @@ export class RoutingService {
   private static async getRoadsInArea(
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number }
-  ): Promise<RoadRow[]> {
+  ): Promise<RoadData[]> {
     try {
       // Create bounding box with some buffer (0.01 degrees ~ 1km)
       const buffer = 0.01;
@@ -212,7 +202,7 @@ export class RoutingService {
           SELECT speed_kmh, congestion_level
           FROM traffic_history
           WHERE road_id = r.id
-            AND time >= NOW() - INTERVAL '30 minutes'
+            AND time >= NOW() - INTERVAL '15 minutes'
           ORDER BY time DESC
           LIMIT 1
         ) th ON true
@@ -240,7 +230,7 @@ export class RoutingService {
   private static async generateRouteAlternatives(
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number },
-    roads: RoadRow[],
+    roads: RoadData[],
     maxRoutes: number
   ): Promise<Route[]> {
     const routes: Route[] = [];
@@ -249,9 +239,7 @@ export class RoutingService {
     const fastestRoute = this.createRoute(
       roads.filter(r => r.road_type === 'highway' || r.current_speed > 50),
       roads,
-      'fastest',
-      origin,
-      destination
+      'fastest'
     );
     if (fastestRoute) routes.push(fastestRoute);
 
@@ -259,9 +247,7 @@ export class RoutingService {
     const shortestRoute = this.createRoute(
       roads.sort((a, b) => a.length_km - b.length_km),
       roads,
-      'shortest',
-      origin,
-      destination
+      'shortest'
     );
     if (shortestRoute && !this.isDuplicateRoute(shortestRoute, routes)) {
       routes.push(shortestRoute);
@@ -274,9 +260,7 @@ export class RoutingService {
     const avoidCongestionRoute = this.createRoute(
       lowCongestionRoads,
       roads,
-      'avoid-congestion',
-      origin,
-      destination
+      'avoid-congestion'
     );
     if (avoidCongestionRoute && !this.isDuplicateRoute(avoidCongestionRoute, routes)) {
       routes.push(avoidCongestionRoute);
@@ -290,11 +274,9 @@ export class RoutingService {
    * Create a single route from a prioritized list of roads
    */
   private static createRoute(
-    priorityRoads: RoadRow[],
-    allRoads: RoadRow[],
-    strategy: string,
-    _origin: { lat: number; lng: number },
-    _destination: { lat: number; lng: number }
+    priorityRoads: RoadData[],
+    allRoads: RoadData[],
+    strategy: string
   ): Route | null {
     if (priorityRoads.length === 0 && allRoads.length === 0) {
       return null;

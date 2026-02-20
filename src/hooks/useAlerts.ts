@@ -83,9 +83,9 @@ export function useAlerts(): UseAlertsReturn {
       .then(res => res.json())
       .then(data => {
         console.log('🚨 Initial alerts response:', data);
-        if (data.success && data.alerts) {
-          console.log('✅ Loaded', data.alerts.length, 'active alerts');
-          setAlerts(data.alerts);
+        if (data.status === 'success' && data.data) {
+          console.log('✅ Loaded', data.data.length, 'active alerts');
+          setAlerts(data.data);
         } else {
           console.log('ℹ️ No active alerts found');
         }

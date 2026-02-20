@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { WeatherService } from '@/services/weatherService';
+import { WeatherService } from '@/services/weatherService.js';
+import { IdeamService } from '@/services/ideamService.js';
 import { logger } from '@/utils/logger';
 import type { ApiResponse } from '@/types';
 
@@ -34,6 +35,24 @@ export class WeatherController {
       };
 
       logger.info('Forecast data retrieved successfully');
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /api/v1/weather/ideam
+  static async getIdeamData(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await IdeamService.getCurrentData();
+
+      const response: ApiResponse<typeof data> = {
+        status: 'success',
+        data,
+        timestamp: new Date().toISOString(),
+      };
+
+      logger.info('IDEAM data retrieved successfully');
       res.json(response);
     } catch (error) {
       next(error);

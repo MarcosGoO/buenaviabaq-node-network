@@ -20,7 +20,11 @@ export class InsightsController {
       const cacheKey = 'insights:executive-summary';
 
       // Try to get from cache first
+<<<<<<< HEAD
       const cached = await CacheService.get<ExecutiveSummary>(cacheKey);
+=======
+      const cached = await CacheService.get<unknown>(cacheKey);
+>>>>>>> develop
       if (cached) {
         logger.info('Executive summary retrieved from cache');
         const response: ApiResponse<ExecutiveSummary> = {
@@ -79,7 +83,11 @@ export class InsightsController {
         : 'insights:zones:all';
 
       // Try to get from cache first
+<<<<<<< HEAD
       const cached = await CacheService.get<ZoneInsights[]>(cacheKey);
+=======
+      const cached = await CacheService.get<unknown>(cacheKey);
+>>>>>>> develop
       if (cached) {
         logger.info(`Zone insights retrieved from cache (zone_id: ${zoneId || 'all'})`);
         const response: ApiResponse<ZoneInsights[]> = {
@@ -131,7 +139,11 @@ export class InsightsController {
       const cacheKey = `insights:comparative:days-${days}`;
 
       // Try to get from cache first
+<<<<<<< HEAD
       const cached = await CacheService.get<ComparativeMetrics[]>(cacheKey);
+=======
+      const cached = await CacheService.get<unknown>(cacheKey);
+>>>>>>> develop
       if (cached) {
         logger.info(`Comparative metrics retrieved from cache (days: ${days})`);
         const response: ApiResponse<ComparativeMetrics[]> = {

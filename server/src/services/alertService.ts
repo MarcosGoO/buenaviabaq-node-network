@@ -3,13 +3,13 @@ import { WeatherService } from './weatherService.js';
 import { TrafficService } from './trafficService.js';
 import { GeoService } from './geoService.js';
 import { EventsService } from './eventsService.js';
-import type { Event } from './eventsService.js';
 
 export enum AlertType {
   ARROYO_FLOOD_RISK = 'arroyo_flood_risk',
   SEVERE_CONGESTION = 'severe_congestion',
   WEATHER_TRAFFIC_IMPACT = 'weather_traffic_impact',
   EVENT_TRAFFIC_IMPACT = 'event_traffic_impact',
+  SEVERE_WEATHER = 'severe_weather',
 }
 
 export enum AlertSeverity {
@@ -49,18 +49,20 @@ export class AlertService {
       const alerts: Alert[] = [];
 
       // Run all alert detections in parallel
-      const [arroyoAlerts, congestionAlerts, weatherTrafficAlerts, eventTrafficAlerts] =
+      const [arroyoAlerts, congestionAlerts, weatherTrafficAlerts, eventTrafficAlerts, severeWeatherAlerts] =
         await Promise.all([
           this.detectArroyoFloodRisk(),
           this.detectSevereCongestion(),
           this.detectWeatherTrafficImpact(),
           this.detectEventTrafficImpact(),
+          this.detectSevereWeather(),
         ]);
 
       alerts.push(...arroyoAlerts);
       alerts.push(...congestionAlerts);
       alerts.push(...weatherTrafficAlerts);
       alerts.push(...eventTrafficAlerts);
+      alerts.push(...severeWeatherAlerts);
 
       logger.info(`Alert detection complete: ${alerts.length} active alerts`);
 
@@ -270,6 +272,46 @@ export class AlertService {
       return alerts;
     } catch (error) {
       logger.error('Error detecting event-traffic impact:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Detect severe weather (intense rain) city-wide
+   */
+  static async detectSevereWeather(): Promise<Alert[]> {
+    try {
+      const weather = await WeatherService.getCurrentWeather();
+      const alerts: Alert[] = [];
+
+      const rainIntensity = weather.rain?.['1h'] || weather.rain_1h || 0;
+      const isHeavyRain = rainIntensity > 5; // 5mm/h
+
+      if (isHeavyRain) {
+        const severity = rainIntensity > 15 ? AlertSeverity.CRITICAL : AlertSeverity.HIGH;
+
+        const alert: Alert = {
+          id: `severe-weather-${Date.now()}`,
+          type: AlertType.SEVERE_WEATHER,
+          severity,
+          title: severity === AlertSeverity.CRITICAL ? 'CRITICAL: Extreme Rainfall' : 'Heavy Rainfall Warning',
+          description: `Intense rain detected (${rainIntensity.toFixed(1)}mm/h). Reduced visibility and increased risk of local flooding city-wide.`,
+          affectedZones: [], // City-wide
+          timestamp: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(), // 1 hour
+          metadata: {
+            rainfall: rainIntensity,
+            condition: weather.condition,
+          },
+        };
+
+        alerts.push(alert);
+        logger.info(`Severe weather alert created: ${alert.id} (${rainIntensity}mm/h)`);
+      }
+
+      return alerts;
+    } catch (error) {
+      logger.error('Error detecting severe weather:', error);
       return [];
     }
   }

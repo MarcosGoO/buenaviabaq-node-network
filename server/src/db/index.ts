@@ -22,7 +22,12 @@ export const query = async (text: string, params?: (string | number | Date | boo
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    logger.debug('Executed query', { text, duration, rows: res.rowCount });
+
+    if (duration > 500) {
+      logger.warn('SLOW QUERY DETECTED (>500ms)', { text, duration, rows: res.rowCount });
+    } else {
+      logger.debug('Executed query', { text, duration, rows: res.rowCount });
+    }
     return res;
   } catch (error) {
     logger.error('Query error', { text, error });
