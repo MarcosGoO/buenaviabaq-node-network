@@ -20,10 +20,38 @@ from .schemas import (
     HealthResponse,
     ModelInfoResponse,
     ModelMetrics,
-    FeatureImportance
+    FeatureImportance,
+    # Sprint 7 schemas
+    ExperimentRequest,
+    ExperimentResult,
+    ExperimentMetrics,
+    CompareModelsRequest,
+    CompareModelsResponse,
+    ModelComparisonEntry,
+    TuningRequest,
+    TuningResponse,
+    CrossValidationRequest,
+    CrossValidationResponse,
+    FoldMetrics,
+    AggregatedMetrics,
+    AggregatedMetric,
 )
 from .model import model_manager
 from .database import db
+from .ml_experiments import (
+    train_xgboost_experiment,
+    train_prophet_experiment,
+    train_lstm_experiment,
+    compare_models,
+)
+from .hyperparameter_tuning import (
+    run_grid_search_xgboost,
+    run_optuna_xgboost,
+    run_optuna_lightgbm,
+    load_best_params,
+)
+from .cross_validation import run_timeseries_cv, load_cv_results
+from .preprocessing import preprocessor
 
 # Configure logging
 logging.basicConfig(
@@ -341,6 +369,254 @@ async def get_feature_stats():
     except Exception as e:
         logger.error(f"Failed to get feature stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Sprint 7.1.1 — Model Experimentation endpoints ──────────────────────────
+
+@app.post("/models/experiment", response_model=ExperimentResult, tags=["Experiments"])
+async def run_experiment(request: ExperimentRequest):
+    """
+    Train and evaluate a single model type (xgboost, prophet, lstm).
+    Returns metrics without replacing the production model.
+    """
+    try:
+        training_data = db.fetch_training_data(limit=request.data_limit)
+        if len(training_data) < 20:
+            raise HTTPException(status_code=422, detail="Insufficient training data (need ≥ 20 records).")
+
+        model_type = request.model_type.lower()
+        hp = request.hyperparameters or {}
+
+        if model_type == "prophet":
+            result = train_prophet_experiment(training_data, hyperparameters=hp)
+        else:
+            X, y = preprocessor.prepare_training_data(training_data)
+            if model_type == "xgboost":
+                result = train_xgboost_experiment(X, y, hyperparameters=hp)
+            elif model_type == "lstm":
+                result = train_lstm_experiment(X, y, hyperparameters=hp)
+            else:
+                raise HTTPException(status_code=400, detail=f"Unsupported model_type: '{model_type}'. Use 'xgboost', 'prophet', or 'lstm'.")
+
+        metrics = result["metrics"]
+        return ExperimentResult(
+            model_type=result["model_type"],
+            metrics=ExperimentMetrics(**metrics),
+            params=result.get("params", {}),
+            trained_at=result["trained_at"],
+            note=result.get("note"),
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Experiment failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Experiment failed: {str(e)}")
+
+
+@app.post("/models/compare", response_model=CompareModelsResponse, tags=["Experiments"])
+async def compare_all_models(request: CompareModelsRequest):
+    """
+    Train and compare multiple models side-by-side.
+    Returns a ranked comparison table by MAE.
+    """
+    try:
+        training_data = db.fetch_training_data(limit=request.data_limit)
+        if len(training_data) < 20:
+            raise HTTPException(status_code=422, detail="Insufficient training data (need ≥ 20 records).")
+
+        results = []
+        X = None
+        y = None
+
+        for model_type in request.model_types:
+            model_type = model_type.lower()
+            hp = (request.hyperparameters or {}).get(model_type, {})
+
+            try:
+                if model_type == "prophet":
+                    r = train_prophet_experiment(training_data, hyperparameters=hp)
+                else:
+                    if X is None:
+                        X, y = preprocessor.prepare_training_data(training_data)
+                    if model_type == "xgboost":
+                        r = train_xgboost_experiment(X, y, hyperparameters=hp)
+                    elif model_type == "lstm":
+                        r = train_lstm_experiment(X, y, hyperparameters=hp)
+                    elif model_type in ("lightgbm", "randomforest"):
+                        from .model import TrafficPredictionModel
+                        m = TrafficPredictionModel(model_type=model_type)
+                        metrics = m.train(X, y, hp if hp else None)
+                        r = {
+                            "model_type": model_type,
+                            "metrics": {**metrics, "training_samples": m.training_samples, "test_samples": m.test_samples},
+                            "params": hp,
+                            "trained_at": datetime.now().isoformat(),
+                        }
+                    else:
+                        logger.warning(f"Unknown model_type in compare: {model_type}")
+                        continue
+                results.append(r)
+            except Exception as e:
+                logger.error(f"Model {model_type} failed during comparison: {e}")
+
+        if not results:
+            raise HTTPException(status_code=500, detail="All models failed during comparison.")
+
+        comparison = compare_models(results)
+
+        entries = [
+            ModelComparisonEntry(
+                model_type=m["model_type"],
+                mae=m["mae"],
+                rmse=m["rmse"],
+                r2=m["r2"],
+                mape=m["mape"],
+                training_samples=m.get("training_samples", 0),
+                test_samples=m.get("test_samples", 0),
+                trained_at=m.get("trained_at"),
+            )
+            for m in comparison["models"]
+        ]
+
+        return CompareModelsResponse(
+            models=entries,
+            best_model_by_mae=comparison["best_model_by_mae"],
+            compared_at=comparison["compared_at"],
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Model comparison failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Model comparison failed: {str(e)}")
+
+
+# ── Sprint 7.1.2 — Hyperparameter Tuning endpoints ──────────────────────────
+
+@app.post("/models/tune", response_model=TuningResponse, tags=["Tuning"])
+async def tune_hyperparameters(request: TuningRequest):
+    """
+    Run hyperparameter tuning (grid_search or optuna) for xgboost or lightgbm.
+    Saves best params to ./models/best_params.json.
+    """
+    try:
+        training_data = db.fetch_training_data(limit=request.data_limit)
+        if len(training_data) < 20:
+            raise HTTPException(status_code=422, detail="Insufficient training data (need ≥ 20 records).")
+
+        X, y = preprocessor.prepare_training_data(training_data)
+
+        method = request.method.lower()
+        model_type = request.model_type.lower()
+
+        if method == "grid_search":
+            if model_type != "xgboost":
+                raise HTTPException(status_code=400, detail="grid_search is only supported for 'xgboost'.")
+            result = run_grid_search_xgboost(X, y, cv=request.cv_folds)
+            return TuningResponse(**result, params_saved_to="./models/best_params.json")
+
+        elif method == "optuna":
+            if model_type == "xgboost":
+                result = run_optuna_xgboost(X, y, n_trials=request.n_trials, cv=request.cv_folds)
+            elif model_type == "lightgbm":
+                result = run_optuna_lightgbm(X, y, n_trials=request.n_trials, cv=request.cv_folds)
+            else:
+                raise HTTPException(status_code=400, detail=f"Optuna not supported for '{model_type}'. Use 'xgboost' or 'lightgbm'.")
+            return TuningResponse(**result, params_saved_to="./models/best_params.json")
+
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown method '{method}'. Use 'grid_search' or 'optuna'.")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Hyperparameter tuning failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Tuning failed: {str(e)}")
+
+
+@app.get("/models/best-params", tags=["Tuning"])
+async def get_best_params(key: str = None):
+    """
+    Retrieve stored best hyperparameters from ./models/best_params.json.
+    Optionally filter by key (e.g., 'xgboost_optuna').
+    """
+    params = load_best_params(key)
+    if not params:
+        return {"status": "not_found", "message": "No best params saved yet. Run /models/tune first.", "data": {}}
+    return {"status": "success", "data": params, "timestamp": datetime.now().isoformat()}
+
+
+# ── Sprint 7.1.3 — Temporal Cross-Validation endpoints ──────────────────────
+
+@app.post("/validation/run", response_model=CrossValidationResponse, tags=["Validation"])
+async def run_cross_validation(request: CrossValidationRequest):
+    """
+    Run TimeSeriesSplit cross-validation and return per-fold + aggregated metrics.
+    Results are persisted to ./models/cv_results.json.
+    """
+    try:
+        training_data = db.fetch_training_data(limit=request.data_limit)
+        if len(training_data) < request.n_splits * 5:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Insufficient data: need at least {request.n_splits * 5} samples for {request.n_splits} folds."
+            )
+
+        X, y = preprocessor.prepare_training_data(training_data)
+
+        result = run_timeseries_cv(
+            X, y,
+            model_type=request.model_type,
+            n_splits=request.n_splits,
+            hyperparameters=request.hyperparameters,
+        )
+
+        folds = [FoldMetrics(**f) for f in result["folds"]]
+
+        agg_raw = result["aggregated"]
+        agg_metrics = AggregatedMetrics(
+            mae=AggregatedMetric(**agg_raw["mae"]) if "mae" in agg_raw else None,
+            rmse=AggregatedMetric(**agg_raw["rmse"]) if "rmse" in agg_raw else None,
+            r2=AggregatedMetric(**agg_raw["r2"]) if "r2" in agg_raw else None,
+            mape=AggregatedMetric(**agg_raw["mape"]) if "mape" in agg_raw else None,
+            successful_folds=agg_raw.get("successful_folds", 0),
+        )
+
+        return CrossValidationResponse(
+            model_type=result["model_type"],
+            n_splits=result["n_splits"],
+            folds=folds,
+            aggregated=agg_metrics,
+            total_samples=result["total_samples"],
+            validated_at=result["validated_at"],
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Cross-validation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Cross-validation failed: {str(e)}")
+
+
+@app.get("/validation/results", tags=["Validation"])
+async def get_validation_results():
+    """
+    Retrieve all stored cross-validation results from ./models/cv_results.json.
+    """
+    results = load_cv_results()
+    if not results:
+        return {
+            "status": "not_found",
+            "message": "No CV results saved yet. Run POST /validation/run first.",
+            "data": {},
+        }
+    return {
+        "status": "success",
+        "count": len(results),
+        "data": results,
+        "timestamp": datetime.now().isoformat(),
+    }
 
 
 if __name__ == "__main__":

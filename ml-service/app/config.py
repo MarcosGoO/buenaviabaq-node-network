@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://postgres:password@localhost:5432/viabaq_db"
 
     # Model Settings
-    model_type: Literal["lightgbm", "randomforest", "xgboost"] = "lightgbm"
+    model_type: Literal["lightgbm", "randomforest", "xgboost", "prophet", "lstm"] = "lightgbm"
     model_path: str = "./models/traffic_model.pkl"
     feature_scaler_path: str = "./models/scaler.pkl"
 
