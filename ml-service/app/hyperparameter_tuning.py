@@ -1,6 +1,5 @@
 """
 Hyperparameter Tuning: Grid Search + Optuna (Bayesian optimization)
-Sprint 7.1.2 - Hyperparameter Tuning
 """
 import json
 import logging

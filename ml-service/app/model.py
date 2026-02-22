@@ -4,8 +4,9 @@ Machine Learning model training and prediction
 import numpy as np
 import joblib
 import logging
+import shutil
 from pathlib import Path
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, Tuple, List
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -198,6 +199,9 @@ class TrafficPredictionModel:
 
         logger.info(f"Model trained successfully. Metrics: {self.metrics}")
 
+        # Save a versioned snapshot (timestamp-stamped copy)
+        version_manager.save_versioned(self)
+
         return self.metrics
 
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -232,6 +236,39 @@ class TrafficPredictionModel:
             return dict(zip(feature_names, importances.tolist()))
 
         return {}
+
+    def predict_with_intervals(
+        self, X: np.ndarray, percentile_low: int = 10, percentile_high: int = 90
+    ) -> Tuple[float, float, float]:
+        """
+        Make prediction with confidence intervals.
+
+        Returns:
+            (predicted_speed, lower_bound, upper_bound)
+        """
+        if self.model is None:
+            raise ValueError("Model not trained or loaded")
+
+        pred = float(np.maximum(self.model.predict(X)[0], 0))
+
+        if self.model_type == "randomforest":
+            tree_preds = np.array([
+                np.maximum(est.predict(X)[0], 0)
+                for est in self.model.estimators_
+            ])
+            lower = float(np.percentile(tree_preds, percentile_low))
+            upper = float(np.percentile(tree_preds, percentile_high))
+        elif self.model_type in ("xgboost", "lightgbm"):
+            # Use a simple symmetric margin derived from model RMSE when available
+            margin = self.metrics.get('rmse', pred * 0.15) if self.metrics else pred * 0.15
+            lower = max(0.0, pred - margin)
+            upper = pred + margin
+        else:
+            margin = pred * 0.15
+            lower = max(0.0, pred - margin)
+            upper = pred + margin
+
+        return pred, lower, upper
 
     def get_explanation(self, X: np.ndarray) -> Dict[str, float]:
         """Get SHAP explanations for a single prediction"""
@@ -309,6 +346,84 @@ class TrafficPredictionModel:
     def is_trained(self) -> bool:
         """Check if model is trained"""
         return self.model is not None
+
+
+class ModelVersionManager:
+    """Manages versioned model snapshots (timestamp-stamped .pkl files)."""
+
+    MODELS_DIR = Path("./models")
+    MAX_VERSIONS = 10
+
+    def save_versioned(self, model: "TrafficPredictionModel") -> str:
+        """Save a timestamped copy of the model. Returns the version string."""
+        self.MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        version = datetime.now().strftime("%Y%m%d_%H%M%S")
+        path = self.MODELS_DIR / f"traffic_model_{version}.pkl"
+
+        model_data = {
+            "model": model.model,
+            "model_type": model.model_type,
+            "model_version": version,
+            "metrics": model.metrics,
+            "trained_at": model.trained_at,
+            "training_samples": model.training_samples,
+            "test_samples": model.test_samples,
+        }
+        joblib.dump(model_data, path)
+        logger.info(f"Versioned model saved: {path}")
+
+        self._cleanup_old_versions()
+        return version
+
+    def list_versions(self) -> List[Dict[str, Any]]:
+        """Return metadata for all saved versions, newest first."""
+        versions: List[Dict[str, Any]] = []
+        for pkl_path in sorted(self.MODELS_DIR.glob("traffic_model_????????_??????.pkl"), reverse=True):
+            try:
+                data = joblib.load(pkl_path)
+                versions.append({
+                    "version": data.get("model_version", pkl_path.stem),
+                    "model_type": data.get("model_type", "unknown"),
+                    "metrics": data.get("metrics"),
+                    "trained_at": data.get("trained_at").isoformat() if data.get("trained_at") else None,
+                    "training_samples": data.get("training_samples", 0),
+                    "file": pkl_path.name,
+                })
+            except Exception as exc:
+                logger.warning(f"Could not read version file {pkl_path}: {exc}")
+        return versions
+
+    def load_version(self, version: str) -> Dict[str, Any]:
+        """Load model data for a specific version string."""
+        path = self.MODELS_DIR / f"traffic_model_{version}.pkl"
+        if not path.exists():
+            raise FileNotFoundError(f"Model version '{version}' not found")
+        return joblib.load(path)
+
+    def rollback_to(self, version: str) -> None:
+        """Restore a versioned model as the active production model."""
+        data = self.load_version(version)
+        active_path = Path(settings.model_path)
+        active_path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(data, active_path)
+        logger.info(f"Active model rolled back to version {version}")
+
+    def _cleanup_old_versions(self) -> None:
+        """Keep only the most recent MAX_VERSIONS versioned files."""
+        files = sorted(
+            self.MODELS_DIR.glob("traffic_model_????????_??????.pkl"),
+            reverse=True,
+        )
+        for old in files[self.MAX_VERSIONS:]:
+            try:
+                old.unlink()
+                logger.info(f"Removed old model version: {old.name}")
+            except Exception as exc:
+                logger.warning(f"Could not remove {old}: {exc}")
+
+
+# Global version manager instance
+version_manager = ModelVersionManager()
 
 
 class ModelManager:

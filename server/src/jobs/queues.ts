@@ -62,6 +62,7 @@ export const JobTypes = {
   COLLECT_WEATHER: 'collect-weather',
   COLLECT_ALL: 'collect-all',
   DETECT_ALERTS: 'detect-alerts',
+  RETRAIN_MODEL: 'retrain-model',
 } as const;
 
 export type JobType = (typeof JobTypes)[keyof typeof JobTypes];

@@ -34,11 +34,14 @@ export class JobScheduler {
     this.intervals.push(collectionInterval);
     this.intervals.push(alertInterval);
 
+    // Schedule weekly model retraining (Sunday at 3:00 AM)
+    this.scheduleWeeklyRetraining();
+
     // Run immediately on startup
     await this.scheduleDataCollection();
     await this.scheduleAlertDetection();
 
-    logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes');
+    logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes, model retraining weekly on Sunday 3:00 AM');
   }
 
   /**
@@ -133,6 +136,79 @@ export class JobScheduler {
       logger.info(`Scheduled alert detection job: ${job.id}`);
     } catch (error) {
       logger.error('Failed to schedule alert detection:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Schedule model retraining at Sunday 3:00 AM
+   * Uses setTimeout chain to fire precisely at the next Sunday 3 AM, then repeats weekly.
+   */
+  static scheduleWeeklyRetraining(): void {
+    const scheduleNext = () => {
+      const msUntilNextSunday3AM = this.msUntilNextSunday3AM();
+      logger.info(`Weekly model retraining scheduled in ${Math.round(msUntilNextSunday3AM / 3600_000)}h`);
+
+      const timeout = setTimeout(async () => {
+        try {
+          await this.scheduleModelRetraining();
+        } catch (error) {
+          logger.error('Error scheduling model retraining:', error);
+        }
+        // Schedule the next occurrence
+        scheduleNext();
+      }, msUntilNextSunday3AM);
+
+      this.intervals.push(timeout as unknown as NodeJS.Timeout);
+    };
+
+    scheduleNext();
+  }
+
+  /**
+   * Calculate milliseconds until next Sunday at 03:00 AM local time
+   */
+  private static msUntilNextSunday3AM(): number {
+    const now = new Date();
+    const next = new Date(now);
+
+    // Set to 3:00 AM
+    next.setHours(3, 0, 0, 0);
+
+    // Advance to next Sunday (day 0)
+    const daysUntilSunday = (7 - now.getDay()) % 7 || 7;
+    next.setDate(now.getDate() + daysUntilSunday);
+
+    // If we calculated a time in the past (edge case), add 7 days
+    if (next.getTime() <= now.getTime()) {
+      next.setDate(next.getDate() + 7);
+    }
+
+    return next.getTime() - now.getTime();
+  }
+
+  /**
+   * Enqueue a model retraining job immediately
+   */
+  static async scheduleModelRetraining(): Promise<string> {
+    try {
+      const job = await dataCollectionQueue.add(
+        JobTypes.RETRAIN_MODEL,
+        {
+          type: JobTypes.RETRAIN_MODEL,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          jobId: `retrain-model-${Date.now()}`,
+          priority: 5, // Lower priority than real-time data collection
+          attempts: 2,
+        }
+      );
+
+      logger.info(`Scheduled model retraining job: ${job.id}`);
+      return job.id ?? '';
+    } catch (error) {
+      logger.error('Failed to schedule model retraining:', error);
       throw error;
     }
   }

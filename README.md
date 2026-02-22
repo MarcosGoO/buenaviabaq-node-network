@@ -135,15 +135,14 @@ viabaq-node-network/
 ├── docs/                 # 📚 All documentation
 │   ├── architecture/     # System design
 │   ├── guides/          # Setup & testing guides
-│   ├── sprints/         # Sprint summaries
 │   ├── planning/        # Roadmap & plans
 │   └── changelogs/      # Change history
-├── data/                # 📊 External data files
+├── data/                # External data files
 │   └── raw/            # Raw data (not in git)
-├── scripts/            # 🔧 Utility scripts
+├── scripts/            # Utility scripts
 │   ├── test-api.sh
 │   └── setup.sh
-├── server/             # 🖥️ Backend API
+├── server/             # Backend API
 │   ├── src/
 │   │   ├── api/           # Controllers, routes, middleware
 │   │   ├── core/          # Services, repositories
@@ -151,7 +150,7 @@ viabaq-node-network/
 │   │   └── shared/        # Config, types, utils
 │   ├── tests/          # Unit, integration, e2e tests
 │   └── db/            # Migrations & seeds
-├── src/               # 🎨 Frontend (Next.js)
+├── src/               # Frontend (Next.js)
 │   ├── app/          # Pages & layouts
 │   ├── components/   # React components
 │   └── hooks/        # Custom hooks

@@ -7,7 +7,7 @@ import type { ApiResponse } from '@/types';
 /**
  * InsightsController
  * Handles endpoints for dashboard analytics and insights
- * Sprint 6.1 - Dashboard Analytics
+ * Dashboard Analytics
  */
 export class InsightsController {
   /**

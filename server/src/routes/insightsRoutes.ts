@@ -5,7 +5,6 @@ const router = Router();
 
 /**
  * Insights Routes
- * Sprint 6.1 - Dashboard Analytics
  *
  * GET    /api/v1/insights/summary           - Executive summary for dashboard
  * GET    /api/v1/insights/zones             - Insights for all zones

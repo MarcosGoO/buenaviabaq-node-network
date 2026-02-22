@@ -1,6 +1,5 @@
 """
 Model experimentation: XGBoost, Prophet (time series), LSTM (PyTorch)
-Sprint 7.1.1 - Model Experimentation
 """
 import numpy as np
 import pandas as pd

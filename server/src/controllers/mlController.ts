@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { FeatureStoreService } from '@/services/featureStoreService.js';
+import { MLPredictionService } from '@/services/mlPredictionService.js';
+import { JobScheduler } from '@/jobs/scheduler.js';
 import { logger } from '@/utils/logger.js';
 import { AppError } from '@/middleware/errorHandler.js';
 
@@ -220,6 +222,87 @@ export class MLController {
           rainy_records: parseInt(stats.rainy_records, 10),
           event_records: parseInt(stats.event_records, 10),
           arroyo_records: parseInt(stats.arroyo_records, 10),
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/ml/retrain
+   * Manually trigger model retraining
+   */
+  static async triggerRetrain(req: Request, res: Response, next: NextFunction) {
+    try {
+      const jobId = await JobScheduler.scheduleModelRetraining();
+      logger.info(`Manual model retraining triggered, job: ${jobId}`);
+
+      res.status(202).json({
+        status: 'success',
+        message: 'Model retraining job queued',
+        data: {
+          job_id: jobId,
+          status: 'queued',
+          note: 'Retraining runs asynchronously. Check model-history for results.',
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/ml/model-history
+   * List all saved model versions with metrics
+   */
+  static async getModelHistory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const history = await MLPredictionService.getModelHistory();
+      if (!history) {
+        throw new AppError(503, 'ML service is unavailable');
+      }
+
+      res.json({
+        status: 'success',
+        data: history,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/ml/rollback/:version
+   * Rollback the active model to a specific version
+   */
+  static async rollbackModel(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { version } = req.params;
+      if (!version || typeof version !== 'string') {
+        throw new AppError(400, 'version parameter is required');
+      }
+
+      // Validate version format: YYYYMMDD_HHMMSS
+      if (!/^\d{8}_\d{6}$/.test(version)) {
+        throw new AppError(400, 'Invalid version format. Expected YYYYMMDD_HHMMSS (e.g. 20260221_030000)');
+      }
+
+      const result = await MLPredictionService.rollbackModel(version);
+      if (!result) {
+        throw new AppError(404, `Model version '${version}' not found or rollback failed`);
+      }
+
+      logger.info(`Model rolled back to version ${version}`);
+
+      res.json({
+        status: 'success',
+        data: {
+          version,
+          ...result,
         },
         timestamp: new Date().toISOString(),
       });

@@ -138,7 +138,7 @@ class ModelInfoResponse(BaseModel):
     feature_importance: Optional[List[FeatureImportance]] = None
 
 
-# ── Sprint 7.1.1 — Model Experimentation ────────────────────────────────────
+# — Model Experimentation ────────────────────────────────────
 
 class ExperimentRequest(BaseModel):
     """Request to run a model experiment"""
@@ -198,7 +198,7 @@ class CompareModelsResponse(BaseModel):
     compared_at: str
 
 
-# ── Sprint 7.1.2 — Hyperparameter Tuning ────────────────────────────────────
+# — Hyperparameter Tuning ────────────────────────────────────
 
 class TuningRequest(BaseModel):
     """Request to run hyperparameter tuning"""
@@ -229,7 +229,7 @@ class TuningResponse(BaseModel):
     params_saved_to: str = "./models/best_params.json"
 
 
-# ── Sprint 7.1.3 — Temporal Cross-Validation ────────────────────────────────
+# — Temporal Cross-Validation ────────────────────────────────
 
 class CrossValidationRequest(BaseModel):
     """Request to run TimeSeriesSplit cross-validation"""
@@ -275,3 +275,91 @@ class CrossValidationResponse(BaseModel):
     aggregated: AggregatedMetrics
     total_samples: int
     validated_at: str
+
+
+# — SHAP Explanations ────────────────────────────────────────
+
+class ExplanationFeature(BaseModel):
+    feature_name: str
+    shap_value: float
+    contribution: str  # "positive" | "negative" | "neutral"
+
+
+class ExplanationRequest(BaseModel):
+    road_id: int
+    features: FeatureVector
+
+
+class ExplanationResponse(BaseModel):
+    road_id: int
+    timestamp: datetime
+    top_features: List[ExplanationFeature]
+    model_version: str
+
+
+# — Arroyo Risk Prediction ───────────────────────────────────
+
+class ArroyoInput(BaseModel):
+    arroyo_id: int
+    zone_name: str
+    base_risk_encoded: float = Field(0.0, ge=0.0, le=1.0)
+
+
+class ArroyoRiskRequest(BaseModel):
+    rain_probability: float = Field(..., ge=0.0, le=100.0)
+    wind_speed: float = Field(..., ge=0.0)
+    humidity: float = Field(..., ge=0.0, le=100.0)
+    temperature: Optional[float] = None
+    arroyos: List[ArroyoInput]
+
+
+class ArroyoRiskEntry(BaseModel):
+    arroyo_id: int
+    zone_name: str
+    activation_probability: float = Field(..., ge=0.0, le=100.0)
+    risk_level: str  # "low" | "moderate" | "high" | "critical"
+
+
+class ArroyoRiskResponse(BaseModel):
+    timestamp: datetime
+    weather_summary: Dict[str, Any]
+    arroyos: List[ArroyoRiskEntry]
+
+
+# — Model Versioning ─────────────────────────────────────────
+
+class ModelVersionEntry(BaseModel):
+    version: str
+    model_type: str
+    metrics: Optional[Dict[str, float]] = None
+    trained_at: Optional[str] = None
+    training_samples: int
+    file: str
+
+
+class ModelHistoryResponse(BaseModel):
+    versions: List[ModelVersionEntry]
+    count: int
+    active_model_version: Optional[str] = None
+
+
+class RollbackRequest(BaseModel):
+    version: str
+
+
+class RollbackResponse(BaseModel):
+    status: str
+    version: str
+    message: str
+    timestamp: datetime
+
+
+class RetrainResponse(BaseModel):
+    status: str
+    message: str
+    previous_metrics: Optional[Dict[str, float]] = None
+    new_metrics: Optional[Dict[str, float]] = None
+    model_version: Optional[str] = None
+    improvement_pct: Optional[float] = None
+    action_taken: str  # "swapped" | "kept_current" | "rolled_back"
+    timestamp: datetime
