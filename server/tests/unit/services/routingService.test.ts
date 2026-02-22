@@ -53,7 +53,31 @@ vi.mock('@/services/eventsService.js', () => ({
 
 import { RoutingService } from '@/services/routingService.js';
 
+const defaultWeather = {
+  temperature: 28,
+  humidity: 75,
+  wind_speed: 10,
+  rain_probability: 20,
+  condition: 'Clear',
+  description: 'Clear skies',
+  feels_like: 30,
+  pressure: 1013,
+  visibility: 10,
+  cloud_cover: 5,
+};
+
 describe('RoutingService', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    // Re-apply defaults after clearAllMocks resets implementations
+    const { WeatherService } = await import('@/services/weatherService.js');
+    vi.mocked(WeatherService.getCurrentWeather).mockResolvedValue(defaultWeather as never);
+    const { GeoService } = await import('@/services/geoService.js');
+    vi.mocked(GeoService.getArroyos).mockResolvedValue([] as never);
+    const { EventsService } = await import('@/services/eventsService.js');
+    vi.mocked(EventsService.getUpcomingEvents).mockResolvedValue([] as never);
+  });
+
   describe('validateCoordinates — via calculateRoutes', () => {
     it('should throw for missing lat/lng', async () => {
       await expect(
@@ -129,10 +153,6 @@ describe('RoutingService', () => {
   });
 
   describe('calculateRoutes — route structure', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-    });
-
     it('should return routes with all required fields', async () => {
       const { pool } = await import('@/db');
 
