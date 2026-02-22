@@ -1,5 +1,5 @@
 """
-Sprint 7 tests: Model Experimentation, Hyperparameter Tuning, Cross-Validation
+tests: Model Experimentation, Hyperparameter Tuning, Cross-Validation
 Run: pytest tests/test_sprint7.py -v
 """
 import json

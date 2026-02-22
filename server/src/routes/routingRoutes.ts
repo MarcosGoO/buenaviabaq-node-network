@@ -5,7 +5,7 @@ const router = Router();
 
 /**
  * Routing Routes
- * Sprint 6.2 - Intelligent Routing
+ * Intelligent Routing
  *
  * POST   /api/v1/routes/calculate      - Calculate multiple route alternatives
  * POST   /api/v1/routes/optimal        - Get single best route

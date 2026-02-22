@@ -1,102 +1,160 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Source, Layer } from 'react-map-gl/maplibre';
 import { useZonesData } from '@/hooks/useZonesData';
-import { useTrafficData } from '@/hooks/useTrafficData';
 
-export function TrafficLayer() {
-  const { zones, isLoading: zonesLoading, error: zonesError } = useZonesData();
-  const { roads, isLoading: trafficLoading } = useTrafficData();
+interface TrafficLayerProps {
+  simulatedHour?: number | null;
+}
 
+// Congestion level → fill color
+const CONGESTION_COLORS: Record<string, string> = {
+  low: '#22c55e',      // green
+  moderate: '#eab308', // yellow
+  high: '#f97316',     // orange
+  severe: '#ef4444',   // red
+};
+
+// Congestion level → fill opacity
+const CONGESTION_OPACITY: Record<string, number> = {
+  low: 0.20,
+  moderate: 0.30,
+  high: 0.40,
+  severe: 0.50,
+};
+
+const DEFAULT_COLOR = '#3b82f6';
+const DEFAULT_OPACITY = 0.10;
+
+interface HourlyPattern {
+  hour: number;
+  avg_speed: number;
+  congestion_level: string;
+}
+
+function speedToCongestion(avgSpeed: number): string {
+  if (avgSpeed >= 50) return 'low';
+  if (avgSpeed >= 35) return 'moderate';
+  if (avgSpeed >= 20) return 'high';
+  return 'severe';
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+export function TrafficLayer({ simulatedHour }: TrafficLayerProps) {
+  const { zones, isLoading } = useZonesData();
+  const [hourlyPattern, setHourlyPattern] = useState<HourlyPattern | null>(null);
+
+  // Fetch historical pattern when simulatedHour is set
   useEffect(() => {
-    if (!zonesLoading) {
-      if (zones.length > 0) {
-        console.log('📍 Loaded zones:', zones.length);
-        console.log('📍 First zone:', zones[0]);
-        console.log('📍 First zone geometry:', JSON.stringify(zones[0]?.geometry, null, 2));
-      } else {
-        console.warn('⚠️ No zones loaded');
-      }
+    if (simulatedHour === null || simulatedHour === undefined) return;
+
+    const controller = new AbortController();
+    fetch(`${API_URL}/analytics/hourly-pattern?hour=${simulatedHour}`, { signal: controller.signal })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data) return;
+        // Endpoint may return array or single entry
+        const pattern = Array.isArray(data.data)
+          ? data.data.find((p: HourlyPattern) => p.hour === simulatedHour) ?? data.data[0]
+          : data.data;
+        setHourlyPattern(pattern ?? null);
+      })
+      .catch(() => { /* ignore abort */ });
+
+    return () => controller.abort();
+  }, [simulatedHour]);
+
+  if (isLoading || zones.length === 0) return null;
+
+  // In simulation mode, apply the hourly pattern's congestion to all zones
+  const getZoneCongestion = (zoneCongestion?: string): string => {
+    if (simulatedHour !== null && simulatedHour !== undefined
+        && hourlyPattern && hourlyPattern.hour === simulatedHour) {
+      return hourlyPattern.congestion_level || speedToCongestion(hourlyPattern.avg_speed);
     }
-    if (zonesError) {
-      console.error('❌ Error loading zones:', zonesError);
-    }
-  }, [zones, zonesLoading, zonesError]);
+    return zoneCongestion ?? 'low';
+  };
 
-  useEffect(() => {
-    if (!trafficLoading && roads.length > 0) {
-      console.log('🚗 Loaded traffic data:', roads.length, 'roads');
-    }
-  }, [roads, trafficLoading]);
-
-  // Don't block rendering - show what we can
-  if (zonesLoading) {
-    console.log('⏳ Zones still loading...');
-    return null;
-  }
-
-  if (zones.length === 0) {
-    console.warn('⚠️ No zones to render');
-    return null;
-  }
-
-  // Convert zones to GeoJSON FeatureCollection
+  // Build GeoJSON with congestion properties for data-driven styling
   const zonesGeoJSON: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
     features: zones.map(zone => ({
-      type: 'Feature',
+      type: 'Feature' as const,
       properties: {
         id: zone.id,
         name: zone.name,
+        congestion_level: getZoneCongestion(zone.congestion_level),
+        avg_speed: zone.avg_speed ?? null,
       },
       geometry: zone.geometry as GeoJSON.Geometry,
     })),
   };
 
-  console.log('🗺️ Rendering zones GeoJSON:', JSON.stringify(zonesGeoJSON, null, 2).substring(0, 500) + '...');
-
   return (
-    <>
-      {/* Zones layer - outline */}
-      <Source id="zones-source" type="geojson" data={zonesGeoJSON}>
-        <Layer
-          id="zones-fill"
-          type="fill"
-          paint={{
-            'fill-color': '#3b82f6',
-            'fill-opacity': 0.1,
-          }}
-        />
-        <Layer
-          id="zones-outline"
-          type="line"
-          paint={{
-            'line-color': '#3b82f6',
-            'line-width': 2,
-            'line-opacity': 0.6,
-          }}
-        />
-      </Source>
+    <Source id="zones-source" type="geojson" data={zonesGeoJSON}>
+      {/* Fill layer — color driven by congestion_level */}
+      <Layer
+        id="zones-fill"
+        type="fill"
+        paint={{
+          'fill-color': [
+            'match',
+            ['get', 'congestion_level'],
+            'low',      CONGESTION_COLORS.low,
+            'moderate', CONGESTION_COLORS.moderate,
+            'high',     CONGESTION_COLORS.high,
+            'severe',   CONGESTION_COLORS.severe,
+            DEFAULT_COLOR,
+          ],
+          'fill-opacity': [
+            'match',
+            ['get', 'congestion_level'],
+            'low',      CONGESTION_OPACITY.low,
+            'moderate', CONGESTION_OPACITY.moderate,
+            'high',     CONGESTION_OPACITY.high,
+            'severe',   CONGESTION_OPACITY.severe,
+            DEFAULT_OPACITY,
+          ],
+        }}
+      />
 
-      {/* Zone labels */}
-      <Source id="zones-labels" type="geojson" data={zonesGeoJSON}>
-        <Layer
-          id="zones-labels-layer"
-          type="symbol"
-          layout={{
-            'text-field': ['get', 'name'],
-            'text-size': 12,
-            'text-anchor': 'center',
-            'text-offset': [0, 0],
-          }}
-          paint={{
-            'text-color': '#1e40af',
-            'text-halo-color': '#ffffff',
-            'text-halo-width': 2,
-          }}
-        />
-      </Source>
-    </>
+      {/* Outline layer — matches fill color */}
+      <Layer
+        id="zones-outline"
+        type="line"
+        paint={{
+          'line-color': [
+            'match',
+            ['get', 'congestion_level'],
+            'low',      CONGESTION_COLORS.low,
+            'moderate', CONGESTION_COLORS.moderate,
+            'high',     CONGESTION_COLORS.high,
+            'severe',   CONGESTION_COLORS.severe,
+            DEFAULT_COLOR,
+          ],
+          'line-width': 2,
+          'line-opacity': 0.7,
+        }}
+      />
+
+      {/* Zone name labels */}
+      <Layer
+        id="zones-labels-layer"
+        type="symbol"
+        layout={{
+          'text-field': ['get', 'name'],
+          'text-size': 12,
+          'text-anchor': 'center',
+          'text-offset': [0, 0],
+        }}
+        paint={{
+          'text-color': '#1e293b',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 2,
+        }}
+      />
+    </Source>
   );
 }

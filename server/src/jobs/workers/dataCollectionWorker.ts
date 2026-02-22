@@ -6,6 +6,7 @@ import { WeatherHistoryService } from '@/services/weatherHistoryService.js';
 import { AlertService } from '@/services/alertService.js';
 import { SocketService } from '@/lib/socket.js';
 import { CacheService } from '@/services/cacheService.js';
+import { MLPredictionService } from '@/services/mlPredictionService.js';
 import { JobTypes, type JobType } from '../queues.js';
 
 const connection = {
@@ -155,6 +156,51 @@ async function processAllCollection(): Promise<JobResult> {
 }
 
 /**
+ * Process automatic model retraining
+ * Compares new model vs current, keeps new if MAE improves >2%, rolls back if >5% worse.
+ */
+async function processModelRetraining(): Promise<JobResult> {
+  logger.info('Starting automatic model retraining...');
+
+  try {
+    const result = await MLPredictionService.retrainModel();
+
+    if (!result) {
+      throw new Error('Retraining returned no result');
+    }
+
+    logger.info(`Model retraining completed. Action taken: ${result.action_taken}`, {
+      previous_mae: result.previous_metrics?.mae,
+      new_mae: result.new_metrics?.mae,
+      version: result.model_version,
+    });
+
+    // Invalidate prediction cache so next requests use the new/restored model
+    await CacheService.invalidateNamespace(CacheService.Namespaces.PREDICTIONS);
+
+    // Broadcast model update event to connected clients
+    SocketService.emitAlertNotification({
+      type: 'model:update',
+      action: result.action_taken,
+      model_version: result.model_version,
+      new_mae: result.new_metrics?.mae,
+      previous_mae: result.previous_metrics?.mae,
+      timestamp: new Date().toISOString(),
+    });
+
+    return {
+      success: true,
+      type: JobTypes.RETRAIN_MODEL,
+      timestamp: new Date().toISOString(),
+      recordsProcessed: 1,
+    };
+  } catch (error) {
+    logger.error('Model retraining job failed:', error);
+    throw error;
+  }
+}
+
+/**
  * Main worker processor
  */
 async function processJob(job: Job<JobData>): Promise<JobResult> {
@@ -172,6 +218,9 @@ async function processJob(job: Job<JobData>): Promise<JobResult> {
 
     case JobTypes.DETECT_ALERTS:
       return await processAlertDetection();
+
+    case JobTypes.RETRAIN_MODEL:
+      return await processModelRetraining();
 
     default:
       throw new Error(`Unknown job type: ${job.data.type}`);

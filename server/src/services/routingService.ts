@@ -81,7 +81,7 @@ export interface RouteRequest {
 /**
  * RoutingService
  * Intelligent routing considering traffic, weather, arroyos, and events
- * Sprint 6.2 - Intelligent Routing
+ * Intelligent Routing
  */
 export class RoutingService {
   /**

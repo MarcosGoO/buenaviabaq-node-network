@@ -7,7 +7,6 @@ import type { ApiResponse } from '@/types';
 /**
  * RoutingController
  * Handles endpoints for intelligent routing
- * Sprint 6.2 - Intelligent Routing
  */
 export class RoutingController {
   /**

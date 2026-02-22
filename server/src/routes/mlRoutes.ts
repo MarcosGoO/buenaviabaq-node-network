@@ -23,4 +23,15 @@ router.post('/features/store', MLController.storeFeatures);
 // POST /api/v1/ml/features/batch - Batch extract features for all roads
 router.post('/features/batch', MLController.batchExtractFeatures);
 
+//— Model Retraining & Versioning ──────────────────────────────
+
+// POST /api/v1/ml/retrain - Manually trigger model retraining
+router.post('/retrain', MLController.triggerRetrain);
+
+// GET /api/v1/ml/model-history - List all saved model versions
+router.get('/model-history', MLController.getModelHistory);
+
+// POST /api/v1/ml/rollback/:version - Roll back to a specific model version
+router.post('/rollback/:version', MLController.rollbackModel);
+
 export default router;

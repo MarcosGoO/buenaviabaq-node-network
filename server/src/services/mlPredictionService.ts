@@ -1,6 +1,8 @@
 import { logger } from '@/utils/logger.js';
 import { CacheService } from './cacheService.js';
 import { FeatureStoreService } from './featureStoreService.js';
+import { GeoService } from './geoService.js';
+import { WeatherService } from './weatherService.js';
 import type { FeatureVector } from '@/types/index.js';
 
 interface MLServiceConfig {
@@ -12,9 +14,53 @@ interface PredictionResponse {
   road_id: number;
   timestamp: string;
   predicted_speed_kmh: number;
+  predicted_speed_lower: number | null;
+  predicted_speed_upper: number | null;
   predicted_congestion_level: string;
   confidence_score: number | null;
   model_version: string;
+  shap_values?: Record<string, number> | null;
+}
+
+interface ExplanationFeature {
+  feature_name: string;
+  shap_value: number;
+  contribution: 'positive' | 'negative' | 'neutral';
+}
+
+export interface ExplanationResponse {
+  road_id: number;
+  timestamp: string;
+  top_features: ExplanationFeature[];
+  model_version: string;
+}
+
+interface ArroyoRiskEntry {
+  arroyo_id: number;
+  zone_name: string;
+  activation_probability: number;
+  risk_level: string;
+}
+
+export interface ArroyoRiskResponse {
+  timestamp: string;
+  weather_summary: Record<string, unknown>;
+  arroyos: ArroyoRiskEntry[];
+}
+
+export interface ModelVersionEntry {
+  version: string;
+  model_type: string;
+  metrics: Record<string, number> | null;
+  trained_at: string | null;
+  training_samples: number;
+  file: string;
+}
+
+export interface ModelHistoryResponse {
+  versions: ModelVersionEntry[];
+  count: number;
+  active_model_version: string | null;
 }
 
 interface MLHealthResponse {
@@ -22,6 +68,15 @@ interface MLHealthResponse {
   model_loaded: boolean;
   database_connected: boolean;
 }
+
+// Risk level to numeric encoding (mirrors Python feature store)
+const ARROYO_RISK_ENCODED: Record<string, number> = {
+  none: 0,
+  low: 0.25,
+  medium: 0.5,
+  high: 0.75,
+  critical: 1.0,
+};
 
 /**
  * Service to communicate with Python ML microservice
@@ -176,6 +231,214 @@ export class MLPredictionService {
     } catch (error) {
       logger.error('Failed to predict all roads:', error);
       return {};
+    }
+  }
+
+  /**
+   * Get SHAP explanations for a specific road prediction
+   */
+  static async getExplanation(
+    roadId: number,
+    timestamp?: Date
+  ): Promise<ExplanationResponse | null> {
+    const cacheKey = `ml-explanation:${roadId}:${timestamp?.toISOString() || 'now'}`;
+
+    return await CacheService.getOrSet(
+      cacheKey,
+      async () => {
+        try {
+          const featureVector = await FeatureStoreService.extractFeatures({ roadId, timestamp });
+          const features = this.flattenFeatures(featureVector);
+
+          const response = await fetch(`${this.config.baseUrl}/predict/explanation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ road_id: roadId, features }),
+            signal: AbortSignal.timeout(this.config.timeout),
+          });
+
+          if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`ML explanation error: ${response.status} - ${error}`);
+          }
+
+          return await response.json() as ExplanationResponse;
+        } catch (error) {
+          logger.error(`Failed to get explanation for road ${roadId}:`, error);
+          return null;
+        }
+      },
+      {
+        ttl: CacheService.TTL.LONG,
+        namespace: CacheService.Namespaces.PREDICTIONS,
+      }
+    );
+  }
+
+  /**
+   * Get arroyo activation risk based on current weather forecast
+   */
+  static async getArroyoRisk(): Promise<ArroyoRiskResponse | null> {
+    try {
+      // Fetch weather forecast and arroyo zones in parallel
+      const [forecast, arroyos] = await Promise.all([
+        WeatherService.getForecast(),
+        GeoService.getArroyoZones(),
+      ]);
+
+      // Extract next forecast item weather data
+      const nextForecast = forecast?.forecast?.[0];
+      const rainProb = nextForecast?.rain_probability ?? 0;
+      const windSpeed = nextForecast?.wind_speed ?? 0;
+      const humidity = nextForecast?.humidity ?? 50;
+      const temperature = nextForecast?.temperature ?? null;
+
+      const arroyoInputs = arroyos.map(a => ({
+        arroyo_id: a.id,
+        zone_name: a.name,
+        base_risk_encoded: ARROYO_RISK_ENCODED[a.risk_level] ?? 0,
+      }));
+
+      const response = await fetch(`${this.config.baseUrl}/predict/arroyo-risk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rain_probability: rainProb,
+          wind_speed: windSpeed,
+          humidity,
+          temperature,
+          arroyos: arroyoInputs,
+        }),
+        signal: AbortSignal.timeout(this.config.timeout),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Arroyo risk error: ${response.status} - ${error}`);
+      }
+
+      return await response.json() as ArroyoRiskResponse;
+    } catch (error) {
+      logger.error('Failed to get arroyo risk:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get model version history from ML service
+   */
+  static async getModelHistory(): Promise<ModelHistoryResponse | null> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}/models/history`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(this.config.timeout),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Model history error: ${response.status} - ${error}`);
+      }
+
+      return await response.json() as ModelHistoryResponse;
+    } catch (error) {
+      logger.error('Failed to get model history:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Roll back the active model to a previous version
+   */
+  static async rollbackModel(version: string): Promise<{ status: string; message: string } | null> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}/models/rollback/${encodeURIComponent(version)}`, {
+        method: 'POST',
+        signal: AbortSignal.timeout(this.config.timeout),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Rollback error: ${response.status} - ${error}`);
+      }
+
+      return await response.json() as { status: string; message: string };
+    } catch (error) {
+      logger.error(`Failed to rollback model to version ${version}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Trigger model retraining
+   * Returns metrics comparison: previous vs new model.
+   */
+  static async retrainModel(modelType = 'lightgbm'): Promise<{
+    previous_metrics: Record<string, number> | null;
+    new_metrics: Record<string, number> | null;
+    model_version: string | null;
+    action_taken: string;
+  } | null> {
+    try {
+      // Fetch current model info first
+      const infoRes = await fetch(`${this.config.baseUrl}/model/info`, {
+        signal: AbortSignal.timeout(this.config.timeout),
+      });
+      const previousMetrics = infoRes.ok
+        ? ((await infoRes.json() as { metrics?: { mae?: number; rmse?: number; r2?: number; mape?: number } }).metrics as Record<string, number> | null) ?? null
+        : null;
+
+      // Trigger retraining
+      const trainRes = await fetch(`${this.config.baseUrl}/train`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model_type: modelType, force_retrain: true }),
+        signal: AbortSignal.timeout(60_000), // 60s for training
+      });
+
+      if (!trainRes.ok) {
+        const error = await trainRes.text();
+        throw new Error(`Retraining error: ${trainRes.status} - ${error}`);
+      }
+
+      const trainData = await trainRes.json() as {
+        metrics?: Record<string, number>;
+        model_version?: string;
+      };
+
+      const newMetrics = trainData.metrics ?? null;
+      let actionTaken = 'swapped';
+
+      // Evaluate improvement: if new MAE is >5% worse, rollback automatically
+      if (previousMetrics?.mae && newMetrics?.mae) {
+        const previousMae = previousMetrics.mae;
+        const newMae = newMetrics.mae;
+        if (newMae > previousMae * 1.05) {
+          logger.warn(`New model MAE (${newMae}) is >5% worse than previous (${previousMae}). Rolling back.`);
+          // Get latest versioned model (second newest = the previous one)
+          const historyData = await this.getModelHistory();
+          const previousVersion = historyData?.versions?.[1]?.version;
+          if (previousVersion) {
+            await this.rollbackModel(previousVersion);
+            actionTaken = 'rolled_back';
+          } else {
+            actionTaken = 'kept_current';
+          }
+        } else if (newMae < previousMae * 0.98) {
+          actionTaken = 'swapped'; // improvement > 2%
+        } else {
+          actionTaken = 'kept_current'; // marginal change
+        }
+      }
+
+      return {
+        previous_metrics: previousMetrics,
+        new_metrics: newMetrics,
+        model_version: trainData.model_version ?? null,
+        action_taken: actionTaken,
+      };
+    } catch (error) {
+      logger.error('Model retraining failed:', error);
+      return null;
     }
   }
 

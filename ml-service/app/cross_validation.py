@@ -1,6 +1,5 @@
 """
 Temporal Cross-Validation using TimeSeriesSplit
-Sprint 7.1.3 - Temporal Cross-Validation
 """
 import logging
 import numpy as np

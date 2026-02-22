@@ -12,15 +12,29 @@ interface TimeTravelerProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function TimeTraveler({ className, onTimeChange, ...props }: TimeTravelerProps) {
     const [isPlaying, setIsPlaying] = React.useState(false)
-    const [hour, setHour] = React.useState(12) // Start at 12:00 PM
+    const [hour, setHour] = React.useState(new Date().getHours())
+
+    // Auto-advance hour when playing
+    React.useEffect(() => {
+        if (!isPlaying) return
+        const timer = setInterval(() => {
+            setHour(prev => {
+                const next = (prev + 1) % 24
+                onTimeChange?.(next)
+                return next
+            })
+        }, 1500)
+        return () => clearInterval(timer)
+    }, [isPlaying, onTimeChange])
 
     const handleSliderChange = (value: number[]) => {
+        setIsPlaying(false)
         setHour(value[0])
         onTimeChange?.(value[0])
     }
 
     const togglePlay = () => {
-        setIsPlaying(!isPlaying)
+        setIsPlaying(prev => !prev)
     }
 
     // Formatting hour (e.g., 14 -> 2:00 PM)
@@ -82,7 +96,6 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                 </Button>
                 <div className="flex-1 space-y-2">
                     <Slider
-                        defaultValue={[12]}
                         max={23}
                         step={1}
                         value={[hour]}

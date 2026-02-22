@@ -117,7 +117,7 @@ export interface ComparativeMetrics {
 /**
  * InsightsService
  * Provides high-level aggregated insights for dashboard analytics
- * Sprint 6.1 - Dashboard Analytics
+ * Dashboard Analytics
  */
 export class InsightsService {
   /**

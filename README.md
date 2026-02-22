@@ -131,32 +131,31 @@ Open browser → `http://localhost:3000`
 
 ```
 viabaq-node-network/
- .github/ # CI/CD workflows
- docs/ # All documentation
- architecture/ # System design
- guides/ # Setup & testing guides
- sprints/ # Sprint summaries
- planning/ # Roadmap & plans
- changelogs/ # Change history
- data/ # External data files
- raw/ # Raw data (not in git)
- scripts/ # Utility scripts
- test-api.sh
- setup.sh
- server/ # Backend API
- src/
- api/ # Controllers, routes, middleware
- core/ # Services, repositories
- infrastructure/ # DB, cache, jobs
- shared/ # Config, types, utils
- tests/ # Unit, integration, e2e tests
- db/ # Migrations & seeds
- src/ # Frontend (Next.js)
- app/ # Pages & layouts
- components/ # React components
- hooks/ # Custom hooks
- docker-compose.yml
- README.md # This file
+├── .github/              # CI/CD workflows
+├── docs/                 # All documentation
+│   ├── architecture/     # System design
+│   ├── guides/          # Setup & testing guides
+│   ├── planning/        # Roadmap & plans
+│   └── changelogs/      # Change history
+├── data/                # External data files
+│   └── raw/            # Raw data (not in git)
+├── scripts/            # Utility scripts
+│   ├── test-api.sh
+│   └── setup.sh
+├── server/             # Backend API
+│   ├── src/
+│   │   ├── api/           # Controllers, routes, middleware
+│   │   ├── core/          # Services, repositories
+│   │   ├── infrastructure/ # DB, cache, jobs
+│   │   └── shared/        # Config, types, utils
+│   ├── tests/          # Unit, integration, e2e tests
+│   └── db/            # Migrations & seeds
+├── src/               # Frontend (Next.js)
+│   ├── app/          # Pages & layouts
+│   ├── components/   # React components
+│   └── hooks/        # Custom hooks
+├── docker-compose.yml
+└── README.md          # This file
 ```
 
 ---

@@ -206,4 +206,71 @@ export class PredictionsController {
       next(error);
     }
   }
+
+  /**
+   * GET /api/v1/predictions/road/:id/explanation
+   * Get SHAP feature explanations for a road prediction
+   */
+  static async getExplanationForRoad(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idParam = req.params.id;
+      if (typeof idParam !== 'string') {
+        throw new AppError(400, 'Invalid road ID parameter');
+      }
+
+      const roadId = parseInt(idParam, 10);
+      if (isNaN(roadId) || roadId <= 0) {
+        throw new AppError(400, 'Invalid road ID');
+      }
+
+      const timestampParam = req.query.timestamp;
+      const timestamp = timestampParam && typeof timestampParam === 'string'
+        ? new Date(timestampParam)
+        : undefined;
+
+      const isHealthy = await MLPredictionService.healthCheck();
+      if (!isHealthy) {
+        throw new AppError(503, 'ML service is unavailable');
+      }
+
+      const explanation = await MLPredictionService.getExplanation(roadId, timestamp);
+      if (!explanation) {
+        throw new AppError(500, 'Failed to generate SHAP explanation');
+      }
+
+      res.json({
+        status: 'success',
+        data: explanation,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/predictions/arroyo-risk
+   * Get arroyo flood activation probability based on current weather forecast
+   */
+  static async getArroyoRisk(req: Request, res: Response, next: NextFunction) {
+    try {
+      const isHealthy = await MLPredictionService.healthCheck();
+      if (!isHealthy) {
+        throw new AppError(503, 'ML service is unavailable');
+      }
+
+      const riskData = await MLPredictionService.getArroyoRisk();
+      if (!riskData) {
+        throw new AppError(500, 'Failed to compute arroyo risk');
+      }
+
+      res.json({
+        status: 'success',
+        data: riskData,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

@@ -21,7 +21,6 @@ from .schemas import (
     ModelInfoResponse,
     ModelMetrics,
     FeatureImportance,
-    # Sprint 7 schemas
     ExperimentRequest,
     ExperimentResult,
     ExperimentMetrics,
@@ -35,8 +34,18 @@ from .schemas import (
     FoldMetrics,
     AggregatedMetrics,
     AggregatedMetric,
+    ExplanationRequest,
+    ExplanationResponse,
+    ExplanationFeature,
+    ArroyoRiskRequest,
+    ArroyoRiskResponse,
+    ArroyoRiskEntry,
+    ModelHistoryResponse,
+    ModelVersionEntry,
+    RollbackResponse,
+    RetrainResponse,
 )
-from .model import model_manager
+from .model import model_manager, version_manager
 from .database import db
 from .ml_experiments import (
     train_xgboost_experiment,
@@ -209,15 +218,19 @@ async def predict_traffic(request: PredictionRequest):
         # Extract features
         features_dict = request.features.model_dump()
 
-        # Make prediction
-        predicted_speed, congestion_level, explanation = model_manager.predict(features_dict, explain=request.explain)
-        
-        horizon = features_dict.get('horizon_minutes', 0)
-        # Simplified error margin based on horizon: +/- 5% per 15 mins
-        margin_factor = 1.0 + (horizon / 15.0) * 0.05
-        lower = max(0, predicted_speed / margin_factor)
-        upper = predicted_speed * margin_factor
-        confidence = max(0, 100 - horizon * 0.4)
+        # Make prediction with model-specific confidence intervals
+        X = preprocessor.prepare_prediction_features(features_dict)
+        predicted_speed, lower, upper = model.predict_with_intervals(X)
+
+        max_speed = features_dict.get('max_speed_kmh', 60)
+        congestion_level = preprocessor.encode_congestion_level(predicted_speed, max_speed)
+
+        horizon = features_dict.get('horizon_minutes', 0) or 0
+        confidence = max(0.0, 100.0 - horizon * 0.4)
+
+        explanation = None
+        if request.explain:
+            explanation = model.get_explanation(X)
 
         return PredictionResponse(
             road_id=request.features.road_id,
@@ -257,13 +270,13 @@ async def predict_batch(request: BatchPredictionRequest):
 
         for features in request.features_list:
             features_dict = features.model_dump()
-            predicted_speed, congestion_level, explanation = model_manager.predict(features_dict, explain=False) # Skip batch explain to save time
+            X = preprocessor.prepare_prediction_features(features_dict)
+            predicted_speed, lower, upper = model.predict_with_intervals(X)
 
-            horizon = features_dict.get('horizon_minutes', 0)
-            margin_factor = 1.0 + (horizon / 15.0) * 0.05
-            lower = max(0, predicted_speed / margin_factor)
-            upper = predicted_speed * margin_factor
-            confidence = max(0, 100 - horizon * 0.4)
+            max_speed = features_dict.get('max_speed_kmh', 60)
+            congestion_level = preprocessor.encode_congestion_level(predicted_speed, max_speed)
+            horizon = features_dict.get('horizon_minutes', 0) or 0
+            confidence = max(0.0, 100.0 - horizon * 0.4)
 
             predictions.append(
                 PredictionResponse(
@@ -274,7 +287,7 @@ async def predict_batch(request: BatchPredictionRequest):
                     predicted_speed_upper=upper,
                     predicted_congestion_level=congestion_level,
                     confidence_score=confidence,
-                    shap_values=explanation,
+                    shap_values=None,
                     model_version=model.model_version
                 )
             )
@@ -371,7 +384,7 @@ async def get_feature_stats():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ── Sprint 7.1.1 — Model Experimentation endpoints ──────────────────────────
+# ── Model Experimentation endpoints ──────────────────────────
 
 @app.post("/models/experiment", response_model=ExperimentResult, tags=["Experiments"])
 async def run_experiment(request: ExperimentRequest):
@@ -492,7 +505,7 @@ async def compare_all_models(request: CompareModelsRequest):
         raise HTTPException(status_code=500, detail=f"Model comparison failed: {str(e)}")
 
 
-# ── Sprint 7.1.2 — Hyperparameter Tuning endpoints ──────────────────────────
+#  — Hyperparameter Tuning endpoints ──────────────────────────
 
 @app.post("/models/tune", response_model=TuningResponse, tags=["Tuning"])
 async def tune_hyperparameters(request: TuningRequest):
@@ -547,7 +560,7 @@ async def get_best_params(key: str = None):
     return {"status": "success", "data": params, "timestamp": datetime.now().isoformat()}
 
 
-# ── Sprint 7.1.3 — Temporal Cross-Validation endpoints ──────────────────────
+# — Temporal Cross-Validation endpoints ──────────────────────
 
 @app.post("/validation/run", response_model=CrossValidationResponse, tags=["Validation"])
 async def run_cross_validation(request: CrossValidationRequest):
@@ -617,6 +630,152 @@ async def get_validation_results():
         "data": results,
         "timestamp": datetime.now().isoformat(),
     }
+
+
+# — SHAP Explanations ────────────────────────────────────────
+
+@app.post("/predict/explanation", response_model=ExplanationResponse, tags=["Prediction"])
+async def get_prediction_explanation(request: ExplanationRequest):
+    """
+    Return SHAP-based feature explanations for a prediction.
+    Top 5 most influential features with shap_value and contribution direction.
+    """
+    model = model_manager.get_model()
+    if not model:
+        raise HTTPException(status_code=503, detail="No model loaded.")
+
+    try:
+        features_dict = request.features.model_dump()
+        X = preprocessor.prepare_prediction_features(features_dict)
+        raw_shap = model.get_explanation(X)
+
+        if not raw_shap:
+            raise HTTPException(status_code=500, detail="SHAP explanations unavailable for this model type.")
+
+        sorted_features = sorted(raw_shap.items(), key=lambda kv: abs(kv[1]), reverse=True)[:5]
+        top_features = [
+            ExplanationFeature(
+                feature_name=name,
+                shap_value=round(val, 6),
+                contribution="positive" if val > 0.01 else ("negative" if val < -0.01 else "neutral"),
+            )
+            for name, val in sorted_features
+        ]
+
+        return ExplanationResponse(
+            road_id=request.road_id,
+            timestamp=request.features.timestamp or datetime.now(),
+            top_features=top_features,
+            model_version=model.model_version,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Explanation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Explanation failed: {str(e)}")
+
+
+# — Arroyo Risk Prediction ───────────────────────────────────
+
+@app.post("/predict/arroyo-risk", response_model=ArroyoRiskResponse, tags=["Prediction"])
+async def predict_arroyo_risk(request: ArroyoRiskRequest):
+    """
+    Estimate flood activation probability for each arroyo zone.
+    Uses a heuristic model based on weather features and historical risk level.
+
+    Risk formula (rule-based):
+    - Base score from arroyo's historical risk level (0–1)
+    - Rain probability boost: +rain_probability * 0.5
+    - Wind factor: +0.1 if wind_speed > 30 km/h
+    - Humidity factor: +0.05 if humidity > 80%
+    - Capped at 100%.
+    """
+    try:
+        rain_prob_norm = request.rain_probability / 100.0
+        wind_boost = 0.1 if request.wind_speed > 30 else 0.0
+        humidity_boost = 0.05 if request.humidity > 80 else 0.0
+
+        result_entries: list[ArroyoRiskEntry] = []
+        for arroyo in request.arroyos:
+            raw_score = (
+                arroyo.base_risk_encoded * 0.4
+                + rain_prob_norm * 0.5
+                + wind_boost
+                + humidity_boost
+            )
+            activation_pct = min(raw_score * 100.0, 100.0)
+
+            if activation_pct >= 70:
+                risk_level = "critical"
+            elif activation_pct >= 50:
+                risk_level = "high"
+            elif activation_pct >= 25:
+                risk_level = "moderate"
+            else:
+                risk_level = "low"
+
+            result_entries.append(ArroyoRiskEntry(
+                arroyo_id=arroyo.arroyo_id,
+                zone_name=arroyo.zone_name,
+                activation_probability=round(activation_pct, 2),
+                risk_level=risk_level,
+            ))
+
+        return ArroyoRiskResponse(
+            timestamp=datetime.now(),
+            weather_summary={
+                "rain_probability": request.rain_probability,
+                "wind_speed": request.wind_speed,
+                "humidity": request.humidity,
+                "temperature": request.temperature,
+            },
+            arroyos=result_entries,
+        )
+
+    except Exception as e:
+        logger.error(f"Arroyo risk prediction failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Arroyo risk prediction failed: {str(e)}")
+
+
+# — Model Versioning endpoints ────────────────────────────────
+
+@app.get("/models/history", response_model=ModelHistoryResponse, tags=["Model"])
+async def get_model_history():
+    """
+    List all saved model versions with their metrics, newest first.
+    Keeps up to the last 10 versioned snapshots.
+    """
+    versions = version_manager.list_versions()
+    current_model = model_manager.get_model()
+    return ModelHistoryResponse(
+        versions=[ModelVersionEntry(**v) for v in versions],
+        count=len(versions),
+        active_model_version=current_model.model_version if current_model else None,
+    )
+
+
+@app.post("/models/rollback/{version}", response_model=RollbackResponse, tags=["Model"])
+async def rollback_model(version: str):
+    """
+    Restore a versioned model snapshot as the active production model.
+    The version string must match a saved file (format: YYYYMMDD_HHMMSS).
+    """
+    try:
+        version_manager.rollback_to(version)
+        # Reload the active model into memory
+        model_manager.load_model()
+        return RollbackResponse(
+            status="success",
+            version=version,
+            message=f"Model rolled back to version {version} and reloaded.",
+            timestamp=datetime.now(),
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Rollback failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Rollback failed: {str(e)}")
 
 
 if __name__ == "__main__":
