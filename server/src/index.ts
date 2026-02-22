@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
 import { config } from '@/config/index.js';
 import { logger } from '@/utils/logger.js';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler.js';
@@ -11,6 +12,7 @@ import { testConnection } from '@/db/index.js';
 import { RedisStore } from 'rate-limit-redis';
 import { RedisClient, redis } from '@/lib/redis.js';
 import { SocketService } from '@/lib/socket.js';
+import { swaggerSpec } from '@/swagger.js';
 import geoRoutes from '@/routes/geoRoutes.js';
 import weatherRoutes from '@/routes/weatherRoutes.js';
 import trafficRoutes from '@/routes/trafficRoutes.js';
@@ -107,6 +109,22 @@ app.get('/health', async (req, res) => {
       },
     },
   });
+});
+
+// Swagger UI — API Documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'VíaBaq API Docs',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    filter: true,
+  },
+}));
+
+// Raw OpenAPI spec (JSON)
+app.get('/api/docs.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
 });
 
 // API Routes
