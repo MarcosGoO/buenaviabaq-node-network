@@ -48,10 +48,7 @@ export function TrafficLayer({ simulatedHour }: TrafficLayerProps) {
 
   // Fetch historical pattern when simulatedHour is set
   useEffect(() => {
-    if (simulatedHour === null || simulatedHour === undefined) {
-      setHourlyPattern(null);
-      return;
-    }
+    if (simulatedHour === null || simulatedHour === undefined) return;
 
     const controller = new AbortController();
     fetch(`${API_URL}/analytics/hourly-pattern?hour=${simulatedHour}`, { signal: controller.signal })
@@ -73,7 +70,8 @@ export function TrafficLayer({ simulatedHour }: TrafficLayerProps) {
 
   // In simulation mode, apply the hourly pattern's congestion to all zones
   const getZoneCongestion = (zoneCongestion?: string): string => {
-    if (simulatedHour !== null && simulatedHour !== undefined && hourlyPattern) {
+    if (simulatedHour !== null && simulatedHour !== undefined
+        && hourlyPattern && hourlyPattern.hour === simulatedHour) {
       return hourlyPattern.congestion_level || speedToCongestion(hourlyPattern.avg_speed);
     }
     return zoneCongestion ?? 'low';
