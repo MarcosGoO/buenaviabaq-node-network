@@ -25,10 +25,18 @@ const ATLANTICO_BOUNDS: [number, number, number, number] = [
 
 export function MapViewport() {
     const [viewState, setViewState] = React.useState(BARRANQUILLA_COORDS)
+    const [simulatedHour, setSimulatedHour] = React.useState<number | null>(null)
     const mapRef = React.useRef<MapRef>(null)
 
     const recenterMap = () => {
         setViewState(BARRANQUILLA_COORDS)
+    }
+
+    // When the user moves the slider, simulate historical data for that hour.
+    // null = live mode (current real data)
+    const handleTimeChange = (hour: number) => {
+        const currentHour = new Date().getHours()
+        setSimulatedHour(hour === currentHour ? null : hour)
     }
 
     return (
@@ -46,7 +54,7 @@ export function MapViewport() {
                 attributionControl={false}
                 reuseMaps
             >
-                <TrafficLayer />
+                <TrafficLayer simulatedHour={simulatedHour} />
                 <NavigationControl position="bottom-right" showCompass={false} visualizePitch={false} />
             </Map>
 
@@ -62,8 +70,15 @@ export function MapViewport() {
             </Button>
 
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-lg px-4 pointer-events-auto">
-                <TimeTraveler />
+                <TimeTraveler onTimeChange={handleTimeChange} />
             </div>
+
+            {/* Time simulation indicator */}
+            {simulatedHour !== null && (
+                <div className="absolute top-4 right-4 z-10 bg-amber-500/90 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm tracking-wider uppercase">
+                    Historical — {simulatedHour}:00
+                </div>
+            )}
 
             {/* Top Left Overlay for Alerts */}
             <AlertsPanel />

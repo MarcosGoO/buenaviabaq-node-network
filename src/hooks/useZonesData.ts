@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export interface Zone {
   id: number;
@@ -9,64 +9,106 @@ export interface Zone {
     type: string;
     coordinates: number[][][];
   };
+  congestion_level?: 'low' | 'moderate' | 'high' | 'severe';
+  avg_speed?: number;
+  active_alerts?: number;
+  arroyo_risk_level?: string | null;
 }
 
 interface UseZonesDataReturn {
   zones: Zone[];
   isLoading: boolean;
   error: string | null;
+  refresh: () => Promise<void>;
 }
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 export function useZonesData(): UseZonesDataReturn {
   const [zones, setZones] = useState<Zone[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchZones = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const fetchZones = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-        console.log('📍 Fetching zones from:', `${apiUrl}/geo/zones`);
+      // Fetch zones geometry and zone insights in parallel
+      const [geoRes, insightsRes] = await Promise.all([
+        fetch(`${API_URL}/geo/zones`),
+        fetch(`${API_URL}/insights/zones`).catch(() => null),
+      ]);
 
-        const response = await fetch(`${apiUrl}/geo/zones`);
-
-        if (!response.ok) {
-          // If rate limited, just log and continue with empty state
-          if (response.status === 429) {
-            console.warn('⚠️ Rate limited - zones will load on next retry');
-            setError('Rate limited - retrying soon');
-            return;
-          }
-          throw new Error(`HTTP error! status: ${response.status}`);
+      if (!geoRes.ok) {
+        if (geoRes.status === 429) {
+          console.warn('⚠️ Rate limited - zones will load on next retry');
+          setError('Rate limited - retrying soon');
+          return;
         }
-
-        const data = await response.json();
-        console.log('📍 Raw API response:', data);
-
-        // Backend returns status: "success" not success: true
-        if ((data.success || data.status === 'success') && data.data) {
-          console.log('✅ Successfully loaded zones:', data.data.length);
-          setZones(data.data);
-        } else {
-          console.warn('⚠️ API response missing data:', data);
-        }
-      } catch (err) {
-        console.error('❌ Failed to fetch zones:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
+        throw new Error(`HTTP error! status: ${geoRes.status}`);
       }
-    };
 
-    fetchZones();
+      const geoData = await geoRes.json();
+
+      if (!((geoData.success || geoData.status === 'success') && geoData.data)) {
+        console.warn('⚠️ API response missing data:', geoData);
+        return;
+      }
+
+      const baseZones: Zone[] = geoData.data;
+
+      // Merge with insights if available
+      if (insightsRes?.ok) {
+        const insightsData = await insightsRes.json();
+        const insights = insightsData.data as Array<{
+          zone_id: number;
+          congestion_level: string;
+          avg_speed: number;
+          active_alerts: number;
+          arroyo_risk_level: string | null;
+        }>;
+
+        if (Array.isArray(insights)) {
+          const insightsMap = new Map(insights.map(i => [i.zone_id, i]));
+          const merged = baseZones.map(zone => {
+            const insight = insightsMap.get(zone.id);
+            return insight
+              ? {
+                  ...zone,
+                  congestion_level: insight.congestion_level as Zone['congestion_level'],
+                  avg_speed: insight.avg_speed,
+                  active_alerts: insight.active_alerts,
+                  arroyo_risk_level: insight.arroyo_risk_level,
+                }
+              : zone;
+          });
+          setZones(merged);
+          return;
+        }
+      }
+
+      setZones(baseZones);
+    } catch (err) {
+      console.error('❌ Failed to fetch zones:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchZones();
+
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchZones, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchZones]);
 
   return {
     zones,
     isLoading,
     error,
+    refresh: fetchZones,
   };
 }

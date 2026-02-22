@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   LineChart,
   Line,
@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Activity, Cloud, AlertTriangle } from 'lucide-react';
+import { Activity, Cloud, AlertTriangle, LayoutDashboard, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -42,24 +42,45 @@ interface WeatherImpact {
   avg_travel_time: number;
 }
 
+interface ExecutiveSummary {
+  system: { avg_speed_kmh: number; overall_congestion_level: string; total_active_roads: number; monitored_zones: number };
+  traffic: { current_avg_speed: number; historical_avg_speed: number; speed_change_percentage: number; congestion_breakdown: { low: number; moderate: number; high: number; severe: number } };
+  weather: { current_condition: string; temperature_celsius: number; rain_probability: number; is_affecting_traffic: boolean; weather_impact_score: number };
+  alerts: { total_active: number; critical_count: number };
+  predictions: { next_hour_trend: string; rush_hour_active: boolean; estimated_avg_travel_time_minutes: number; confidence_score: number };
+  generated_at: string;
+}
+
+const TREND_ICON = { improving: TrendingUp, stable: Minus, worsening: TrendingDown }
+const TREND_COLOR = { improving: 'text-green-600', stable: 'text-muted-foreground', worsening: 'text-red-600' }
+const CONGESTION_COLOR: Record<string, string> = { low: '#22c55e', moderate: '#eab308', high: '#f97316', severe: '#ef4444' }
+
+function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+  return (
+    <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+      <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-2xl font-bold text-foreground">{value}</p>
+      {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+    </div>
+  )
+}
+
 export default function AnalyticsDashboard() {
   const [hourlyPattern, setHourlyPattern] = useState<HourlyPattern[]>([]);
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [weatherImpact, setWeatherImpact] = useState<WeatherImpact[]>([]);
+  const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
 
-      const [hourlyRes, hotspotsRes, weatherRes] = await Promise.all([
+      const [hourlyRes, hotspotsRes, weatherRes, summaryRes] = await Promise.all([
         fetch(`${API_BASE}/analytics/hourly-pattern`),
         fetch(`${API_BASE}/analytics/hotspots?limit=5`),
         fetch(`${API_BASE}/analytics/weather-impact?days=7`),
+        fetch(`${API_BASE}/insights/summary`).catch(() => null),
       ]);
 
       const hourlyData = await hourlyRes.json();
@@ -69,12 +90,24 @@ export default function AnalyticsDashboard() {
       setHourlyPattern(hourlyData.data || []);
       setHotspots(hotspotsData.data || []);
       setWeatherImpact(weatherData.data || []);
+
+      if (summaryRes?.ok) {
+        const summaryData = await summaryRes.json();
+        setSummary(summaryData.data ?? null);
+      }
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAnalytics();
+    // Auto-refresh every 5 minutes
+    const interval = setInterval(fetchAnalytics, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchAnalytics]);
 
   if (loading) {
     return (
@@ -96,8 +129,12 @@ export default function AnalyticsDashboard() {
         </button>
       </div>
 
-      <Tabs defaultValue="patterns" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="summary" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="summary">
+            <LayoutDashboard className="w-4 h-4 mr-2" />
+            Resumen
+          </TabsTrigger>
           <TabsTrigger value="patterns">
             <Activity className="w-4 h-4 mr-2" />
             Patrones
@@ -108,9 +145,161 @@ export default function AnalyticsDashboard() {
           </TabsTrigger>
           <TabsTrigger value="weather">
             <Cloud className="w-4 h-4 mr-2" />
-            Impacto Clima
+            Clima
           </TabsTrigger>
         </TabsList>
+
+        {/* Executive Summary */}
+        <TabsContent value="summary" className="space-y-4">
+          {summary ? (
+            <>
+              {/* System KPIs */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Estado General del Sistema</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <StatCard label="Velocidad promedio" value={`${summary.system.avg_speed_kmh} km/h`} />
+                    <StatCard label="Congestión general" value={summary.system.overall_congestion_level} sub="nivel actual" />
+                    <StatCard label="Vías activas" value={summary.system.total_active_roads} />
+                    <StatCard label="Zonas monitoreadas" value={summary.system.monitored_zones} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Traffic vs Historical */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tráfico Actual vs Histórico</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <StatCard label="Velocidad actual" value={`${summary.traffic.current_avg_speed} km/h`} />
+                    <StatCard label="Velocidad histórica" value={`${summary.traffic.historical_avg_speed} km/h`} />
+                    <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                      <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Cambio</p>
+                      <div className="flex items-center gap-1">
+                        {(() => {
+                          const pct = summary.traffic.speed_change_percentage
+                          const trend = pct > 2 ? 'improving' : pct < -2 ? 'worsening' : 'stable'
+                          const Icon = TREND_ICON[trend]
+                          return (
+                            <>
+                              <Icon className={`h-5 w-5 ${TREND_COLOR[trend]}`} />
+                              <span className={`text-2xl font-bold ${TREND_COLOR[trend]}`}>
+                                {pct > 0 ? '+' : ''}{pct}%
+                              </span>
+                            </>
+                          )
+                        })()}
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                      <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Próxima hora</p>
+                      <div className="flex items-center gap-1">
+                        {(() => {
+                          const trend = summary.predictions.next_hour_trend as 'improving' | 'stable' | 'worsening'
+                          const Icon = TREND_ICON[trend] ?? Minus
+                          return <Icon className={`h-5 w-5 ${TREND_COLOR[trend] ?? ''}`} />
+                        })()}
+                        <span className="text-sm font-semibold capitalize">{summary.predictions.next_hour_trend}</span>
+                      </div>
+                      {summary.predictions.rush_hour_active && (
+                        <p className="text-[10px] text-amber-600 font-bold mt-1">⚡ Rush hour</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Congestion breakdown bar */}
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Distribución de Congestión</p>
+                    <div className="flex h-6 rounded-full overflow-hidden gap-0.5">
+                      {Object.entries(summary.traffic.congestion_breakdown).map(([level, count]) => {
+                        const total = Object.values(summary.traffic.congestion_breakdown).reduce((a, b) => a + b, 0)
+                        const pct = total > 0 ? (count / total) * 100 : 0
+                        return pct > 0 ? (
+                          <div
+                            key={level}
+                            style={{ width: `${pct}%`, backgroundColor: CONGESTION_COLOR[level] }}
+                            title={`${level}: ${count} roads (${Math.round(pct)}%)`}
+                            className="transition-all"
+                          />
+                        ) : null
+                      })}
+                    </div>
+                    <div className="flex gap-4 mt-2">
+                      {Object.entries(summary.traffic.congestion_breakdown).map(([level, count]) => (
+                        <div key={level} className="flex items-center gap-1">
+                          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: CONGESTION_COLOR[level] }} />
+                          <span className="text-[10px] text-muted-foreground capitalize">{level}: {count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Weather + Alerts */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader><CardTitle>Condiciones Climáticas</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Condición</span><span className="font-semibold">{summary.weather.current_condition}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Temperatura</span><span className="font-semibold">{summary.weather.temperature_celsius}°C</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Prob. lluvia</span><span className="font-semibold">{summary.weather.rain_probability}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Impacto en tráfico</span>
+                        <span className={`font-semibold ${summary.weather.is_affecting_traffic ? 'text-amber-600' : 'text-green-600'}`}>
+                          {summary.weather.is_affecting_traffic ? 'Sí' : 'No'}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-1"><span className="text-muted-foreground text-sm">Score impacto</span><span className="font-semibold">{summary.weather.weather_impact_score}/100</span></div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${summary.weather.weather_impact_score}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader><CardTitle>Alertas & Predicciones</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Alertas activas</span><span className="font-semibold">{summary.alerts.total_active}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Alertas críticas</span>
+                        <span className={`font-semibold ${summary.alerts.critical_count > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {summary.alerts.critical_count}
+                        </span>
+                      </div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Rush hour activo</span>
+                        <span className={`font-semibold ${summary.predictions.rush_hour_active ? 'text-amber-600' : 'text-green-600'}`}>
+                          {summary.predictions.rush_hour_active ? 'Sí' : 'No'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Tiempo viaje estimado</span><span className="font-semibold">{summary.predictions.estimated_avg_travel_time_minutes} min</span></div>
+                      <div>
+                        <div className="flex justify-between mb-1"><span className="text-muted-foreground text-sm">Confianza</span><span className="font-semibold">{summary.predictions.confidence_score}%</span></div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${summary.predictions.confidence_score}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <LayoutDashboard className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                <p className="text-muted-foreground">Resumen ejecutivo no disponible. Verifica que el servicio esté corriendo.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
         {/* Hourly Patterns */}
         <TabsContent value="patterns" className="space-y-4">
