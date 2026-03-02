@@ -492,28 +492,28 @@ export class InsightsService {
         ? await pool.query(query, [zoneId])
         : await pool.query(query);
 
-      const insights: ZoneInsights[] = await Promise.all(
-        result.rows.map(async (row) => {
-          // For now, use mock data for alerts (will be integrated with AlertService)
-          const activeAlerts = 0;
+      // For now, use mock data for alerts (will be integrated with AlertService)
+      // TODO: When integrating AlertService, change .map() back to
+      //       async (row) => { ... } and wrap in await Promise.all(...)
+      const insights: ZoneInsights[] = result.rows.map((row) => {
+        const activeAlerts = 0;
 
-          // Calculate travel time impact
-          const historicalSpeed = 45; // Average historical speed for zone
-          const currentSpeed = Number(row.avg_speed) || historicalSpeed;
-          const travelTimeImpact = Math.round(((historicalSpeed - currentSpeed) / historicalSpeed) * 100);
+        // Calculate travel time impact
+        const historicalSpeed = 45; // Average historical speed for zone
+        const currentSpeed = Number(row.avg_speed) || historicalSpeed;
+        const travelTimeImpact = Math.round(((historicalSpeed - currentSpeed) / historicalSpeed) * 100);
 
-          return {
-            zone_id: row.zone_id,
-            zone_name: row.zone_name,
-            avg_speed: Number(row.avg_speed) || 0,
-            congestion_level: row.congestion_level || 'low',
-            total_roads: Number(row.total_roads) || 0,
-            active_alerts: activeAlerts,
-            arroyo_risk_level: row.arroyo_risk_level !== 'none' ? row.arroyo_risk_level : null,
-            travel_time_impact_percentage: Math.max(travelTimeImpact, 0)
-          };
-        })
-      );
+        return {
+          zone_id: row.zone_id,
+          zone_name: row.zone_name,
+          avg_speed: Number(row.avg_speed) || 0,
+          congestion_level: row.congestion_level || 'low',
+          total_roads: Number(row.total_roads) || 0,
+          active_alerts: activeAlerts,
+          arroyo_risk_level: row.arroyo_risk_level !== 'none' ? row.arroyo_risk_level : null,
+          travel_time_impact_percentage: Math.max(travelTimeImpact, 0)
+        };
+      });
 
       logger.info(`Retrieved insights for ${insights.length} zone(s)`);
       return insights;
