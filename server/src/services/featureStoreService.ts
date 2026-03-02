@@ -496,14 +496,20 @@ export class FeatureStoreService {
 
       logger.info(`Starting batch feature extraction for ${roadIds.length} roads`);
 
-      // Extract features for each road (can be parallelized in production)
-      for (const roadId of roadIds) {
-        try {
-          await this.storeFeatures(roadId, targetTime);
-        } catch (error) {
-          logger.error(`Failed to extract features for road ${roadId}:`, error);
-          // Continue with next road
-        }
+      // Process roads in parallel batches to avoid DB connection pool exhaustion
+      const BATCH_SIZE = 10;
+      for (let i = 0; i < roadIds.length; i += BATCH_SIZE) {
+        const batch = roadIds.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          batch.map(async (roadId) => {
+            try {
+              await this.storeFeatures(roadId, targetTime);
+            } catch (error) {
+              logger.error(`Failed to extract features for road ${roadId}:`, error);
+              // Continue with next road
+            }
+          })
+        );
       }
 
       logger.info(`Completed batch feature extraction for ${roadIds.length} roads`);
