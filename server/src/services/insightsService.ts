@@ -1,6 +1,6 @@
 import { pool } from '@/db';
 import { logger } from '@/utils/logger';
-import { WeatherService } from './weatherService.js';
+import { WeatherService, type WeatherData } from './weatherService.js';
 import { AlertService } from './alertService.js';
 import { GeoService } from './geoService.js';
 
@@ -128,7 +128,10 @@ export class InsightsService {
     try {
       logger.info('Generating executive summary...');
 
-      // Fetch data in parallel for performance
+      // Fetch weather once — shared by getWeatherMetrics and getArroyoMetrics
+      const currentWeather = await WeatherService.getCurrentWeather();
+
+      // Fetch remaining data in parallel for performance
       const [
         systemMetrics,
         trafficMetrics,
@@ -139,9 +142,9 @@ export class InsightsService {
       ] = await Promise.all([
         this.getSystemMetrics(),
         this.getTrafficMetrics(),
-        this.getWeatherMetrics(),
+        this.getWeatherMetrics(currentWeather),
         this.getAlertsMetrics(),
-        this.getArroyoMetrics(),
+        this.getArroyoMetrics(currentWeather),
         this.getPredictiveMetrics()
       ]);
 
@@ -289,10 +292,8 @@ export class InsightsService {
   /**
    * Get weather metrics and impact assessment
    */
-  private static async getWeatherMetrics() {
+  private static async getWeatherMetrics(weather: WeatherData) {
     try {
-      const weather = await WeatherService.getCurrentWeather();
-
       // Calculate weather impact score (0-100)
       let impactScore = 0;
 
@@ -373,14 +374,12 @@ export class InsightsService {
   /**
    * Get arroyo zones metrics
    */
-  private static async getArroyoMetrics() {
+  private static async getArroyoMetrics(weather: WeatherData) {
     try {
       const allArroyos = await GeoService.getArroyos();
       const highRiskArroyos = await GeoService.getArroyos('high');
       const mediumRiskArroyos = await GeoService.getArroyos('medium');
 
-      // Get current weather to determine affected zones
-      const weather = await WeatherService.getCurrentWeather();
       const affectedZones = weather.rain_probability > 50
         ? highRiskArroyos.slice(0, 3).map(arroyo => ({
             id: arroyo.id,
