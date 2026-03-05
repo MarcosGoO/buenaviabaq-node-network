@@ -1,14 +1,16 @@
 "use client"
 
 import * as React from "react"
-import Map, { NavigationControl, type ViewStateChangeEvent, type MapRef } from 'react-map-gl/maplibre'
+import Map, { NavigationControl, Source, Layer, type ViewStateChangeEvent, type MapRef } from 'react-map-gl/maplibre'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TimeTraveler } from "@/components/ui/time-traveler"
 import { AlertsPanel } from "@/components/panels/AlertsPanel"
 import { TrafficLayer } from "@/components/map/TrafficLayer"
+import { RoutePlannerPanel } from "@/components/panels/RoutePlannerPanel"
 import { Navigation2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import type { Route } from "@/hooks/useRouting"
 
 const BARRANQUILLA_COORDS = {
     longitude: -74.7964,
@@ -23,9 +25,22 @@ const ATLANTICO_BOUNDS: [number, number, number, number] = [
     -74.55, 11.15  // Northeast (Long, Lat) - Past Puerto Colombia/River
 ]
 
+// Build a GeoJSON FeatureCollection from route segments
+function routeToGeoJSON(route: Route): GeoJSON.FeatureCollection {
+    const features: GeoJSON.Feature[] = route.segments
+        .filter(s => s.geometry?.type === 'LineString' && Array.isArray(s.geometry.coordinates))
+        .map(s => ({
+            type: 'Feature' as const,
+            properties: { congestion_level: s.congestion_level, road_name: s.road_name },
+            geometry: s.geometry as GeoJSON.LineString,
+        }))
+    return { type: 'FeatureCollection', features }
+}
+
 export function MapViewport() {
     const [viewState, setViewState] = React.useState(BARRANQUILLA_COORDS)
     const [simulatedHour, setSimulatedHour] = React.useState<number | null>(null)
+    const [activeRoute, setActiveRoute] = React.useState<Route | null>(null)
     const mapRef = React.useRef<MapRef>(null)
 
     const recenterMap = () => {
@@ -38,6 +53,8 @@ export function MapViewport() {
         const currentHour = new Date().getHours()
         setSimulatedHour(hour === currentHour ? null : hour)
     }
+
+    const routeGeoJSON = activeRoute ? routeToGeoJSON(activeRoute) : null
 
     return (
         <div className="relative h-full w-full overflow-hidden bg-slate-100">
@@ -55,6 +72,35 @@ export function MapViewport() {
                 reuseMaps
             >
                 <TrafficLayer simulatedHour={simulatedHour} />
+
+                {/* Route overlay — drawn on top of traffic layer */}
+                {routeGeoJSON && (
+                    <Source id="active-route" type="geojson" data={routeGeoJSON}>
+                        {/* Casing (white outline for contrast) */}
+                        <Layer
+                            id="route-casing"
+                            type="line"
+                            paint={{
+                                'line-color': '#ffffff',
+                                'line-width': 10,
+                                'line-opacity': 0.8,
+                            }}
+                            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+                        />
+                        {/* Main route line */}
+                        <Layer
+                            id="route-line"
+                            type="line"
+                            paint={{
+                                'line-color': '#6366f1',
+                                'line-width': 5,
+                                'line-opacity': 0.95,
+                            }}
+                            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+                        />
+                    </Source>
+                )}
+
                 <NavigationControl position="bottom-right" showCompass={false} visualizePitch={false} />
             </Map>
 
@@ -82,6 +128,9 @@ export function MapViewport() {
 
             {/* Top Left Overlay for Alerts */}
             <AlertsPanel />
+
+            {/* Top Right Overlay for Route Planner */}
+            <RoutePlannerPanel onRouteSelect={setActiveRoute} />
 
             {/* Bottom left branding - fixed positioning */}
             <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none" suppressHydrationWarning>
