@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { MLController } from '@/controllers/mlController.js';
+import { requireAdminAuth } from '@/middleware/adminAuth.js';
 
 const router = Router();
 
@@ -20,18 +21,18 @@ router.post('/features/extract', MLController.extractFeatures);
 // POST /api/v1/ml/features/store - Store features for a road
 router.post('/features/store', MLController.storeFeatures);
 
-// POST /api/v1/ml/features/batch - Batch extract features for all roads
-router.post('/features/batch', MLController.batchExtractFeatures);
+// POST /api/v1/ml/features/batch - Batch extract features for all roads (admin)
+router.post('/features/batch', requireAdminAuth, MLController.batchExtractFeatures);
 
-//— Model Retraining & Versioning ──────────────────────────────
+//— Model Retraining & Versioning (admin-only) ─────────────────
 
 // POST /api/v1/ml/retrain - Manually trigger model retraining
-router.post('/retrain', MLController.triggerRetrain);
+router.post('/retrain', requireAdminAuth, MLController.triggerRetrain);
 
 // GET /api/v1/ml/model-history - List all saved model versions
-router.get('/model-history', MLController.getModelHistory);
+router.get('/model-history', requireAdminAuth, MLController.getModelHistory);
 
 // POST /api/v1/ml/rollback/:version - Roll back to a specific model version
-router.post('/rollback/:version', MLController.rollbackModel);
+router.post('/rollback/:version', requireAdminAuth, MLController.rollbackModel);
 
 export default router;
