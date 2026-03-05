@@ -28,16 +28,22 @@ export function useZonesData(): UseZonesDataReturn {
   const [zones, setZones] = useState<Zone[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchZones = useCallback(async () => {
+    // Cancel any in-flight request before starting a new one
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+    const { signal } = abortControllerRef.current;
+
     try {
       setIsLoading(true);
       setError(null);
 
       // Fetch zones geometry and zone insights in parallel
       const [geoRes, insightsRes] = await Promise.all([
-        fetch(`${API_URL}/geo/zones`),
-        fetch(`${API_URL}/insights/zones`).catch(() => null),
+        fetch(`${API_URL}/geo/zones`, { signal }),
+        fetch(`${API_URL}/insights/zones`, { signal }).catch(() => null),
       ]);
 
       if (!geoRes.ok) {
@@ -90,6 +96,7 @@ export function useZonesData(): UseZonesDataReturn {
 
       setZones(baseZones);
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error('❌ Failed to fetch zones:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {

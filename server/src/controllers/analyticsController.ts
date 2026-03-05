@@ -5,21 +5,30 @@ import { logger } from '@/utils/logger.js';
 import type { ApiResponse } from '@/types';
 
 export class AnalyticsController {
+  private static parsePositiveInt(value: string | undefined, defaultValue: number): number | null {
+    if (!value) return defaultValue;
+    const parsed = parseInt(value, 10);
+    if (isNaN(parsed) || parsed <= 0) return null;
+    return parsed;
+  }
+
   // GET /api/v1/analytics/traffic-patterns?road_id=1&days=30
   static async getTrafficPatterns(req: Request, res: Response, next: NextFunction) {
     try {
-      const roadId = req.query.road_id ? parseInt(req.query.road_id as string, 10) : undefined;
-      const days = req.query.days ? parseInt(req.query.days as string, 10) : 30;
+      const roadId = req.query.road_id
+        ? AnalyticsController.parsePositiveInt(req.query.road_id as string, 0)
+        : undefined;
+      const days = AnalyticsController.parsePositiveInt(req.query.days as string | undefined, 30);
 
-      if (roadId && isNaN(roadId)) {
+      if (roadId === null || days === null) {
         return res.status(400).json({
           status: 'error',
-          message: 'Invalid road_id parameter',
+          message: 'Invalid parameter: road_id and days must be positive integers',
           timestamp: new Date().toISOString(),
         });
       }
 
-      const patterns = await AnalyticsService.getTrafficPatterns(roadId, days);
+      const patterns = await AnalyticsService.getTrafficPatterns(roadId || undefined, days);
 
       const response: ApiResponse<typeof patterns> = {
         status: 'success',
@@ -37,8 +46,16 @@ export class AnalyticsController {
   // GET /api/v1/analytics/hotspots?limit=10&days=7
   static async getHotspots(req: Request, res: Response, next: NextFunction) {
     try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
-      const days = req.query.days ? parseInt(req.query.days as string, 10) : 7;
+      const limit = AnalyticsController.parsePositiveInt(req.query.limit as string | undefined, 10);
+      const days = AnalyticsController.parsePositiveInt(req.query.days as string | undefined, 7);
+
+      if (limit === null || days === null) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid parameter: limit and days must be positive integers',
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       const hotspots = await AnalyticsService.getHotspots(limit, days);
 
@@ -122,7 +139,15 @@ export class AnalyticsController {
   // GET /api/v1/analytics/weather-impact?days=30
   static async getWeatherImpact(req: Request, res: Response, next: NextFunction) {
     try {
-      const days = req.query.days ? parseInt(req.query.days as string, 10) : 30;
+      const days = AnalyticsController.parsePositiveInt(req.query.days as string | undefined, 30);
+
+      if (days === null) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid parameter: days must be a positive integer',
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       const impact = await AnalyticsService.getWeatherImpact(days);
 
@@ -142,18 +167,20 @@ export class AnalyticsController {
   // GET /api/v1/analytics/rush-hour?road_id=1&days=30
   static async getRushHourStats(req: Request, res: Response, next: NextFunction) {
     try {
-      const roadId = req.query.road_id ? parseInt(req.query.road_id as string, 10) : undefined;
-      const days = req.query.days ? parseInt(req.query.days as string, 10) : 30;
+      const roadId = req.query.road_id
+        ? AnalyticsController.parsePositiveInt(req.query.road_id as string, 0)
+        : undefined;
+      const days = AnalyticsController.parsePositiveInt(req.query.days as string | undefined, 30);
 
-      if (roadId && isNaN(roadId)) {
+      if (roadId === null || days === null) {
         return res.status(400).json({
           status: 'error',
-          message: 'Invalid road_id parameter',
+          message: 'Invalid parameter: road_id and days must be positive integers',
           timestamp: new Date().toISOString(),
         });
       }
 
-      const stats = await AnalyticsService.getRushHourStats(roadId, days);
+      const stats = await AnalyticsService.getRushHourStats(roadId || undefined, days);
 
       const response: ApiResponse<typeof stats> = {
         status: 'success',
