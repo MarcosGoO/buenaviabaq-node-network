@@ -45,7 +45,10 @@ export function useTrafficData(): UseTrafficDataReturn {
       setError(null);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-      const response = await fetch(`${apiUrl}/traffic/realtime`);
+      const [response, summaryResponse] = await Promise.all([
+        fetch(`${apiUrl}/traffic/realtime`),
+        fetch(`${apiUrl}/traffic/summary`),
+      ]);
 
       if (!response.ok) {
         // If rate limited, just log and continue with existing state
@@ -65,8 +68,6 @@ export function useTrafficData(): UseTrafficDataReturn {
         setRoads(data.data);
       }
 
-      // Fetch summary
-      const summaryResponse = await fetch(`${apiUrl}/traffic/summary`);
       if (summaryResponse.ok) {
         const summaryData = await summaryResponse.json();
         if ((summaryData.success || summaryData.status === 'success') && summaryData.data) {
