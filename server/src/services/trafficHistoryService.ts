@@ -137,10 +137,10 @@ export class TrafficHistoryService {
           COUNT(*) FILTER (WHERE is_raining = TRUE) as rainy_snapshots
         FROM traffic_history
         WHERE road_id = $1
-          AND time >= NOW() - INTERVAL '${days} days'
+          AND time >= NOW() - $2 * INTERVAL '1 day'
       `;
 
-      const result = await pool.query(query, [roadId]);
+      const result = await pool.query(query, [roadId, days]);
 
       logger.info(`Retrieved traffic statistics for road ${roadId}`);
       return result.rows[0];

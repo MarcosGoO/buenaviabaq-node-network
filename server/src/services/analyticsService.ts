@@ -173,9 +173,9 @@ export class AnalyticsService {
       }
 
       const speedDiff = current.current_avg_speed - historical.historical_avg_speed;
-      const percentageChange = Math.round(
-        (speedDiff / historical.historical_avg_speed) * 100
-      );
+      const percentageChange = historical.historical_avg_speed !== 0
+        ? Math.round((speedDiff / historical.historical_avg_speed) * 100)
+        : 0;
 
       const comparison: DailyComparison = {
         current_avg_speed: current.current_avg_speed,

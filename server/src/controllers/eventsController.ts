@@ -119,7 +119,7 @@ export class EventsController {
     try {
       const eventData: CreateEventDTO = req.body;
 
-      // Basic validation
+      // Presence validation
       if (!eventData.title || !eventData.event_type || !eventData.location_name) {
         return res.status(400).json({
           status: 'error',
@@ -137,6 +137,33 @@ export class EventsController {
         return res.status(400).json({
           status: 'error',
           message: 'Missing required fields: latitude, longitude, start_time, end_time',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Length validation
+      if (
+        eventData.title.length > 255 ||
+        eventData.location_name.length > 255 ||
+        (eventData.description && eventData.description.length > 2000)
+      ) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Field too long: title and location_name max 255 chars, description max 2000 chars',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Coordinate range validation (Barranquilla bounds)
+      if (
+        typeof eventData.latitude !== 'number' ||
+        typeof eventData.longitude !== 'number' ||
+        eventData.latitude < 10.9 || eventData.latitude > 11.1 ||
+        eventData.longitude < -74.9 || eventData.longitude > -74.7
+      ) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Coordinates out of valid range for Barranquilla',
           timestamp: new Date().toISOString(),
         });
       }

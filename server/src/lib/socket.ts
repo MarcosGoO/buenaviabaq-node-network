@@ -75,13 +75,21 @@ export class SocketService {
       logger.info(`Client connected: ${socket.id}`);
 
       // Handle client subscribing to specific zones
-      socket.on('subscribe:zone', (zoneId: number) => {
+      socket.on('subscribe:zone', (zoneId: unknown) => {
+        if (!Number.isInteger(zoneId) || (zoneId as number) <= 0) {
+          socket.emit('error', { message: 'Invalid zone ID' });
+          return;
+        }
         void socket.join(`zone:${zoneId}`);
         logger.debug(`Client ${socket.id} subscribed to zone:${zoneId}`);
       });
 
       // Handle client unsubscribing from zones
-      socket.on('unsubscribe:zone', (zoneId: number) => {
+      socket.on('unsubscribe:zone', (zoneId: unknown) => {
+        if (!Number.isInteger(zoneId) || (zoneId as number) <= 0) {
+          socket.emit('error', { message: 'Invalid zone ID' });
+          return;
+        }
         void socket.leave(`zone:${zoneId}`);
         logger.debug(`Client ${socket.id} unsubscribed from zone:${zoneId}`);
       });

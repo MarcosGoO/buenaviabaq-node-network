@@ -136,10 +136,10 @@ export class WeatherHistoryService {
           COUNT(*) FILTER (WHERE rain_1h > 0) as rainy_hours,
           COUNT(*) as total_records
         FROM weather_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
+        WHERE time >= NOW() - $1 * INTERVAL '1 day'
       `;
 
-      const result = await pool.query(query);
+      const result = await pool.query(query, [days]);
 
       logger.info(`Retrieved weather statistics for last ${days} days`);
       return result.rows[0];
@@ -161,12 +161,12 @@ export class WeatherHistoryService {
           ROUND(AVG(rain_probability)) as avg_rain_prob,
           COUNT(*) as sample_count
         FROM weather_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
+        WHERE time >= NOW() - $1 * INTERVAL '1 day'
         GROUP BY EXTRACT(HOUR FROM time)
         ORDER BY hour
       `;
 
-      const result = await pool.query(query);
+      const result = await pool.query(query, [days]);
 
       logger.info('Retrieved hourly weather pattern');
       return result.rows;
