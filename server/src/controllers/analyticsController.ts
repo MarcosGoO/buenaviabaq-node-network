@@ -229,9 +229,9 @@ export class AnalyticsController {
   static async getRoadStats(req: Request, res: Response, next: NextFunction) {
     try {
       const roadId = parseInt(String(req.params.road_id), 10);
-      const days = req.query.days ? parseInt(req.query.days as string, 10) : 7;
+      const days = AnalyticsController.parsePositiveInt(req.query.days as string | undefined, 7);
 
-      if (isNaN(roadId)) {
+      if (isNaN(roadId) || days === null) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid road ID',
