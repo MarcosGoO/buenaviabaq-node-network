@@ -540,13 +540,13 @@ export class InsightsService {
       const historicalSpeedQuery = `
         SELECT ROUND(AVG(speed_kmh)) as historical_speed
         FROM traffic_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
+        WHERE time >= NOW() - $1 * INTERVAL '1 day'
           AND time < NOW() - INTERVAL '1 day'
       `;
 
       const [speedResult, historicalSpeedResult] = await Promise.all([
         pool.query(speedQuery),
-        pool.query(historicalSpeedQuery)
+        pool.query(historicalSpeedQuery, [days])
       ]);
 
       const currentSpeed = Number(speedResult.rows[0]?.current_speed) || 0;
@@ -576,13 +576,13 @@ export class InsightsService {
       const historicalTravelTimeQuery = `
         SELECT ROUND(AVG(travel_time_minutes)) as historical_time
         FROM traffic_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
+        WHERE time >= NOW() - $1 * INTERVAL '1 day'
           AND time < NOW() - INTERVAL '1 day'
       `;
 
       const [travelTimeResult, historicalTravelTimeResult] = await Promise.all([
         pool.query(travelTimeQuery),
-        pool.query(historicalTravelTimeQuery)
+        pool.query(historicalTravelTimeQuery, [days])
       ]);
 
       const currentTime = Number(travelTimeResult.rows[0]?.current_time) || 0;

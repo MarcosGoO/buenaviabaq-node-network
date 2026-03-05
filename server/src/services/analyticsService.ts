@@ -231,15 +231,15 @@ export class AnalyticsService {
           MODE() WITHIN GROUP (ORDER BY congestion_level) as typical_congestion,
           COUNT(*) as sample_count
         FROM traffic_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
-          ${roadId ? 'AND road_id = $1' : ''}
+        WHERE time >= NOW() - $1 * INTERVAL '1 day'
+          ${roadId ? 'AND road_id = $2' : ''}
         GROUP BY is_rush_hour
         ORDER BY is_rush_hour DESC
       `;
 
       const result = roadId
-        ? await pool.query(query, [roadId])
-        : await pool.query(query);
+        ? await pool.query(query, [days, roadId])
+        : await pool.query(query, [days]);
 
       logger.info('Retrieved rush hour statistics');
       return result.rows;
