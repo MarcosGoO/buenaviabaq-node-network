@@ -38,7 +38,8 @@ export class AnalyticsService {
   // Get traffic patterns by hour and day of week
   static async getTrafficPatterns(roadId?: number, days: number = 30) {
     try {
-      const query = `
+      const query = roadId
+        ? `
         SELECT
           hour_of_day,
           day_of_week,
@@ -46,15 +47,27 @@ export class AnalyticsService {
           MODE() WITHIN GROUP (ORDER BY congestion_level) as avg_congestion_level,
           COUNT(*) as sample_count
         FROM traffic_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
-          ${roadId ? 'AND road_id = $1' : ''}
+        WHERE time >= NOW() - $2 * INTERVAL '1 day'
+          AND road_id = $1
         GROUP BY hour_of_day, day_of_week
         ORDER BY day_of_week, hour_of_day
-      `;
+        `
+        : `
+        SELECT
+          hour_of_day,
+          day_of_week,
+          ROUND(AVG(speed_kmh)) as avg_speed,
+          MODE() WITHIN GROUP (ORDER BY congestion_level) as avg_congestion_level,
+          COUNT(*) as sample_count
+        FROM traffic_history
+        WHERE time >= NOW() - $1 * INTERVAL '1 day'
+        GROUP BY hour_of_day, day_of_week
+        ORDER BY day_of_week, hour_of_day
+        `;
 
       const result = roadId
-        ? await pool.query(query, [roadId])
-        : await pool.query(query);
+        ? await pool.query(query, [roadId, days])
+        : await pool.query(query, [days]);
 
       logger.info(`Retrieved traffic patterns for ${days} days`);
       return result.rows as TrafficPattern[];
@@ -79,13 +92,13 @@ export class AnalyticsService {
           MODE() WITHIN GROUP (ORDER BY hour_of_day) as peak_hour,
           COUNT(*) FILTER (WHERE congestion_level = 'severe') as total_incidents
         FROM traffic_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
+        WHERE time >= NOW() - $2 * INTERVAL '1 day'
         GROUP BY road_id, road_name
         ORDER BY congestion_frequency DESC
         LIMIT $1
       `;
 
-      const result = await pool.query(query, [limit]);
+      const result = await pool.query(query, [limit, days]);
 
       logger.info(`Retrieved top ${limit} traffic hotspots`);
       return result.rows as Hotspot[];
@@ -192,12 +205,12 @@ export class AnalyticsService {
           COUNT(*) as sample_count,
           ROUND(AVG(travel_time_minutes)) as avg_travel_time
         FROM traffic_history
-        WHERE time >= NOW() - INTERVAL '${days} days'
+        WHERE time >= NOW() - $1 * INTERVAL '1 day'
         GROUP BY is_raining
         ORDER BY is_raining
       `;
 
-      const result = await pool.query(query);
+      const result = await pool.query(query, [days]);
 
       logger.info('Retrieved weather impact analysis');
       return result.rows;
