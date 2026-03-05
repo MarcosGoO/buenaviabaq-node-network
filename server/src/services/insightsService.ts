@@ -488,15 +488,14 @@ export class InsightsService {
         ORDER BY z.id
       `;
 
-      const result = zoneId
-        ? await pool.query(query, [zoneId])
-        : await pool.query(query);
+      const [queryResult, allAlerts] = await Promise.all([
+        zoneId ? pool.query(query, [zoneId]) : pool.query(query),
+        AlertService.detectActiveAlerts().then(AlertService.getActiveAlerts),
+      ]);
 
-      // For now, use mock data for alerts (will be integrated with AlertService)
-      // TODO: When integrating AlertService, change .map() back to
-      //       async (row) => { ... } and wrap in await Promise.all(...)
-      const insights: ZoneInsights[] = result.rows.map((row) => {
-        const activeAlerts = 0;
+      const insights: ZoneInsights[] = queryResult.rows.map((row) => {
+        const zoneIdNum = Number(row.zone_id);
+        const activeAlerts = allAlerts.filter(a => a.affectedZones.includes(zoneIdNum)).length;
 
         // Calculate travel time impact
         const historicalSpeed = 45; // Average historical speed for zone
@@ -504,7 +503,7 @@ export class InsightsService {
         const travelTimeImpact = Math.round(((historicalSpeed - currentSpeed) / historicalSpeed) * 100);
 
         return {
-          zone_id: row.zone_id,
+          zone_id: zoneIdNum,
           zone_name: row.zone_name,
           avg_speed: Number(row.avg_speed) || 0,
           congestion_level: row.congestion_level || 'low',

@@ -229,6 +229,11 @@ describe('InsightsService', () => {
   });
 
   describe('getZoneInsights', () => {
+    beforeEach(() => {
+      vi.mocked(AlertService.detectActiveAlerts).mockResolvedValue([] as never);
+      vi.mocked(AlertService.getActiveAlerts).mockReturnValue([] as never);
+    });
+
     it('should return an array of zone insights', async () => {
       vi.mocked(pool.query).mockResolvedValue({
         rows: [
@@ -286,6 +291,31 @@ describe('InsightsService', () => {
       const insights = await InsightsService.getZoneInsights();
 
       expect(insights).toHaveLength(0);
+    });
+
+    it('should count active_alerts per zone from AlertService', async () => {
+      vi.mocked(pool.query).mockResolvedValue({
+        rows: [
+          { zone_id: 1, zone_name: 'Centro', avg_speed: 25, congestion_level: 'severe', total_roads: 10, arroyo_risk_level: 'high' },
+          { zone_id: 2, zone_name: 'Norte', avg_speed: 50, congestion_level: 'low', total_roads: 20, arroyo_risk_level: 'none' },
+        ],
+      } as never);
+
+      const mockAlerts = [
+        { id: 'a1', affectedZones: [1], type: 'severe_congestion', severity: 'high' },
+        { id: 'a2', affectedZones: [1, 2], type: 'weather_traffic_impact', severity: 'medium' },
+        { id: 'a3', affectedZones: [1], type: 'arroyo_flood_risk', severity: 'critical' },
+      ];
+      vi.mocked(AlertService.detectActiveAlerts).mockResolvedValue(mockAlerts as never);
+      vi.mocked(AlertService.getActiveAlerts).mockReturnValue(mockAlerts as never);
+
+      const insights = await InsightsService.getZoneInsights();
+
+      const centro = insights.find(z => z.zone_id === 1);
+      const norte = insights.find(z => z.zone_id === 2);
+
+      expect(centro!.active_alerts).toBe(3); // a1, a2, a3 all include zone 1
+      expect(norte!.active_alerts).toBe(1);  // only a2 includes zone 2
     });
   });
 
