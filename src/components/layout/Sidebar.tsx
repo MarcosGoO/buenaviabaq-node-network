@@ -8,12 +8,19 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/ui/stat-card"
 import { WeatherWidget } from "@/components/widgets/WeatherWidget"
+import { useTrafficData } from "@/hooks/useTrafficData"
+import { useZonesData } from "@/hooks/useZonesData"
 
 type SidebarProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function Sidebar({ className, ...props }: SidebarProps) {
     const [collapsed, setCollapsed] = React.useState(false)
     const pathname = usePathname()
+    const { summary } = useTrafficData()
+    const { zones } = useZonesData()
+
+    const avgSpeed = summary?.average_speed != null ? Math.round(summary.average_speed) : '--'
+    const activeZones = zones.length > 0 ? zones.length : '--'
 
     return (
         <div
@@ -96,14 +103,13 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                             </div>
                             <StatCard
                                 label="Avg Speed"
-                                value={42}
+                                value={avgSpeed}
                                 unit="km/h"
                                 icon={Activity}
-                                trend={{ value: 8, isPositive: true }}
                             />
                             <StatCard
                                 label="Active Zones"
-                                value={12}
+                                value={activeZones}
                                 icon={MapPin}
                             />
                         </div>
