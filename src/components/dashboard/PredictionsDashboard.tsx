@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  LineChart,
   Line,
   BarChart,
   Bar,
@@ -24,7 +23,6 @@ import {
   Droplets,
   TrendingUp,
   AlertTriangle,
-  Activity,
   ChevronDown,
 } from 'lucide-react';
 import { usePredictions } from '@/hooks/usePredictions';
@@ -290,11 +288,11 @@ export default function PredictionsDashboard() {
                           border: '1px solid hsl(var(--border))',
                           borderRadius: '8px',
                         }}
-                        formatter={(value: number, name: string) => {
+                        formatter={(value, name) => {
                           const label =
                             name === 'speed' ? 'Velocidad' :
                             name === 'upper' ? 'Limite superior' :
-                            name === 'lower' ? 'Limite inferior' : name;
+                            name === 'lower' ? 'Limite inferior' : String(name);
                           return [`${value} km/h`, label];
                         }}
                       />
@@ -379,10 +377,10 @@ export default function PredictionsDashboard() {
                           border: '1px solid hsl(var(--border))',
                           borderRadius: '8px',
                         }}
-                        formatter={(value: number) => [
-                          `${value > 0 ? '+' : ''}${value}`,
-                          'Impacto SHAP',
-                        ]}
+                        formatter={(value) => {
+                          const v = Number(value);
+                          return [`${v > 0 ? '+' : ''}${v}`, 'Impacto SHAP'] as [string, string];
+                        }}
                       />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {shapData.map((entry, index) => (

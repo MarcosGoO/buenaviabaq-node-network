@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, Gauge } from "lucide-react"
+import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, Gauge, Brain, ShieldAlert } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/ui/stat-card"
@@ -67,6 +67,8 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                 <nav className="flex flex-col gap-2 px-3">
                     <NavItem icon={Gauge} label="Traffic Flow" collapsed={collapsed} active={pathname === '/'} href="/" />
                     <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} active={pathname === '/analytics'} href="/analytics" />
+                    <NavItem icon={Brain} label="Predicciones" collapsed={collapsed} active={pathname === '/predictions'} href="/predictions" />
+                    <NavItem icon={ShieldAlert} label="Admin ML" collapsed={collapsed} active={pathname === '/admin'} href="/admin" />
                     <NavItem icon={Settings} label="Settings" collapsed={collapsed} active={pathname === '/settings'} href="/settings" />
                 </nav>
 
