@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Activity, Cloud, AlertTriangle, LayoutDashboard, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Activity, Cloud, AlertTriangle, LayoutDashboard, TrendingUp, TrendingDown, Minus, GitCompareArrows, ChevronDown } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -51,6 +51,20 @@ interface ExecutiveSummary {
   generated_at: string;
 }
 
+interface TrafficRoadBasic {
+  id: number;
+  name: string;
+}
+
+interface DailyComparison {
+  current_avg_speed: number;
+  historical_avg_speed: number;
+  speed_difference: number;
+  percentage_change: number;
+  current_congestion_level: string;
+  historical_congestion_level: string;
+}
+
 const TREND_ICON = { improving: TrendingUp, stable: Minus, worsening: TrendingDown }
 const TREND_COLOR = { improving: 'text-green-600', stable: 'text-muted-foreground', worsening: 'text-red-600' }
 const CONGESTION_COLOR: Record<string, string> = { low: '#22c55e', moderate: '#eab308', high: '#f97316', severe: '#ef4444' }
@@ -71,6 +85,16 @@ export default function AnalyticsDashboard() {
   const [weatherImpact, setWeatherImpact] = useState<WeatherImpact[]>([]);
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Comparative state
+  const [roads, setRoads] = useState<TrafficRoadBasic[]>([]);
+  const [compareRoadA, setCompareRoadA] = useState<number | null>(null);
+  const [compareRoadB, setCompareRoadB] = useState<number | null>(null);
+  const [comparisonA, setComparisonA] = useState<DailyComparison | null>(null);
+  const [comparisonB, setComparisonB] = useState<DailyComparison | null>(null);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [dropdownA, setDropdownA] = useState(false);
+  const [dropdownB, setDropdownB] = useState(false);
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -102,6 +126,37 @@ export default function AnalyticsDashboard() {
     }
   }, []);
 
+  // Fetch roads list for comparative
+  useEffect(() => {
+    async function loadRoads() {
+      try {
+        const res = await fetch(`${API_BASE}/traffic/realtime`);
+        if (res.ok) {
+          const json = await res.json();
+          const list = (json.data || []).map((r: { id: number; name: string }) => ({ id: r.id, name: r.name }));
+          setRoads(list);
+        }
+      } catch { /* ignore */ }
+    }
+    loadRoads();
+  }, []);
+
+  const fetchComparison = useCallback(async () => {
+    if (!compareRoadA && !compareRoadB) return;
+    setCompareLoading(true);
+    const [resA, resB] = await Promise.all([
+      compareRoadA ? fetch(`${API_BASE}/analytics/compare/${compareRoadA}`).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
+      compareRoadB ? fetch(`${API_BASE}/analytics/compare/${compareRoadB}`).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
+    ]);
+    setComparisonA(resA?.data ?? null);
+    setComparisonB(resB?.data ?? null);
+    setCompareLoading(false);
+  }, [compareRoadA, compareRoadB]);
+
+  useEffect(() => {
+    fetchComparison();
+  }, [fetchComparison]);
+
   useEffect(() => {
     fetchAnalytics();
     // Auto-refresh every 5 minutes
@@ -130,7 +185,7 @@ export default function AnalyticsDashboard() {
       </div>
 
       <Tabs defaultValue="summary" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="summary">
             <LayoutDashboard className="w-4 h-4 mr-2" />
             Resumen
@@ -146,6 +201,10 @@ export default function AnalyticsDashboard() {
           <TabsTrigger value="weather">
             <Cloud className="w-4 h-4 mr-2" />
             Clima
+          </TabsTrigger>
+          <TabsTrigger value="compare">
+            <GitCompareArrows className="w-4 h-4 mr-2" />
+            Comparar
           </TabsTrigger>
         </TabsList>
 
@@ -467,6 +526,177 @@ export default function AnalyticsDashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Comparative Side-by-Side */}
+        <TabsContent value="compare" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GitCompareArrows className="h-5 w-5 text-primary" />
+                Comparar Zonas — Actual vs Historico
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Selecciona dos vias para comparar su trafico actual contra el promedio historico (misma hora y dia de la semana).
+              </p>
+
+              {/* Road Selectors */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* Road A Selector */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Via A</label>
+                  <div className="relative">
+                    <button
+                      onClick={() => { setDropdownA(!dropdownA); setDropdownB(false); }}
+                      className="flex items-center gap-2 px-3 py-2 bg-background border rounded-lg hover:bg-accent transition-colors w-full justify-between text-sm"
+                    >
+                      <span className="truncate">{roads.find(r => r.id === compareRoadA)?.name || 'Seleccionar via...'}</span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    </button>
+                    {dropdownA && (
+                      <div className="absolute left-0 top-full mt-1 w-full max-h-48 overflow-y-auto bg-background border rounded-lg shadow-xl z-50">
+                        {roads.map(road => (
+                          <button
+                            key={road.id}
+                            onClick={() => { setCompareRoadA(road.id); setDropdownA(false); }}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-accent ${road.id === compareRoadA ? 'bg-primary/10 text-primary font-medium' : ''}`}
+                          >
+                            {road.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Road B Selector */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Via B</label>
+                  <div className="relative">
+                    <button
+                      onClick={() => { setDropdownB(!dropdownB); setDropdownA(false); }}
+                      className="flex items-center gap-2 px-3 py-2 bg-background border rounded-lg hover:bg-accent transition-colors w-full justify-between text-sm"
+                    >
+                      <span className="truncate">{roads.find(r => r.id === compareRoadB)?.name || 'Seleccionar via...'}</span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    </button>
+                    {dropdownB && (
+                      <div className="absolute left-0 top-full mt-1 w-full max-h-48 overflow-y-auto bg-background border rounded-lg shadow-xl z-50">
+                        {roads.map(road => (
+                          <button
+                            key={road.id}
+                            onClick={() => { setCompareRoadB(road.id); setDropdownB(false); }}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-accent ${road.id === compareRoadB ? 'bg-primary/10 text-primary font-medium' : ''}`}
+                          >
+                            {road.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {compareLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                </div>
+              ) : (comparisonA || comparisonB) ? (
+                <>
+                  {/* Side-by-Side Comparison Cards */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    {[
+                      { label: roads.find(r => r.id === compareRoadA)?.name || 'Via A', data: comparisonA, color: '#8884d8' },
+                      { label: roads.find(r => r.id === compareRoadB)?.name || 'Via B', data: comparisonB, color: '#82ca9d' },
+                    ].map(({ label, data, color }) => (
+                      <Card key={label} className="overflow-hidden">
+                        <div className="h-1" style={{ backgroundColor: color }} />
+                        <CardContent className="p-4 space-y-3">
+                          <p className="text-sm font-bold">{label}</p>
+                          {data ? (
+                            <>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="p-2 rounded bg-muted/50">
+                                  <p className="text-[10px] text-muted-foreground uppercase">Actual</p>
+                                  <p className="text-lg font-bold">{data.current_avg_speed} km/h</p>
+                                  <p className="text-xs capitalize text-muted-foreground">{data.current_congestion_level}</p>
+                                </div>
+                                <div className="p-2 rounded bg-muted/50">
+                                  <p className="text-[10px] text-muted-foreground uppercase">Historico</p>
+                                  <p className="text-lg font-bold">{data.historical_avg_speed} km/h</p>
+                                  <p className="text-xs capitalize text-muted-foreground">{data.historical_congestion_level}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {(() => {
+                                  const pct = data.percentage_change;
+                                  const trend = pct > 2 ? 'improving' : pct < -2 ? 'worsening' : 'stable';
+                                  const Icon = TREND_ICON[trend];
+                                  return (
+                                    <>
+                                      <Icon className={`h-4 w-4 ${TREND_COLOR[trend]}`} />
+                                      <span className={`text-sm font-bold ${TREND_COLOR[trend]}`}>
+                                        {pct > 0 ? '+' : ''}{pct}%
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">vs historico</span>
+                                    </>
+                                  );
+                                })()}
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-sm text-muted-foreground py-4 text-center">Selecciona una via</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Overlay Bar Chart */}
+                  {comparisonA && comparisonB && (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart
+                        data={[
+                          {
+                            metric: 'Vel. Actual',
+                            [roads.find(r => r.id === compareRoadA)?.name || 'Via A']: comparisonA.current_avg_speed,
+                            [roads.find(r => r.id === compareRoadB)?.name || 'Via B']: comparisonB.current_avg_speed,
+                          },
+                          {
+                            metric: 'Vel. Historica',
+                            [roads.find(r => r.id === compareRoadA)?.name || 'Via A']: comparisonA.historical_avg_speed,
+                            [roads.find(r => r.id === compareRoadB)?.name || 'Via B']: comparisonB.historical_avg_speed,
+                          },
+                          {
+                            metric: 'Diferencia',
+                            [roads.find(r => r.id === compareRoadA)?.name || 'Via A']: Math.abs(comparisonA.speed_difference),
+                            [roads.find(r => r.id === compareRoadB)?.name || 'Via B']: Math.abs(comparisonB.speed_difference),
+                          },
+                        ]}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="metric" />
+                        <YAxis label={{ value: 'km/h', angle: -90, position: 'insideLeft' }} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey={roads.find(r => r.id === compareRoadA)?.name || 'Via A'} fill="#8884d8" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey={roads.find(r => r.id === compareRoadB)?.name || 'Via B'} fill="#82ca9d" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <GitCompareArrows className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                  <p className="text-muted-foreground">
+                    Selecciona dos vias arriba para ver la comparacion lado a lado.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
