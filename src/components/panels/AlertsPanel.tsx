@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAlerts, type Alert } from "@/hooks/useAlerts"
+import { useSettings } from "@/hooks/useSettings"
+import { useNotifications } from "@/hooks/useNotifications"
+import { ToastContainer } from "@/components/ui/toast-container"
 
 // Alert type → icon + color
 const ALERT_STYLES: Record<string, { icon: React.ElementType; color: string; bg: string; border: string }> = {
@@ -67,12 +70,25 @@ function AlertCard({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
 export function AlertsPanel() {
     const [isOpen, setIsOpen] = React.useState(false)
     const { alerts, dismissAlert, clearAll } = useAlerts()
+    const { settings } = useSettings()
+    const { toasts, dismissToast, permissionState, requestPermission } = useNotifications(
+      alerts,
+      settings.minAlertSeverity,
+      settings.showAlerts
+    )
 
     const hasAlerts = alerts.length > 0
     // Show at most 4 alerts to avoid overflow
     const visibleAlerts = alerts.slice(0, 4)
 
     return (
+        <>
+        <ToastContainer
+          toasts={toasts}
+          onDismiss={dismissToast}
+          permissionState={permissionState}
+          onRequestPermission={requestPermission}
+        />
         <div className="absolute top-4 left-4 z-50 pointer-events-auto flex flex-col gap-3 transition-all duration-300 ease-in-out" suppressHydrationWarning>
             {/* Toggle Button when closed */}
             <div
@@ -152,5 +168,6 @@ export function AlertsPanel() {
                 )}
             </div>
         </div>
+        </>
     )
 }
