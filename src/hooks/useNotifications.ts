@@ -40,18 +40,12 @@ export function useNotifications(
   showAlerts: boolean
 ): UseNotificationsReturn {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [permissionState, setPermissionState] = useState<NotificationPermission | 'unsupported'>('default');
+  const [permissionState, setPermissionState] = useState<NotificationPermission | 'unsupported'>(() => {
+    if (typeof window === 'undefined') return 'default';
+    if (!('Notification' in window)) return 'unsupported';
+    return Notification.permission;
+  });
   const seenIds = useRef<Set<string>>(new Set());
-
-  // Init permission state
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!('Notification' in window)) {
-      setPermissionState('unsupported');
-    } else {
-      setPermissionState(Notification.permission);
-    }
-  }, []);
 
   const requestPermission = useCallback(async () => {
     if (typeof window === 'undefined' || !('Notification' in window)) return;
