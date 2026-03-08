@@ -9,6 +9,8 @@ export interface CacheOptions {
 export class CacheService {
   private static readonly DEFAULT_TTL = 300; // 5 minutes
   private static readonly NAMESPACE_SEPARATOR = ':';
+  private static cacheHits = 0;
+  private static cacheMisses = 0;
 
   /**
    * Build cache key with namespace
@@ -29,10 +31,12 @@ export class CacheService {
       const cached = await redis.get(fullKey);
 
       if (!cached) {
+        this.cacheMisses += 1;
         logger.debug(`Cache miss for key: ${fullKey}`);
         return null;
       }
 
+      this.cacheHits += 1;
       logger.debug(`Cache hit for key: ${fullKey}`);
       return JSON.parse(cached) as T;
     } catch (error) {
@@ -186,6 +190,8 @@ export class CacheService {
     GEO: 'geo',
     PREDICTIONS: 'predictions',
     ALERTS: 'alerts',
+    INSIGHTS: 'insights',
+    ROUTES: 'routes',
   } as const;
 
   /**
@@ -198,4 +204,16 @@ export class CacheService {
     HOUR: 3600, // 1 hour
     DAY: 86400, // 24 hours
   } as const;
+
+  /**
+   * Runtime cache hit/miss counters for observability endpoint
+   */
+  static getRuntimeStats(): { hits: number; misses: number; hitRate: number } {
+    const total = this.cacheHits + this.cacheMisses;
+    return {
+      hits: this.cacheHits,
+      misses: this.cacheMisses,
+      hitRate: total === 0 ? 0 : Number(((this.cacheHits / total) * 100).toFixed(2)),
+    };
+  }
 }

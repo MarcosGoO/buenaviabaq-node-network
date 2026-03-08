@@ -36,13 +36,16 @@ export class RoutingController {
       }
 
       // Generate cache key based on coordinates
-      const cacheKey = `routes:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
+      const cacheKey = `${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
+      const cacheTTL = 600;
 
       // Calculate routes (used to type the cache hit as well)
       type RouteList = Awaited<ReturnType<typeof RoutingService.calculateRoutes>>;
 
-      const cached = await CacheService.get<RouteList>(cacheKey, 'routes');
+      const cached = await CacheService.get<RouteList>(cacheKey, CacheService.Namespaces.ROUTES);
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.info('Routes retrieved from cache');
         const response: ApiResponse<RouteList> = {
           status: 'success',
@@ -65,7 +68,9 @@ export class RoutingController {
       }
 
       // Cache for 10 minutes (routes can change with traffic)
-      await CacheService.set(cacheKey, routes, 600, 'routes');
+      await CacheService.set(cacheKey, routes, cacheTTL, CacheService.Namespaces.ROUTES);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       const response: ApiResponse<typeof routes> = {
         status: 'success',
@@ -108,12 +113,15 @@ export class RoutingController {
       }
 
       // Generate cache key
-      const cacheKey = `route:optimal:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
+      const cacheKey = `optimal:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
+      const cacheTTL = 600;
 
       // Check cache
       type OptimalRoute = Awaited<ReturnType<typeof RoutingService.getOptimalRoute>>;
-      const cached = await CacheService.get<OptimalRoute>(cacheKey, 'routes');
+      const cached = await CacheService.get<OptimalRoute>(cacheKey, CacheService.Namespaces.ROUTES);
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.info('Optimal route retrieved from cache');
         const response: ApiResponse<OptimalRoute> = {
           status: 'success',
@@ -136,7 +144,9 @@ export class RoutingController {
       }
 
       // Cache for 10 minutes
-      await CacheService.set(cacheKey, route, 600, 'routes');
+      await CacheService.set(cacheKey, route, cacheTTL, CacheService.Namespaces.ROUTES);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       const response: ApiResponse<typeof route> = {
         status: 'success',
@@ -201,7 +211,7 @@ export class RoutingController {
    */
   static async clearCache(req: Request, res: Response, next: NextFunction) {
     try {
-      await CacheService.invalidateNamespace('routes');
+      await CacheService.invalidateNamespace(CacheService.Namespaces.ROUTES);
 
       const response: ApiResponse<{ cleared: boolean }> = {
         status: 'success',

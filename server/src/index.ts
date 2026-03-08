@@ -3,16 +3,24 @@ import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
-import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { config } from '@/config/index.js';
 import { logger } from '@/utils/logger.js';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler.js';
 import { testConnection } from '@/db/index.js';
-import { RedisStore } from 'rate-limit-redis';
-import { RedisClient, redis } from '@/lib/redis.js';
+import { RedisClient } from '@/lib/redis.js';
 import { SocketService } from '@/lib/socket.js';
 import { swaggerSpec } from '@/swagger.js';
+import { cacheHeaders } from '@/middleware/cacheHeaders.js';
+import { requestMetricsMiddleware } from '@/middleware/requestMetrics.js';
+import {
+  alertsLimiter,
+  geoWeatherLimiter,
+  globalApiLimiter,
+  insightsLimiter,
+  metricsLimiter,
+  routingLimiter,
+} from '@/middleware/rateLimiter.js';
 import geoRoutes from '@/routes/geoRoutes.js';
 import weatherRoutes from '@/routes/weatherRoutes.js';
 import trafficRoutes from '@/routes/trafficRoutes.js';
@@ -23,6 +31,8 @@ import predictionsRoutes from '@/routes/predictionsRoutes.js';
 import alertsRoutes from '@/routes/alertsRoutes.js';
 import insightsRoutes from '@/routes/insightsRoutes.js';
 import routingRoutes from '@/routes/routingRoutes.js';
+import metricsRoutes from '@/routes/metricsRoutes.js';
+import { CacheWarmupService } from '@/services/cacheWarmupService.js';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -34,44 +44,7 @@ app.use(cors({
   credentials: true,
 }));
 
-// Rate limiting - more permissive in development for hot-reload
-const limiter = rateLimit({
-  windowMs: config.RATE_LIMIT_WINDOW_MS,
-  max: config.NODE_ENV === 'development' ? 500 : config.RATE_LIMIT_MAX_REQUESTS, // 500 in dev, 100 in prod
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: new RedisStore({
-    // @ts-expect-error - ioredis and rate-limit-redis type mismatch
-    sendCommand: (...args: string[]) => redis.call(...args),
-  }),
-});
-app.use(`/api/${config.API_VERSION}`, limiter);
-
-// Granular limiters
-const routingLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30, // 30 req/min
-  message: 'Too many routing requests, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: new RedisStore({
-    // @ts-expect-error - ioredis and rate-limit-redis type mismatch
-    sendCommand: (...args: string[]) => redis.call(...args),
-  }),
-});
-
-const analyticsLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 60, // 60 req/min
-  message: 'Too many analytics requests, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: new RedisStore({
-    // @ts-expect-error - ioredis and rate-limit-redis type mismatch
-    sendCommand: (...args: string[]) => redis.call(...args),
-  }),
-});
+app.use(`/api/${config.API_VERSION}`, globalApiLimiter);
 
 // Body parsing & compression
 app.use(express.json({ limit: '10mb' }));
@@ -79,6 +52,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression({
   threshold: 1024, // 1kb explicit threshold
 }));
+app.use(requestMetricsMiddleware);
+app.use(cacheHeaders);
 
 // Request logging
 app.use((req, res, next) => {
@@ -128,16 +103,17 @@ app.get('/api/docs.json', (_req, res) => {
 });
 
 // API Routes
-app.use(`/api/${config.API_VERSION}/geo`, geoRoutes);
-app.use(`/api/${config.API_VERSION}/weather`, weatherRoutes);
+app.use(`/api/${config.API_VERSION}/geo`, geoWeatherLimiter, geoRoutes);
+app.use(`/api/${config.API_VERSION}/weather`, geoWeatherLimiter, weatherRoutes);
 app.use(`/api/${config.API_VERSION}/traffic`, trafficRoutes);
 app.use(`/api/${config.API_VERSION}/events`, eventsRoutes);
-app.use(`/api/${config.API_VERSION}/analytics`, analyticsLimiter, analyticsRoutes);
+app.use(`/api/${config.API_VERSION}/analytics`, insightsLimiter, analyticsRoutes);
 app.use(`/api/${config.API_VERSION}/ml`, mlRoutes);
 app.use(`/api/${config.API_VERSION}/predictions`, predictionsRoutes);
-app.use(`/api/${config.API_VERSION}/alerts`, alertsRoutes);
-app.use(`/api/${config.API_VERSION}/insights`, insightsRoutes);
+app.use(`/api/${config.API_VERSION}/alerts`, alertsLimiter, alertsRoutes);
+app.use(`/api/${config.API_VERSION}/insights`, insightsLimiter, insightsRoutes);
 app.use(`/api/${config.API_VERSION}/routes`, routingLimiter, routingRoutes);
+app.use(`/api/${config.API_VERSION}/metrics`, metricsLimiter, metricsRoutes);
 
 // Error handling
 app.use(notFoundHandler);
@@ -176,6 +152,9 @@ httpServer.listen(PORT, async () => {
 
   // Start background jobs after server is running
   await startBackgroundJobs();
+
+  // Warm frequently used cached endpoint
+  void CacheWarmupService.warmInsightsSummaryCache();
 });
 
 // Graceful shutdown

@@ -17,11 +17,17 @@ export class InsightsController {
    */
   static async getExecutiveSummary(req: Request, res: Response, next: NextFunction) {
     try {
-      const cacheKey = 'insights:executive-summary';
+      const cacheKey = 'executive-summary';
+      const cacheTTL = 300;
 
       // Try to get from cache first
-      const cached = await CacheService.get<ExecutiveSummary>(cacheKey);
+      const cached = await CacheService.get<ExecutiveSummary>(
+        cacheKey,
+        CacheService.Namespaces.INSIGHTS
+      );
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.info('Executive summary retrieved from cache');
         const response: ApiResponse<ExecutiveSummary> = {
           status: 'success',
@@ -36,7 +42,9 @@ export class InsightsController {
       const summary = await InsightsService.getExecutiveSummary();
 
       // Cache for 5 minutes (300 seconds)
-      await CacheService.set(cacheKey, summary, 300, 'insights');
+      await CacheService.set(cacheKey, summary, cacheTTL, CacheService.Namespaces.INSIGHTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       const response: ApiResponse<typeof summary> = {
         status: 'success',
@@ -75,12 +83,18 @@ export class InsightsController {
       }
 
       const cacheKey = zoneId
-        ? `insights:zone:${zoneId}`
-        : 'insights:zones:all';
+        ? `zone:${zoneId}`
+        : 'zones:all';
+      const cacheTTL = 300;
 
       // Try to get from cache first
-      const cached = await CacheService.get<ZoneInsights[]>(cacheKey);
+      const cached = await CacheService.get<ZoneInsights[]>(
+        cacheKey,
+        CacheService.Namespaces.INSIGHTS
+      );
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.info(`Zone insights retrieved from cache (zone_id: ${zoneId || 'all'})`);
         const response: ApiResponse<ZoneInsights[]> = {
           status: 'success',
@@ -95,7 +109,9 @@ export class InsightsController {
       const insights = await InsightsService.getZoneInsights(zoneId);
 
       // Cache for 5 minutes
-      await CacheService.set(cacheKey, insights, 300, 'insights');
+      await CacheService.set(cacheKey, insights, cacheTTL, CacheService.Namespaces.INSIGHTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       const response: ApiResponse<typeof insights> = {
         status: 'success',
@@ -128,11 +144,17 @@ export class InsightsController {
         });
       }
 
-      const cacheKey = `insights:comparative:days-${days}`;
+      const cacheKey = `comparative:days-${days}`;
+      const cacheTTL = 600;
 
       // Try to get from cache first
-      const cached = await CacheService.get<ComparativeMetrics[]>(cacheKey);
+      const cached = await CacheService.get<ComparativeMetrics[]>(
+        cacheKey,
+        CacheService.Namespaces.INSIGHTS
+      );
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.info(`Comparative metrics retrieved from cache (days: ${days})`);
         const response: ApiResponse<ComparativeMetrics[]> = {
           status: 'success',
@@ -147,7 +169,9 @@ export class InsightsController {
       const metrics = await InsightsService.getComparativeMetrics(days);
 
       // Cache for 10 minutes (600 seconds)
-      await CacheService.set(cacheKey, metrics, 600, 'insights');
+      await CacheService.set(cacheKey, metrics, cacheTTL, CacheService.Namespaces.INSIGHTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       const response: ApiResponse<typeof metrics> = {
         status: 'success',
@@ -170,7 +194,7 @@ export class InsightsController {
    */
   static async clearCache(req: Request, res: Response, next: NextFunction) {
     try {
-      await CacheService.invalidateNamespace('insights');
+      await CacheService.invalidateNamespace(CacheService.Namespaces.INSIGHTS);
 
       const response: ApiResponse<{ cleared: boolean }> = {
         status: 'success',

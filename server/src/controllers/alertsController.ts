@@ -11,9 +11,12 @@ export class AlertsController {
   static async getActiveAlerts(req: Request, res: Response) {
     try {
       const cacheKey = 'alerts:active';
+      const cacheTTL = 120;
       const cached = await CacheService.get<unknown>(cacheKey, CacheService.Namespaces.ALERTS);
 
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.debug('Returning cached active alerts');
         return res.json(cached);
       }
@@ -29,7 +32,9 @@ export class AlertsController {
       };
 
       // Cache for 2 minutes (alerts are time-sensitive)
-      await CacheService.set(cacheKey, response, 120, CacheService.Namespaces.ALERTS);
+      await CacheService.set(cacheKey, response, cacheTTL, CacheService.Namespaces.ALERTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       res.json(response);
     } catch (error) {
@@ -58,9 +63,12 @@ export class AlertsController {
       }
 
       const cacheKey = `alerts:severity:${severity}`;
+      const cacheTTL = 120;
       const cached = await CacheService.get<unknown>(cacheKey, CacheService.Namespaces.ALERTS);
 
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.debug(`Returning cached alerts for severity: ${severity}`);
         return res.json(cached);
       }
@@ -80,7 +88,9 @@ export class AlertsController {
         alerts: filteredAlerts,
       };
 
-      await CacheService.set(cacheKey, response, 120, CacheService.Namespaces.ALERTS);
+      await CacheService.set(cacheKey, response, cacheTTL, CacheService.Namespaces.ALERTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       res.json(response);
     } catch (error) {
@@ -109,9 +119,12 @@ export class AlertsController {
       }
 
       const cacheKey = `alerts:type:${type}`;
+      const cacheTTL = 120;
       const cached = await CacheService.get<unknown>(cacheKey, CacheService.Namespaces.ALERTS);
 
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.debug(`Returning cached alerts for type: ${type}`);
         return res.json(cached);
       }
@@ -128,7 +141,9 @@ export class AlertsController {
         alerts: filteredAlerts,
       };
 
-      await CacheService.set(cacheKey, response, 120, CacheService.Namespaces.ALERTS);
+      await CacheService.set(cacheKey, response, cacheTTL, CacheService.Namespaces.ALERTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       res.json(response);
     } catch (error) {
@@ -147,9 +162,12 @@ export class AlertsController {
   static async getCriticalAlerts(req: Request, res: Response) {
     try {
       const cacheKey = 'alerts:critical';
+      const cacheTTL = 60;
       const cached = await CacheService.get<unknown>(cacheKey, CacheService.Namespaces.ALERTS);
 
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.debug('Returning cached critical alerts');
         return res.json(cached);
       }
@@ -165,7 +183,9 @@ export class AlertsController {
         alerts: criticalAlerts,
       };
 
-      await CacheService.set(cacheKey, response, 60, CacheService.Namespaces.ALERTS);
+      await CacheService.set(cacheKey, response, cacheTTL, CacheService.Namespaces.ALERTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       res.json(response);
     } catch (error) {
@@ -184,9 +204,12 @@ export class AlertsController {
   static async getAlertsSummary(req: Request, res: Response) {
     try {
       const cacheKey = 'alerts:summary';
+      const cacheTTL = 120;
       const cached = await CacheService.get<unknown>(cacheKey, CacheService.Namespaces.ALERTS);
 
       if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
         logger.debug('Returning cached alerts summary');
         return res.json(cached);
       }
@@ -216,7 +239,9 @@ export class AlertsController {
         summary,
       };
 
-      await CacheService.set(cacheKey, response, 120, CacheService.Namespaces.ALERTS);
+      await CacheService.set(cacheKey, response, cacheTTL, CacheService.Namespaces.ALERTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
 
       res.json(response);
     } catch (error) {

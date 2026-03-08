@@ -27,8 +27,11 @@ No authentication required for this portfolio API. Rate limits apply.
 ### Rate Limits
 | Namespace | Limit |
 |-----------|-------|
-| Analytics | 60 req/min |
+| Insights/Analytics | 60 req/min |
 | Routing | 30 req/min |
+| Alerts | 120 req/min |
+| Geo/Weather | 300 req/min |
+| Metrics | 60 req/min |
 | General | 100 req/min (prod) |
     `.trim(),
     contact: {
@@ -60,6 +63,7 @@ No authentication required for this portfolio API. Rate limits apply.
     { name: 'Alerts', description: 'Active traffic and risk alerts' },
     { name: 'Predictions', description: 'ML-powered traffic speed predictions' },
     { name: 'Routes', description: 'Optimal route calculation' },
+    { name: 'Metrics', description: 'Runtime observability metrics' },
     { name: 'ML', description: 'ML model management: features, retraining, versioning' },
   ],
   components: {
@@ -360,6 +364,58 @@ No authentication required for this portfolio API. Rate limits apply.
     // ──────────────────────────────
     // GEO
     // ──────────────────────────────
+    '/api/v1/metrics': {
+      get: {
+        tags: ['Metrics'],
+        summary: 'Runtime metrics',
+        description: 'Returns uptime, memory, request throughput, cache hit ratio, and DB pool usage.',
+        responses: {
+          200: {
+            description: 'Metrics response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    uptime_seconds: { type: 'number' },
+                    memory_mb: {
+                      type: 'object',
+                      properties: {
+                        used: { type: 'number' },
+                        total: { type: 'number' },
+                      },
+                    },
+                    requests: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'number' },
+                        per_minute: { type: 'number' },
+                      },
+                    },
+                    cache: {
+                      type: 'object',
+                      properties: {
+                        hits: { type: 'number' },
+                        misses: { type: 'number' },
+                        hit_rate: { type: 'number' },
+                      },
+                    },
+                    db: {
+                      type: 'object',
+                      properties: {
+                        pool_size: { type: 'number' },
+                        active_connections: { type: 'number' },
+                      },
+                    },
+                    timestamp: { type: 'string', format: 'date-time' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     '/api/v1/geo/zones': {
       get: {
         tags: ['Geo'],

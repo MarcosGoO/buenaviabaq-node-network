@@ -7,6 +7,7 @@ import { AlertService } from '@/services/alertService.js';
 import { SocketService } from '@/lib/socket.js';
 import { CacheService } from '@/services/cacheService.js';
 import { MLPredictionService } from '@/services/mlPredictionService.js';
+import { CacheInvalidationService } from '@/services/cacheInvalidationService.js';
 import { JobTypes, type JobType } from '../queues.js';
 
 const connection = {
@@ -37,8 +38,8 @@ async function processTrafficCollection(): Promise<JobResult> {
     // Store traffic snapshot in database
     await TrafficHistoryService.storeTrafficSnapshot();
 
-    // Invalidate traffic cache to force fresh data
-    await CacheService.invalidateNamespace(CacheService.Namespaces.TRAFFIC);
+    // Traffic changes impact routing scores and recommendations
+    await CacheInvalidationService.invalidateTrafficRelatedCaches();
 
     logger.info('Traffic data collection completed successfully');
 
