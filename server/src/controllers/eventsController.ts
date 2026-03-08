@@ -4,6 +4,16 @@ import { logger } from '@/utils/logger';
 import type { ApiResponse } from '@/types';
 
 export class EventsController {
+  private static isFiniteNumber(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value);
+  }
+
+  private static parseDate(value: string | undefined): Date | null {
+    if (!value) return null;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
   // GET /api/v1/events
   static async getAllEvents(req: Request, res: Response, next: NextFunction) {
     try {
@@ -55,10 +65,18 @@ export class EventsController {
       const longitude = parseFloat(req.query.lng as string);
       const radius = req.query.radius ? parseInt(req.query.radius as string, 10) : 5000;
 
-      if (isNaN(latitude) || isNaN(longitude)) {
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid latitude or longitude',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      if (!Number.isFinite(radius) || radius <= 0 || radius > 50000) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid radius. Must be between 1 and 50000 meters',
           timestamp: new Date().toISOString(),
         });
       }
@@ -156,14 +174,24 @@ export class EventsController {
 
       // Coordinate range validation (Barranquilla bounds)
       if (
-        typeof eventData.latitude !== 'number' ||
-        typeof eventData.longitude !== 'number' ||
+        !EventsController.isFiniteNumber(eventData.latitude) ||
+        !EventsController.isFiniteNumber(eventData.longitude) ||
         eventData.latitude < 10.9 || eventData.latitude > 11.1 ||
         eventData.longitude < -74.9 || eventData.longitude > -74.7
       ) {
         return res.status(400).json({
           status: 'error',
           message: 'Coordinates out of valid range for Barranquilla',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const startDate = EventsController.parseDate(eventData.start_time);
+      const endDate = EventsController.parseDate(eventData.end_time);
+      if (!startDate || !endDate || endDate <= startDate) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid dates. end_time must be later than start_time',
           timestamp: new Date().toISOString(),
         });
       }
@@ -197,6 +225,38 @@ export class EventsController {
       }
 
       const eventData: UpdateEventDTO = req.body;
+
+      if (eventData.latitude !== undefined || eventData.longitude !== undefined) {
+        if (!EventsController.isFiniteNumber(eventData.latitude) || !EventsController.isFiniteNumber(eventData.longitude)) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Both latitude and longitude must be finite numbers when provided',
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+
+      if (eventData.start_time !== undefined || eventData.end_time !== undefined) {
+        const startDate = EventsController.parseDate(eventData.start_time);
+        const endDate = EventsController.parseDate(eventData.end_time);
+
+        if ((eventData.start_time && !startDate) || (eventData.end_time && !endDate)) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Invalid date format in start_time or end_time',
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        if (startDate && endDate && endDate <= startDate) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Invalid dates. end_time must be later than start_time',
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+
       const event = await EventsService.updateEvent(id, eventData);
 
       if (!event) {

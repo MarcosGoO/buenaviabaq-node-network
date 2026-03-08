@@ -12,6 +12,12 @@ export class AnalyticsController {
     return parsed;
   }
 
+  private static parseIsoDate(value: string | undefined): Date | null {
+    if (!value) return null;
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
   // GET /api/v1/analytics/traffic-patterns?road_id=1&days=30
   static async getTrafficPatterns(req: Request, res: Response, next: NextFunction) {
     try {
@@ -206,6 +212,26 @@ export class AnalyticsController {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid road ID',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const startDate = AnalyticsController.parseIsoDate(startTime);
+      const endDate = AnalyticsController.parseIsoDate(endTime);
+      if (!startDate || !endDate || endDate <= startDate) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid time range. start and end must be valid dates and end > start',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const rangeMs = endDate.getTime() - startDate.getTime();
+      const maxRangeMs = 90 * 24 * 60 * 60 * 1000;
+      if (rangeMs > maxRangeMs) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid time range. Maximum allowed window is 90 days',
           timestamp: new Date().toISOString(),
         });
       }

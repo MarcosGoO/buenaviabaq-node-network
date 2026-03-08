@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { EventsController } from '@/controllers/eventsController';
+import { requireAdminAuth } from '@/middleware/adminAuth.js';
 
 const router = Router();
 
@@ -16,12 +17,12 @@ router.get('/near', EventsController.getEventsNearLocation);
 router.get('/:id', EventsController.getEventById);
 
 // Create new event
-router.post('/', EventsController.createEvent);
+router.post('/', requireAdminAuth, EventsController.createEvent);
 
 // Update event
-router.put('/:id', EventsController.updateEvent);
+router.put('/:id', requireAdminAuth, EventsController.updateEvent);
 
 // Delete event
-router.delete('/:id', EventsController.deleteEvent);
+router.delete('/:id', requireAdminAuth, EventsController.deleteEvent);
 
 export default router;

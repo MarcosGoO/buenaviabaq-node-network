@@ -127,15 +127,21 @@ export class CacheService {
   static async invalidateNamespace(namespace: string): Promise<number> {
     try {
       const pattern = `${namespace}${this.NAMESPACE_SEPARATOR}*`;
-      const keys = await redis.keys(pattern);
+      let cursor = '0';
+      let deleted = 0;
 
-      if (keys.length === 0) {
-        return 0;
-      }
+      do {
+        const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 500);
+        cursor = nextCursor;
 
-      const result = await redis.del(...keys);
-      logger.info(`Invalidated ${result} keys in namespace: ${namespace}`);
-      return result;
+        if (keys.length > 0) {
+          // UNLINK avoids blocking Redis main thread on large deletes
+          deleted += await redis.unlink(...keys);
+        }
+      } while (cursor !== '0');
+
+      logger.info(`Invalidated ${deleted} keys in namespace: ${namespace}`);
+      return deleted;
     } catch (error) {
       logger.error(`Cache invalidate namespace error for ${namespace}:`, error);
       return 0;

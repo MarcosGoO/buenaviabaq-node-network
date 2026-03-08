@@ -62,6 +62,11 @@ export class TrafficHistoryService {
         isRushHour,
       ]);
 
+      if (values.length === 0) {
+        logger.warn('No traffic roads available to store snapshot');
+        return;
+      }
+
       const query = `
         INSERT INTO traffic_history (
           time, road_id, road_name, zone_id, congestion_level,

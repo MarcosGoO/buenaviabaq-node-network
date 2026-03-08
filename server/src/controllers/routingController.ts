@@ -9,6 +9,17 @@ import type { ApiResponse } from '@/types';
  * Handles endpoints for intelligent routing
  */
 export class RoutingController {
+  private static isValidCoordinate(value: unknown): value is number {
+    return typeof value === 'number' && Number.isFinite(value);
+  }
+
+  private static hasValidCoordinates(routeRequest: RouteRequest): boolean {
+    return RoutingController.isValidCoordinate(routeRequest.origin?.lat) &&
+      RoutingController.isValidCoordinate(routeRequest.origin?.lng) &&
+      RoutingController.isValidCoordinate(routeRequest.destination?.lat) &&
+      RoutingController.isValidCoordinate(routeRequest.destination?.lng);
+  }
+
   /**
    * POST /api/v1/routes/calculate
    * Calculate multiple route alternatives
@@ -26,8 +37,7 @@ export class RoutingController {
         });
       }
 
-      if (!routeRequest.origin.lat || !routeRequest.origin.lng ||
-        !routeRequest.destination.lat || !routeRequest.destination.lng) {
+      if (!RoutingController.hasValidCoordinates(routeRequest)) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid coordinates. lat and lng are required for origin and destination',
@@ -103,8 +113,7 @@ export class RoutingController {
         });
       }
 
-      if (!routeRequest.origin.lat || !routeRequest.origin.lng ||
-        !routeRequest.destination.lat || !routeRequest.destination.lng) {
+      if (!RoutingController.hasValidCoordinates(routeRequest)) {
         return res.status(400).json({
           status: 'error',
           message: 'Invalid coordinates. lat and lng are required for origin and destination',

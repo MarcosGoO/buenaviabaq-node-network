@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 import { logger } from '@/utils/logger.js';
 import { config } from '@/config/index.js';
 
@@ -24,8 +25,23 @@ export function requireAdminAuth(req: Request, res: Response, next: NextFunction
   }
 
   const provided = req.headers['x-admin-key'];
+  const providedValue = Array.isArray(provided) ? provided[0] : provided;
 
-  if (!provided || provided !== adminKey) {
+  if (!providedValue) {
+    logger.warn(`Rejected unauthorized admin request from ${req.ip} to ${req.path}`);
+    return res.status(401).json({
+      status: 'error',
+      message: 'Unauthorized: valid x-admin-key header required',
+    });
+  }
+
+  const expectedBuffer = Buffer.from(adminKey);
+  const providedBuffer = Buffer.from(providedValue);
+  const isValid =
+    expectedBuffer.length === providedBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+
+  if (!isValid) {
     logger.warn(`Rejected unauthorized admin request from ${req.ip} to ${req.path}`);
     return res.status(401).json({
       status: 'error',
