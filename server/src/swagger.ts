@@ -687,6 +687,33 @@ No authentication required for this portfolio API. Rate limits apply.
         },
       },
     },
+    '/api/v1/insights/departure-advice': {
+      get: {
+        tags: ['Insights'],
+        summary: 'Best departure window advice',
+        description: 'Recommends the best departure window based on traffic history, weather forecast, and active alerts.',
+        parameters: [
+          {
+            in: 'query',
+            name: 'hours',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 12, default: 3 },
+            description: 'How many hours ahead to analyze.',
+          },
+          {
+            in: 'query',
+            name: 'interval',
+            required: false,
+            schema: { type: 'integer', enum: [15, 30, 60], default: 30 },
+            description: 'Window granularity in minutes.',
+          },
+        ],
+        responses: {
+          200: { description: 'Departure advice', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiResponse' } } } },
+          400: { $ref: '#/components/responses/BadRequest' },
+        },
+      },
+    },
     '/api/v1/insights/clear-cache': {
       post: {
         tags: ['Insights'],

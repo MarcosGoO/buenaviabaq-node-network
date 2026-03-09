@@ -114,12 +114,171 @@ export interface ComparativeMetrics {
   is_favorable: boolean;
 }
 
+export interface DepartureWindowAdvice {
+  departure_time: string;
+  expected_avg_speed_kmh: number;
+  expected_travel_time_minutes: number;
+  congestion_risk: 'low' | 'moderate' | 'high';
+  rain_probability: number;
+  risk_score: number; // 0-100
+  recommendation: string;
+}
+
+export interface DepartureAdvice {
+  generated_at: string;
+  parameters: {
+    hours_ahead: number;
+    interval_minutes: number;
+  };
+  best_departure: DepartureWindowAdvice;
+  windows: DepartureWindowAdvice[];
+  context: {
+    active_alerts: number;
+    critical_alerts: number;
+    rain_now_probability: number;
+  };
+}
+
 /**
  * InsightsService
  * Provides high-level aggregated insights for dashboard analytics
  * Dashboard Analytics
  */
 export class InsightsService {
+  private static buildCongestionRisk(avgSpeed: number): 'low' | 'moderate' | 'high' {
+    if (avgSpeed >= 35) return 'low';
+    if (avgSpeed >= 22) return 'moderate';
+    return 'high';
+  }
+
+  private static buildRecommendation(
+    riskScore: number,
+    rainProbability: number,
+    congestionRisk: 'low' | 'moderate' | 'high'
+  ): string {
+    if (riskScore >= 75) {
+      return 'Riesgo alto: considera retrasar el viaje o tomar ruta alternativa.';
+    }
+
+    if (rainProbability >= 65) {
+      return 'Lluvia probable: conduce con precaucion y considera salir con margen adicional.';
+    }
+
+    if (congestionRisk === 'high') {
+      return 'Congestion alta estimada: recomendable adelantar salida o usar rutas secundarias.';
+    }
+
+    if (riskScore <= 35) {
+      return 'Ventana favorable para salir.';
+    }
+
+    return 'Condiciones moderadas: planifica con tiempo de holgura.';
+  }
+
+  /**
+   * Recommend the best departure window for the next N hours.
+   */
+  static async getDepartureAdvice(
+    hoursAhead: number = 3,
+    intervalMinutes: number = 30
+  ): Promise<DepartureAdvice> {
+    try {
+      const now = new Date();
+      const end = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);
+      const currentDow = now.getDay();
+
+      const hourlyQuery = `
+        SELECT
+          EXTRACT(HOUR FROM time)::int as hour_of_day,
+          ROUND(AVG(speed_kmh))::int as avg_speed,
+          ROUND(AVG(travel_time_minutes))::int as avg_travel_time
+        FROM traffic_history
+        WHERE time >= NOW() - INTERVAL '30 days'
+          AND EXTRACT(DOW FROM time) = $1
+        GROUP BY EXTRACT(HOUR FROM time)
+      `;
+
+      const [hourlyResult, currentWeather, forecastData, allAlerts] = await Promise.all([
+        pool.query(hourlyQuery, [currentDow]),
+        WeatherService.getCurrentWeather(),
+        WeatherService.getForecast(),
+        AlertService.detectActiveAlerts(),
+      ]);
+
+      const activeAlerts = AlertService.getActiveAlerts(allAlerts);
+      const criticalAlerts = activeAlerts.filter((a) => a.severity === 'critical').length;
+      const highAlerts = activeAlerts.filter((a) => a.severity === 'high').length;
+
+      const hourlyMap = new Map<number, { avg_speed: number; avg_travel_time: number }>();
+      for (const row of hourlyResult.rows) {
+        hourlyMap.set(Number(row.hour_of_day), {
+          avg_speed: Number(row.avg_speed) || 30,
+          avg_travel_time: Number(row.avg_travel_time) || 20,
+        });
+      }
+
+      const windows: DepartureWindowAdvice[] = [];
+
+      for (
+        let slot = new Date(now);
+        slot <= end;
+        slot = new Date(slot.getTime() + intervalMinutes * 60 * 1000)
+      ) {
+        const slotHour = slot.getHours();
+        const traffic = hourlyMap.get(slotHour) || { avg_speed: 30, avg_travel_time: 20 };
+
+        const forecastForSlot = forecastData?.forecast?.find((f) => {
+          const diff = Math.abs(new Date(f.timestamp).getTime() - slot.getTime());
+          return diff <= 90 * 60 * 1000; // nearest forecast bucket (~3h), allow 90 min
+        });
+
+        const rainProbability = forecastForSlot
+          ? forecastForSlot.rain_probability
+          : currentWeather.rain_probability;
+
+        const congestionRisk = this.buildCongestionRisk(traffic.avg_speed);
+        const congestionScore = congestionRisk === 'high' ? 45 : congestionRisk === 'moderate' ? 28 : 12;
+        const rainScore = Math.round((Math.min(rainProbability, 100) / 100) * 35);
+        const alertsScore = Math.min((criticalAlerts * 12) + (highAlerts * 6), 20);
+
+        const riskScore = Math.min(congestionScore + rainScore + alertsScore, 100);
+        const recommendation = this.buildRecommendation(riskScore, rainProbability, congestionRisk);
+
+        windows.push({
+          departure_time: slot.toISOString(),
+          expected_avg_speed_kmh: traffic.avg_speed,
+          expected_travel_time_minutes: traffic.avg_travel_time,
+          congestion_risk: congestionRisk,
+          rain_probability: rainProbability,
+          risk_score: riskScore,
+          recommendation,
+        });
+      }
+
+      const bestDeparture = windows.reduce((best, current) =>
+        current.risk_score < best.risk_score ? current : best
+      );
+
+      return {
+        generated_at: new Date().toISOString(),
+        parameters: {
+          hours_ahead: hoursAhead,
+          interval_minutes: intervalMinutes,
+        },
+        best_departure: bestDeparture,
+        windows,
+        context: {
+          active_alerts: activeAlerts.length,
+          critical_alerts: criticalAlerts,
+          rain_now_probability: currentWeather.rain_probability,
+        },
+      };
+    } catch (error) {
+      logger.error('Error generating departure advice:', error);
+      throw error;
+    }
+  }
+
   /**
    * Get comprehensive executive summary for dashboard
    * Aggregates data from multiple services

@@ -1,5 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { InsightsService, ExecutiveSummary, ZoneInsights, ComparativeMetrics } from '@/services/insightsService.js';
+import {
+  InsightsService,
+  ExecutiveSummary,
+  ZoneInsights,
+  ComparativeMetrics,
+  DepartureAdvice,
+} from '@/services/insightsService.js';
 import { CacheService } from '@/services/cacheService.js';
 import { logger } from '@/utils/logger.js';
 import type { ApiResponse } from '@/types';
@@ -206,6 +212,69 @@ export class InsightsController {
       res.json(response);
     } catch (error) {
       logger.error('Error clearing insights cache:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/insights/departure-advice?hours=3&interval=30
+   * Recommend best departure window based on traffic/weather/alerts
+   * Cached for 2 minutes
+   */
+  static async getDepartureAdvice(req: Request, res: Response, next: NextFunction) {
+    try {
+      const hours = req.query.hours ? parseInt(req.query.hours as string, 10) : 3;
+      const interval = req.query.interval ? parseInt(req.query.interval as string, 10) : 30;
+
+      if (isNaN(hours) || hours < 1 || hours > 12) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid hours parameter. Must be between 1 and 12',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      if (isNaN(interval) || ![15, 30, 60].includes(interval)) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid interval parameter. Must be one of: 15, 30, 60',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const cacheTTL = 120;
+      const cacheKey = `departure-advice:h${hours}:i${interval}`;
+      const cached = await CacheService.get<DepartureAdvice>(
+        cacheKey,
+        CacheService.Namespaces.INSIGHTS
+      );
+
+      if (cached) {
+        res.locals.cacheHit = true;
+        res.locals.cacheTTL = cacheTTL;
+        const response: ApiResponse<DepartureAdvice> = {
+          status: 'success',
+          data: cached,
+          timestamp: new Date().toISOString(),
+          cached: true,
+        };
+        return res.json(response);
+      }
+
+      const advice = await InsightsService.getDepartureAdvice(hours, interval);
+      await CacheService.set(cacheKey, advice, cacheTTL, CacheService.Namespaces.INSIGHTS);
+      res.locals.cacheHit = false;
+      res.locals.cacheTTL = cacheTTL;
+
+      const response: ApiResponse<DepartureAdvice> = {
+        status: 'success',
+        data: advice,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.json(response);
+    } catch (error) {
+      logger.error('Error generating departure advice:', error);
       next(error);
     }
   }
