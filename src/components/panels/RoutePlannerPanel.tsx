@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useRouting, type Route as CalcRoute, type RouteCoord } from "@/hooks/useRouting"
 import { useDepartureAdvice } from "@/hooks/useDepartureAdvice"
+import { useDeparturePlan } from "@/hooks/useDeparturePlan"
 
 // ─── Barranquilla landmark presets ────────────────────────────────────────────
 const PRESETS: { label: string; coord: RouteCoord }[] = [
@@ -244,6 +245,7 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
 
   const { routes, selectedRoute, isLoading, error, calculateRoutes, selectRoute, clearRoutes } = useRouting()
   const { advice, loading: adviceLoading } = useDepartureAdvice(4, 30)
+  const { plan, savePlan, clearPlan } = useDeparturePlan()
   const departureNudge = advice ? getDepartureNudge(advice.best_departure.departure_time) : null
 
   const handleCalculate = async () => {
@@ -264,6 +266,18 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
     setOrigin(null)
     setDestination(null)
     onRouteSelect?.(null)
+  }
+
+  const handleSaveDeparturePlan = () => {
+    if (!advice?.best_departure) return
+
+    savePlan({
+      departureTime: advice.best_departure.departure_time,
+      riskScore: advice.best_departure.risk_score,
+      rainProbability: advice.best_departure.rain_probability,
+      recommendation: advice.best_departure.recommendation,
+      savedAt: new Date().toISOString(),
+    })
   }
 
   const canCalculate = !!origin && !!destination && !isLoading
@@ -384,6 +398,28 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
                     <p className="text-[8px] uppercase tracking-wider text-muted-foreground">Alertas</p>
                     <p className="mt-1 text-xs font-bold">{advice.context.active_alerts}</p>
                   </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 flex-1 text-[10px] font-bold uppercase tracking-wider"
+                    onClick={handleSaveDeparturePlan}
+                  >
+                    Guardar salida
+                  </Button>
+                  {plan && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider"
+                      onClick={clearPlan}
+                    >
+                      Quitar
+                    </Button>
+                  )}
                 </div>
               </div>
             )}

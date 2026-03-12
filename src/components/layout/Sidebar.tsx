@@ -3,13 +3,14 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, Gauge, Brain, ShieldAlert } from "lucide-react"
+import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, Gauge, Brain, ShieldAlert, Clock3, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/ui/stat-card"
 import { WeatherWidget } from "@/components/widgets/WeatherWidget"
 import { useTrafficData } from "@/hooks/useTrafficData"
 import { useZonesData } from "@/hooks/useZonesData"
+import { useDeparturePlan } from "@/hooks/useDeparturePlan"
 
 type SidebarProps = React.HTMLAttributes<HTMLDivElement>;
 
@@ -18,9 +19,17 @@ export function Sidebar({ className, ...props }: SidebarProps) {
     const pathname = usePathname()
     const { summary } = useTrafficData()
     const { zones } = useZonesData()
+    const { plan, clearPlan } = useDeparturePlan()
 
     const avgSpeed = summary?.average_speed != null ? Math.round(summary.average_speed) : '--'
     const activeZones = zones.length > 0 ? zones.length : '--'
+
+    const formatPlanTime = React.useCallback((value: string) => {
+        return new Intl.DateTimeFormat("es-CO", {
+            hour: "numeric",
+            minute: "2-digit",
+        }).format(new Date(value))
+    }, [])
 
     return (
         <div
@@ -114,6 +123,52 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                                 value={activeZones}
                                 icon={MapPin}
                             />
+                        </div>
+                    )}
+                </div>
+
+                {/* Saved departure plan */}
+                <div className={cn(
+                    "transition-all duration-300",
+                    collapsed ? "opacity-0 scale-95 h-0" : "opacity-100 scale-100"
+                )}>
+                    {!collapsed && plan && (
+                        <div className="px-3">
+                            <div className="flex items-center gap-2 px-1 mb-2">
+                                <div className="h-1 w-1 bg-sky-500 rounded-full animate-pulse" />
+                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                    Planned Departure
+                                </span>
+                            </div>
+                            <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <div className="flex items-center gap-2 text-sky-700">
+                                            <Clock3 className="h-4 w-4" />
+                                            <span className="text-xs font-bold uppercase tracking-wider">Salida guardada</span>
+                                        </div>
+                                        <p className="mt-2 text-2xl font-black text-foreground">{formatPlanTime(plan.departureTime)}</p>
+                                    </div>
+                                    <button
+                                        onClick={clearPlan}
+                                        className="rounded-full p-1 text-muted-foreground hover:bg-background/70 hover:text-foreground transition-colors"
+                                        title="Quitar plan"
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="rounded-xl bg-background/80 px-3 py-2">
+                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Riesgo</p>
+                                        <p className="mt-1 text-sm font-bold">{plan.riskScore}/100</p>
+                                    </div>
+                                    <div className="rounded-xl bg-background/80 px-3 py-2">
+                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Lluvia</p>
+                                        <p className="mt-1 text-sm font-bold">{plan.rainProbability}%</p>
+                                    </div>
+                                </div>
+                                <p className="text-xs leading-relaxed text-muted-foreground">{plan.recommendation}</p>
+                            </div>
                         </div>
                     )}
                 </div>
