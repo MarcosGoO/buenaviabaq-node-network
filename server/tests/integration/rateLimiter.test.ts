@@ -41,12 +41,12 @@ async function assertRateLimit(
 describe.sequential('Rate Limiter Middleware', () => {
   beforeAll(async () => {
     process.env.NODE_ENV = 'test';
-    const module = await import('@/middleware/rateLimiter.js');
-    routingLimiter = module.routingLimiter;
-    insightsLimiter = module.insightsLimiter;
-    alertsLimiter = module.alertsLimiter;
-    geoWeatherLimiter = module.geoWeatherLimiter;
-    metricsLimiter = module.metricsLimiter;
+    const rateLimiterModule = await import('@/middleware/rateLimiter.js');
+    routingLimiter = rateLimiterModule.routingLimiter;
+    insightsLimiter = rateLimiterModule.insightsLimiter;
+    alertsLimiter = rateLimiterModule.alertsLimiter;
+    geoWeatherLimiter = rateLimiterModule.geoWeatherLimiter;
+    metricsLimiter = rateLimiterModule.metricsLimiter;
   });
 
   it('limits /routes group at 30 req/min', async () => {

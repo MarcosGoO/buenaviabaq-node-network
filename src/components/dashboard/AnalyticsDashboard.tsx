@@ -16,6 +16,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Activity, Cloud, AlertTriangle, LayoutDashboard, TrendingUp, TrendingDown, Minus, GitCompareArrows, ChevronDown } from 'lucide-react';
+import DepartureAdviceCard from '@/components/dashboard/DepartureAdviceCard';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -212,6 +213,8 @@ export default function AnalyticsDashboard() {
         <TabsContent value="summary" className="space-y-4">
           {summary ? (
             <>
+              <DepartureAdviceCard />
+
               {/* System KPIs */}
               <Card>
                 <CardHeader>
