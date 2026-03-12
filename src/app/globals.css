@@ -72,6 +72,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   }
 }
 

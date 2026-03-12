@@ -31,7 +31,6 @@ export default function RealTimeUpdates() {
   }, []);
 
   const showToast = React.useCallback((update: Update) => {
-    // Create a temporary toast element
     const toast = document.createElement('div');
     toast.className = cn(
       'fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg',
@@ -39,15 +38,27 @@ export default function RealTimeUpdates() {
       'transform transition-all duration-300',
       'animate-in slide-in-from-bottom-5'
     );
-    toast.innerHTML = `
-      <div class="flex items-center gap-3">
-        <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-        <div>
-          <p class="font-semibold text-sm">${getUpdateTypeLabel(update.type)}</p>
-          <p class="text-xs text-muted-foreground">${update.message}</p>
-        </div>
-      </div>
-    `;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex items-center gap-3';
+
+    const indicator = document.createElement('div');
+    indicator.className = 'h-2 w-2 rounded-full bg-green-500 animate-pulse';
+
+    const content = document.createElement('div');
+    const title = document.createElement('p');
+    title.className = 'font-semibold text-sm';
+    title.textContent = getUpdateTypeLabel(update.type);
+
+    const message = document.createElement('p');
+    message.className = 'text-xs text-muted-foreground';
+    message.textContent = update.message;
+
+    content.appendChild(title);
+    content.appendChild(message);
+    wrapper.appendChild(indicator);
+    wrapper.appendChild(content);
+    toast.appendChild(wrapper);
 
     document.body.appendChild(toast);
 

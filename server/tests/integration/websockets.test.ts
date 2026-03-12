@@ -1,16 +1,83 @@
-import { describe, it, expect } from 'vitest';
-import { AlertService, AlertType, AlertSeverity } from '@/services/alertService.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-/**
- * WebSocket Integration Tests
- *
- * Note: These tests require a running server and are skipped in CI/CD.
- * To run manually: Start server with `npm run dev` then run tests.
- *
- * For CI/CD, we test the core alert logic without requiring a live server.
- */
+vi.mock('@/utils/logger.js', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+
+vi.mock('@/services/weatherService.js', () => ({
+  WeatherService: {
+    getCurrentWeather: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/trafficService.js', () => ({
+  TrafficService: {
+    getRealTimeTraffic: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/geoService.js', () => ({
+  GeoService: {
+    getArroyos: vi.fn(),
+    getRoadsZones: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/eventsService.js', () => ({
+  EventsService: {
+    getUpcomingEvents: vi.fn(),
+  },
+}));
+
+import { AlertService, AlertSeverity, AlertType } from '@/services/alertService.js';
+import { WeatherService } from '@/services/weatherService.js';
+import { TrafficService } from '@/services/trafficService.js';
+import { GeoService } from '@/services/geoService.js';
+import { EventsService } from '@/services/eventsService.js';
 
 describe('Alert Service Unit Tests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(WeatherService.getCurrentWeather).mockResolvedValue({
+      condition: 'Rain',
+      rain_1h: 8,
+      rain_probability: 80,
+      weather: [{ main: 'Rain', description: 'heavy rain' }],
+    } as never);
+
+    vi.mocked(TrafficService.getRealTimeTraffic).mockResolvedValue([
+      { road_id: 1, road_name: 'Murillo', congestion_level: 'severe' },
+      { road_id: 2, road_name: 'Via 40', congestion_level: 'high' },
+      { road_id: 3, road_name: 'Circunvalar', congestion_level: 'low' },
+    ] as never);
+
+    vi.mocked(GeoService.getArroyos).mockImplementation(async (riskLevel?: string) => {
+      const all = [
+        { id: 10, name: 'Arroyo A', zone_id: 1, risk_level: 'high' },
+        { id: 11, name: 'Arroyo B', zone_id: 2, risk_level: 'medium' },
+      ];
+      return riskLevel ? all.filter((item) => item.risk_level === riskLevel) : all;
+    });
+
+    vi.mocked(GeoService.getRoadsZones).mockResolvedValue(
+      new Map<number, number[]>([
+        [1, [1, 2]],
+        [2, [2]],
+      ]) as never
+    );
+
+    vi.mocked(EventsService.getUpcomingEvents).mockResolvedValue([
+      {
+        id: 77,
+        title: 'Concierto',
+        event_type: 'music',
+        start_time: new Date().toISOString(),
+        end_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      },
+    ] as never);
+  });
+
   it('should detect active alerts and filter expired ones', async () => {
     const allAlerts = await AlertService.detectActiveAlerts();
     const activeAlerts = AlertService.getActiveAlerts(allAlerts);
@@ -18,7 +85,6 @@ describe('Alert Service Unit Tests', () => {
     expect(Array.isArray(allAlerts)).toBe(true);
     expect(Array.isArray(activeAlerts)).toBe(true);
 
-    // All active alerts should have expiration in the future
     const now = new Date();
     activeAlerts.forEach(alert => {
       expect(new Date(alert.expiresAt) > now).toBe(true);
@@ -86,8 +152,6 @@ describe('Alert Service Unit Tests', () => {
     const alerts = await AlertService.detectArroyoFloodRisk();
 
     expect(Array.isArray(alerts)).toBe(true);
-
-    // If there are alerts, they should be properly formatted
     alerts.forEach(alert => {
       expect(alert.id).toBeDefined();
       expect(alert.type).toBe(AlertType.ARROYO_FLOOD_RISK);
@@ -104,7 +168,6 @@ describe('Alert Service Unit Tests', () => {
     const alerts = await AlertService.detectSevereCongestion();
 
     expect(Array.isArray(alerts)).toBe(true);
-
     alerts.forEach(alert => {
       expect(alert.type).toBe(AlertType.SEVERE_CONGESTION);
       expect(alert.severity).toBe(AlertSeverity.HIGH);
@@ -117,7 +180,6 @@ describe('Alert Service Unit Tests', () => {
     const alerts = await AlertService.detectWeatherTrafficImpact();
 
     expect(Array.isArray(alerts)).toBe(true);
-
     alerts.forEach(alert => {
       expect(alert.type).toBe(AlertType.WEATHER_TRAFFIC_IMPACT);
       expect(alert.severity).toBe(AlertSeverity.MEDIUM);
@@ -129,7 +191,6 @@ describe('Alert Service Unit Tests', () => {
     const alerts = await AlertService.detectEventTrafficImpact();
 
     expect(Array.isArray(alerts)).toBe(true);
-
     alerts.forEach(alert => {
       expect(alert.type).toBe(AlertType.EVENT_TRAFFIC_IMPACT);
       expect(alert.metadata.eventId).toBeDefined();
@@ -141,30 +202,23 @@ describe('Alert Service Unit Tests', () => {
     const allAlerts = await AlertService.detectActiveAlerts();
 
     allAlerts.forEach(alert => {
-      // Required fields
       expect(alert.id).toBeDefined();
       expect(typeof alert.id).toBe('string');
-
       expect(alert.type).toBeDefined();
       expect(Object.values(AlertType).includes(alert.type)).toBe(true);
-
       expect(alert.severity).toBeDefined();
       expect(Object.values(AlertSeverity).includes(alert.severity)).toBe(true);
-
       expect(alert.title).toBeDefined();
       expect(typeof alert.title).toBe('string');
-
       expect(alert.description).toBeDefined();
       expect(typeof alert.description).toBe('string');
-
       expect(alert.affectedZones).toBeDefined();
       expect(Array.isArray(alert.affectedZones)).toBe(true);
-
       expect(alert.timestamp).toBeDefined();
       expect(alert.expiresAt).toBeDefined();
-
       expect(alert.metadata).toBeDefined();
       expect(typeof alert.metadata).toBe('object');
     });
   });
 });
+

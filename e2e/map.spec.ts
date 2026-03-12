@@ -30,8 +30,6 @@ test.describe('Map View', () => {
   });
 
   test('should display real-time updates panel or badge', async ({ page }) => {
-    // RealTimeUpdates component renders status text
-    const rtPanel = page.getByText(/tiempo real|en vivo|live|conectado/i).first();
     // It may not always be visible (depends on WS connection), so we just assert it doesn't crash
     await expect(page.locator('main')).toBeVisible();
     // Page should not show an error boundary
