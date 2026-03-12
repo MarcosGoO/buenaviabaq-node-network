@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useRouting, type Route as CalcRoute, type RouteCoord } from "@/hooks/useRouting"
+import { useDepartureAdvice } from "@/hooks/useDepartureAdvice"
 
 // ─── Barranquilla landmark presets ────────────────────────────────────────────
 const PRESETS: { label: string; coord: RouteCoord }[] = [
@@ -32,6 +33,40 @@ function scoreBg(score: number) {
   if (score >= 75) return "bg-emerald-500/10 border-emerald-500/30"
   if (score >= 50) return "bg-amber-500/10 border-amber-500/30"
   return "bg-red-500/10 border-red-500/30"
+}
+
+function formatClock(value: string) {
+  return new Intl.DateTimeFormat("es-CO", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value))
+}
+
+function getDepartureNudge(bestDepartureTime: string) {
+  const departureMs = new Date(bestDepartureTime).getTime()
+  const deltaMinutes = Math.round((departureMs - Date.now()) / 60000)
+
+  if (deltaMinutes <= 20) {
+    return {
+      title: "Salir ahora",
+      detail: "La ventana recomendada esta activa o muy cerca.",
+      tone: "text-emerald-700 bg-emerald-500/10 border-emerald-500/30",
+    }
+  }
+
+  if (deltaMinutes <= 50) {
+    return {
+      title: `Espera ${deltaMinutes} min`,
+      detail: "Una breve espera puede reducir riesgo de congestion y clima.",
+      tone: "text-amber-700 bg-amber-500/10 border-amber-500/30",
+    }
+  }
+
+  return {
+    title: `Salida sugerida en ${deltaMinutes} min`,
+    detail: "Conviene posponer el desplazamiento si no es urgente.",
+    tone: "text-rose-700 bg-rose-500/10 border-rose-500/30",
+  }
 }
 
 // ─── Coord input with presets ──────────────────────────────────────────────────
@@ -208,6 +243,8 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
   const [avoidCongestion, setAvoidCongestion] = React.useState(true)
 
   const { routes, selectedRoute, isLoading, error, calculateRoutes, selectRoute, clearRoutes } = useRouting()
+  const { advice, loading: adviceLoading } = useDepartureAdvice(4, 30)
+  const departureNudge = advice ? getDepartureNudge(advice.best_departure.departure_time) : null
 
   const handleCalculate = async () => {
     if (!origin || !destination) return
@@ -314,6 +351,48 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
                 Sin tráfico
               </button>
             </div>
+
+            {/* Departure recommendation */}
+            {advice && advice.best_departure && (
+              <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-700/80">
+                      Mejor ventana de salida
+                    </p>
+                    <p className="mt-1 text-lg font-black text-foreground">
+                      {formatClock(advice.best_departure.departure_time)}
+                    </p>
+                  </div>
+                  <div className={cn("rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-wider", departureNudge?.tone)}>
+                    {departureNudge?.title}
+                  </div>
+                </div>
+                <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
+                  {departureNudge?.detail}
+                </p>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="rounded-lg bg-background/80 px-2 py-2">
+                    <p className="text-[8px] uppercase tracking-wider text-muted-foreground">Riesgo</p>
+                    <p className="mt-1 text-xs font-bold">{advice.best_departure.risk_score}/100</p>
+                  </div>
+                  <div className="rounded-lg bg-background/80 px-2 py-2">
+                    <p className="text-[8px] uppercase tracking-wider text-muted-foreground">Lluvia</p>
+                    <p className="mt-1 text-xs font-bold">{advice.best_departure.rain_probability}%</p>
+                  </div>
+                  <div className="rounded-lg bg-background/80 px-2 py-2">
+                    <p className="text-[8px] uppercase tracking-wider text-muted-foreground">Alertas</p>
+                    <p className="mt-1 text-xs font-bold">{advice.context.active_alerts}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {adviceLoading && (
+              <div className="rounded-xl border border-border/30 bg-muted/20 px-3 py-2 text-[10px] text-muted-foreground">
+                Calculando ventana recomendada de salida...
+              </div>
+            )}
 
             {/* Action button */}
             <Button
