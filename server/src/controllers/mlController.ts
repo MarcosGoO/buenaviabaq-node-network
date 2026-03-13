@@ -412,4 +412,63 @@ export class MLController {
       next(error);
     }
   }
+
+  /**
+   * POST /api/v1/ml/drift-status/check
+   * Force sync + drift evaluation immediately (admin only).
+   */
+  static async checkDriftNow(req: Request, res: Response, next: NextFunction) {
+    try {
+      const recentHoursRaw = req.body?.recent_hours !== undefined
+        ? Number.parseInt(String(req.body.recent_hours), 10)
+        : 24;
+      const baselineDaysRaw = req.body?.baseline_days !== undefined
+        ? Number.parseInt(String(req.body.baseline_days), 10)
+        : 30;
+      const minSamplesRaw = req.body?.min_samples !== undefined
+        ? Number.parseInt(String(req.body.min_samples), 10)
+        : 40;
+      const lookbackHoursRaw = req.body?.lookback_hours !== undefined
+        ? Number.parseInt(String(req.body.lookback_hours), 10)
+        : 72;
+      const toleranceMinutesRaw = req.body?.tolerance_minutes !== undefined
+        ? Number.parseInt(String(req.body.tolerance_minutes), 10)
+        : 30;
+
+      if (!Number.isFinite(recentHoursRaw) || recentHoursRaw < 1 || recentHoursRaw > 24 * 14) {
+        throw new AppError(400, 'recent_hours must be an integer between 1 and 336');
+      }
+      if (!Number.isFinite(baselineDaysRaw) || baselineDaysRaw < 1 || baselineDaysRaw > 365) {
+        throw new AppError(400, 'baseline_days must be an integer between 1 and 365');
+      }
+      if (!Number.isFinite(minSamplesRaw) || minSamplesRaw < 1 || minSamplesRaw > 10000) {
+        throw new AppError(400, 'min_samples must be an integer between 1 and 10000');
+      }
+      if (!Number.isFinite(lookbackHoursRaw) || lookbackHoursRaw < 1 || lookbackHoursRaw > 720) {
+        throw new AppError(400, 'lookback_hours must be an integer between 1 and 720');
+      }
+      if (!Number.isFinite(toleranceMinutesRaw) || toleranceMinutesRaw < 1 || toleranceMinutesRaw > 180) {
+        throw new AppError(400, 'tolerance_minutes must be an integer between 1 and 180');
+      }
+
+      const sync = await PredictionEvaluationService.syncActualValues(lookbackHoursRaw, toleranceMinutesRaw);
+      const drift = await PredictionDriftService.getDriftStatus(
+        recentHoursRaw,
+        baselineDaysRaw,
+        minSamplesRaw
+      );
+
+      res.json({
+        status: 'success',
+        data: {
+          forced_check: true,
+          sync,
+          drift,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

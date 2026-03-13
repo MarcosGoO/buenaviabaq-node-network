@@ -44,4 +44,7 @@ router.post('/evaluation/sync-actuals', requireAdminAuth, MLController.syncEvalu
 // GET /api/v1/ml/drift-status - Model drift status (recent vs baseline performance)
 router.get('/drift-status', MLController.getDriftStatus);
 
+// POST /api/v1/ml/drift-status/check - Force drift check now (admin)
+router.post('/drift-status/check', requireAdminAuth, MLController.checkDriftNow);
+
 export default router;

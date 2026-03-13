@@ -2,12 +2,14 @@ import { logger } from '@/utils/logger.js';
 import { dataCollectionQueue, JobTypes } from './queues.js';
 import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
 import { PredictionDriftService } from '@/services/predictionDriftService.js';
+import { SocketService } from '@/lib/socket.js';
 
 /**
  * Schedule recurring jobs
  */
 export class JobScheduler {
   private static intervals: NodeJS.Timeout[] = [];
+  private static lastDriftAlertStatus: 'drift' | 'critical' | null = null;
 
   /**
    * Start all scheduled jobs
@@ -242,8 +244,36 @@ export class JobScheduler {
     };
 
     if (drift.status === 'critical' || drift.status === 'drift') {
+      if (this.lastDriftAlertStatus !== drift.status) {
+        SocketService.emitAlertNotification({
+          type: 'model:drift',
+          severity: drift.status === 'critical' ? 'critical' : 'high',
+          drift_status: drift.status,
+          max_change_ratio: drift.deltas.max_change_ratio,
+          recent_samples: drift.recent.samples,
+          baseline_samples: drift.baseline.samples,
+          synced_rows: sync.updated,
+          timestamp: new Date().toISOString(),
+        });
+      }
+      this.lastDriftAlertStatus = drift.status;
       logger.warn('Model drift monitor detected degradation', payload);
       return;
+    }
+
+    if (this.lastDriftAlertStatus !== null) {
+      SocketService.emitAlertNotification({
+        type: 'model:drift_recovered',
+        severity: 'medium',
+        previous_status: this.lastDriftAlertStatus,
+        current_status: drift.status,
+        max_change_ratio: drift.deltas.max_change_ratio,
+        recent_samples: drift.recent.samples,
+        baseline_samples: drift.baseline.samples,
+        synced_rows: sync.updated,
+        timestamp: new Date().toISOString(),
+      });
+      this.lastDriftAlertStatus = null;
     }
 
     logger.info('Model drift monitor snapshot', payload);

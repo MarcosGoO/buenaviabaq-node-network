@@ -1310,6 +1310,41 @@ No authentication required for this portfolio API. Rate limits apply.
         },
       },
     },
+    '/api/v1/ml/drift-status/check': {
+      post: {
+        tags: ['ML'],
+        summary: 'Force immediate drift check',
+        description: 'Admin endpoint that syncs actual values and computes drift snapshot immediately.',
+        requestBody: {
+          required: false,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  recent_hours: { type: 'integer', minimum: 1, maximum: 336, default: 24 },
+                  baseline_days: { type: 'integer', minimum: 1, maximum: 365, default: 30 },
+                  min_samples: { type: 'integer', minimum: 1, maximum: 10000, default: 40 },
+                  lookback_hours: { type: 'integer', minimum: 1, maximum: 720, default: 72 },
+                  tolerance_minutes: { type: 'integer', minimum: 1, maximum: 180, default: 30 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Forced drift check response',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiResponse' },
+              },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+        },
+      },
+    },
     '/api/v1/ml/features': {
       get: {
         tags: ['ML'],
