@@ -1,5 +1,7 @@
 import { logger } from '@/utils/logger.js';
 import { dataCollectionQueue, JobTypes } from './queues.js';
+import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
+import { PredictionDriftService } from '@/services/predictionDriftService.js';
 
 /**
  * Schedule recurring jobs
@@ -31,8 +33,18 @@ export class JobScheduler {
       }
     }, 2 * 60 * 1000); // 2 minutes
 
+    // Schedule prediction feedback sync + drift monitor every 15 minutes
+    const driftMonitorInterval = setInterval(async () => {
+      try {
+        await this.monitorPredictionDrift();
+      } catch (error) {
+        logger.error('Error monitoring prediction drift:', error);
+      }
+    }, 15 * 60 * 1000); // 15 minutes
+
     this.intervals.push(collectionInterval);
     this.intervals.push(alertInterval);
+    this.intervals.push(driftMonitorInterval);
 
     // Schedule weekly model retraining (Sunday at 3:00 AM)
     this.scheduleWeeklyRetraining();
@@ -40,8 +52,9 @@ export class JobScheduler {
     // Run immediately on startup
     await this.scheduleDataCollection();
     await this.scheduleAlertDetection();
+    await this.monitorPredictionDrift();
 
-    logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes, model retraining weekly on Sunday 3:00 AM');
+    logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes, drift monitor every 15 minutes, model retraining weekly on Sunday 3:00 AM');
   }
 
   /**
@@ -211,6 +224,29 @@ export class JobScheduler {
       logger.error('Failed to schedule model retraining:', error);
       throw error;
     }
+  }
+
+  /**
+   * Sync observed values and monitor short-term model drift.
+   */
+  static async monitorPredictionDrift(): Promise<void> {
+    const sync = await PredictionEvaluationService.syncActualValues(72, 30);
+    const drift = await PredictionDriftService.getDriftStatus();
+
+    const payload = {
+      status: drift.status,
+      max_change_ratio: drift.deltas.max_change_ratio,
+      recent_samples: drift.recent.samples,
+      baseline_samples: drift.baseline.samples,
+      synced_rows: sync.updated,
+    };
+
+    if (drift.status === 'critical' || drift.status === 'drift') {
+      logger.warn('Model drift monitor detected degradation', payload);
+      return;
+    }
+
+    logger.info('Model drift monitor snapshot', payload);
   }
 
   /**

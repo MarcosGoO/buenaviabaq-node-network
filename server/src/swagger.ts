@@ -1272,6 +1272,44 @@ No authentication required for this portfolio API. Rate limits apply.
         },
       },
     },
+    '/api/v1/ml/drift-status': {
+      get: {
+        tags: ['ML'],
+        summary: 'Model drift status',
+        description: 'Compares recent prediction error metrics against a historical baseline and classifies drift level.',
+        parameters: [
+          {
+            name: 'recent_hours',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 336, default: 24 },
+          },
+          {
+            name: 'baseline_days',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 365, default: 30 },
+          },
+          {
+            name: 'min_samples',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 10000, default: 40 },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Drift status response',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiResponse' },
+              },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+        },
+      },
+    },
     '/api/v1/ml/features': {
       get: {
         tags: ['ML'],

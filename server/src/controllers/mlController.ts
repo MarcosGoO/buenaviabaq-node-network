@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { FeatureStoreService } from '@/services/featureStoreService.js';
 import { MLPredictionService } from '@/services/mlPredictionService.js';
 import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
+import { PredictionDriftService } from '@/services/predictionDriftService.js';
 import { JobScheduler } from '@/jobs/scheduler.js';
 import { logger } from '@/utils/logger.js';
 import { AppError } from '@/middleware/errorHandler.js';
@@ -363,6 +364,48 @@ export class MLController {
           lookback_hours: lookbackRaw,
           tolerance_minutes: toleranceRaw,
         },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/ml/drift-status
+   * Get model drift status comparing recent vs baseline prediction quality.
+   */
+  static async getDriftStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const recentHoursRaw = typeof req.query.recent_hours === 'string'
+        ? Number.parseInt(req.query.recent_hours, 10)
+        : 24;
+      const baselineDaysRaw = typeof req.query.baseline_days === 'string'
+        ? Number.parseInt(req.query.baseline_days, 10)
+        : 30;
+      const minSamplesRaw = typeof req.query.min_samples === 'string'
+        ? Number.parseInt(req.query.min_samples, 10)
+        : 40;
+
+      if (!Number.isFinite(recentHoursRaw) || recentHoursRaw < 1 || recentHoursRaw > 24 * 14) {
+        throw new AppError(400, 'recent_hours must be an integer between 1 and 336');
+      }
+      if (!Number.isFinite(baselineDaysRaw) || baselineDaysRaw < 1 || baselineDaysRaw > 365) {
+        throw new AppError(400, 'baseline_days must be an integer between 1 and 365');
+      }
+      if (!Number.isFinite(minSamplesRaw) || minSamplesRaw < 1 || minSamplesRaw > 10000) {
+        throw new AppError(400, 'min_samples must be an integer between 1 and 10000');
+      }
+
+      const driftStatus = await PredictionDriftService.getDriftStatus(
+        recentHoursRaw,
+        baselineDaysRaw,
+        minSamplesRaw
+      );
+
+      res.json({
+        status: 'success',
+        data: driftStatus,
         timestamp: new Date().toISOString(),
       });
     } catch (error) {

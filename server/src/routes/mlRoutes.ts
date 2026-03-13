@@ -41,4 +41,7 @@ router.get('/evaluation', MLController.getEvaluation);
 // POST /api/v1/ml/evaluation/sync-actuals - Match predictions with observed values (admin)
 router.post('/evaluation/sync-actuals', requireAdminAuth, MLController.syncEvaluationActuals);
 
+// GET /api/v1/ml/drift-status - Model drift status (recent vs baseline performance)
+router.get('/drift-status', MLController.getDriftStatus);
+
 export default router;
