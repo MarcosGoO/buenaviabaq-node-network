@@ -4,7 +4,7 @@ import * as React from "react"
 import {
   MapPin, Navigation2, Loader2, RotateCcw, ChevronRight,
   AlertTriangle, Clock, Gauge, Route, X, ChevronLeft,
-  Droplets, Wind, Shield
+  Droplets, Wind, Shield, Bookmark
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { useRouting, type Route as CalcRoute, type RouteCoord } from "@/hooks/useRouting"
 import { useDepartureAdvice } from "@/hooks/useDepartureAdvice"
 import { useDeparturePlan } from "@/hooks/useDeparturePlan"
+import { useFavoriteRoutePlan } from "@/hooks/useFavoriteRoutePlan"
 
 // ─── Barranquilla landmark presets ────────────────────────────────────────────
 const PRESETS: { label: string; coord: RouteCoord }[] = [
@@ -68,6 +69,11 @@ function getDepartureNudge(bestDepartureTime: string) {
     detail: "Conviene posponer el desplazamiento si no es urgente.",
     tone: "text-rose-700 bg-rose-500/10 border-rose-500/30",
   }
+}
+
+function getPresetLabel(value: RouteCoord | null, fallback: string) {
+  if (!value) return fallback
+  return PRESETS.find((preset) => preset.coord.lat === value.lat && preset.coord.lng === value.lng)?.label ?? fallback
 }
 
 // ─── Coord input with presets ──────────────────────────────────────────────────
@@ -246,6 +252,11 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
   const { routes, selectedRoute, isLoading, error, calculateRoutes, selectRoute, clearRoutes } = useRouting()
   const { advice, loading: adviceLoading } = useDepartureAdvice(4, 30)
   const { plan, savePlan, clearPlan } = useDeparturePlan()
+  const {
+    plan: favoriteRoutePlan,
+    savePlan: saveFavoriteRoutePlan,
+    clearPlan: clearFavoriteRoutePlan,
+  } = useFavoriteRoutePlan()
   const departureNudge = advice ? getDepartureNudge(advice.best_departure.departure_time) : null
 
   const handleCalculate = async () => {
@@ -277,6 +288,34 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
       rainProbability: advice.best_departure.rain_probability,
       recommendation: advice.best_departure.recommendation,
       savedAt: new Date().toISOString(),
+    })
+  }
+
+  const handleSaveFavoriteRoute = () => {
+    if (!origin || !destination) return
+
+    saveFavoriteRoutePlan({
+      origin,
+      destination,
+      originLabel: getPresetLabel(origin, "Origen personalizado"),
+      destinationLabel: getPresetLabel(destination, "Destino personalizado"),
+      avoidArroyos,
+      avoidCongestion,
+      savedAt: new Date().toISOString(),
+    })
+  }
+
+  const handleLoadFavoriteRoute = async () => {
+    if (!favoriteRoutePlan) return
+
+    setOrigin(favoriteRoutePlan.origin)
+    setDestination(favoriteRoutePlan.destination)
+    setAvoidArroyos(favoriteRoutePlan.avoidArroyos)
+    setAvoidCongestion(favoriteRoutePlan.avoidCongestion)
+
+    await calculateRoutes(favoriteRoutePlan.origin, favoriteRoutePlan.destination, {
+      avoid_arroyos: favoriteRoutePlan.avoidArroyos,
+      avoid_congestion: favoriteRoutePlan.avoidCongestion,
     })
   }
 
@@ -366,6 +405,42 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
               </button>
             </div>
 
+            {favoriteRoutePlan && (
+              <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-violet-700/80">
+                      Trayecto favorito
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-foreground">
+                      {favoriteRoutePlan.originLabel} {" -> "} {favoriteRoutePlan.destinationLabel}
+                    </p>
+                  </div>
+                  <Bookmark className="h-4 w-4 text-violet-600" />
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 flex-1 text-[10px] font-bold uppercase tracking-wider"
+                    onClick={() => { void handleLoadFavoriteRoute() }}
+                  >
+                    Usar trayecto
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider"
+                    onClick={clearFavoriteRoutePlan}
+                  >
+                    Quitar
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Departure recommendation */}
             {advice && advice.best_departure && (
               <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-3">
@@ -408,6 +483,16 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
                     onClick={handleSaveDeparturePlan}
                   >
                     Guardar salida
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 flex-1 text-[10px] font-bold uppercase tracking-wider"
+                    onClick={handleSaveFavoriteRoute}
+                    disabled={!origin || !destination}
+                  >
+                    Guardar trayecto
                   </Button>
                   {plan && (
                     <Button

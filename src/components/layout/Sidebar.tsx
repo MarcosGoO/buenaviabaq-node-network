@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, Gauge, Brain, ShieldAlert, Clock3, X } from "lucide-react"
+import { Car, BarChart3, Settings, ChevronLeft, ChevronRight, Activity, MapPin, Gauge, Brain, ShieldAlert, Clock3, X, Bookmark } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { StatCard } from "@/components/ui/stat-card"
@@ -11,6 +11,7 @@ import { WeatherWidget } from "@/components/widgets/WeatherWidget"
 import { useTrafficData } from "@/hooks/useTrafficData"
 import { useZonesData } from "@/hooks/useZonesData"
 import { useDeparturePlan } from "@/hooks/useDeparturePlan"
+import { useFavoriteRoutePlan } from "@/hooks/useFavoriteRoutePlan"
 
 type SidebarProps = React.HTMLAttributes<HTMLDivElement>;
 
@@ -20,6 +21,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
     const { summary } = useTrafficData()
     const { zones } = useZonesData()
     const { plan, clearPlan } = useDeparturePlan()
+    const { plan: favoriteRoutePlan, clearPlan: clearFavoriteRoutePlan } = useFavoriteRoutePlan()
 
     const avgSpeed = summary?.average_speed != null ? Math.round(summary.average_speed) : '--'
     const activeZones = zones.length > 0 ? zones.length : '--'
@@ -168,6 +170,42 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                                     </div>
                                 </div>
                                 <p className="text-xs leading-relaxed text-muted-foreground">{plan.recommendation}</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className={cn(
+                    "transition-all duration-300",
+                    collapsed ? "opacity-0 scale-95 h-0" : "opacity-100 scale-100"
+                )}>
+                    {!collapsed && favoriteRoutePlan && (
+                        <div className="px-3">
+                            <div className="flex items-center gap-2 px-1 mb-2">
+                                <div className="h-1 w-1 bg-violet-500 rounded-full animate-pulse" />
+                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                    Favorite Trip
+                                </span>
+                            </div>
+                            <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-center gap-2 text-violet-700">
+                                        <Bookmark className="h-4 w-4" />
+                                        <span className="text-xs font-bold uppercase tracking-wider">Trayecto guardado</span>
+                                    </div>
+                                    <button
+                                        onClick={clearFavoriteRoutePlan}
+                                        className="rounded-full p-1 text-muted-foreground hover:bg-background/70 hover:text-foreground transition-colors"
+                                        title="Quitar trayecto"
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                                <div className="rounded-xl bg-background/80 px-3 py-3">
+                                    <p className="text-sm font-bold text-foreground">{favoriteRoutePlan.originLabel}</p>
+                                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1">hacia</p>
+                                    <p className="mt-1 text-sm font-bold text-foreground">{favoriteRoutePlan.destinationLabel}</p>
+                                </div>
                             </div>
                         </div>
                     )}
