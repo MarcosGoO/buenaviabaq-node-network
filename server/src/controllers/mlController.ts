@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { FeatureStoreService } from '@/services/featureStoreService.js';
 import { MLPredictionService } from '@/services/mlPredictionService.js';
+import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
 import { JobScheduler } from '@/jobs/scheduler.js';
 import { logger } from '@/utils/logger.js';
 import { AppError } from '@/middleware/errorHandler.js';
@@ -303,6 +304,64 @@ export class MLController {
         data: {
           version,
           ...result,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/ml/evaluation
+   * Get temporal prediction quality metrics.
+   */
+  static async getEvaluation(req: Request, res: Response, next: NextFunction) {
+    try {
+      const daysRaw = typeof req.query.days === 'string' ? Number.parseInt(req.query.days, 10) : 14;
+      const days = Number.isFinite(daysRaw) && daysRaw > 0 ? Math.min(daysRaw, 90) : 14;
+
+      const evaluation = await PredictionEvaluationService.getTemporalEvaluation(days);
+
+      res.json({
+        status: 'success',
+        data: evaluation,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/ml/evaluation/sync-actuals
+   * Sync observed speed values to compute error metrics.
+   */
+  static async syncEvaluationActuals(req: Request, res: Response, next: NextFunction) {
+    try {
+      const lookbackRaw = req.body?.lookback_hours !== undefined
+        ? Number.parseInt(String(req.body.lookback_hours), 10)
+        : 72;
+      const toleranceRaw = req.body?.tolerance_minutes !== undefined
+        ? Number.parseInt(String(req.body.tolerance_minutes), 10)
+        : 30;
+
+      if (!Number.isFinite(lookbackRaw) || lookbackRaw <= 0 || lookbackRaw > 24 * 30) {
+        throw new AppError(400, 'lookback_hours must be an integer between 1 and 720');
+      }
+
+      if (!Number.isFinite(toleranceRaw) || toleranceRaw <= 0 || toleranceRaw > 180) {
+        throw new AppError(400, 'tolerance_minutes must be an integer between 1 and 180');
+      }
+
+      const result = await PredictionEvaluationService.syncActualValues(lookbackRaw, toleranceRaw);
+
+      res.json({
+        status: 'success',
+        data: {
+          ...result,
+          lookback_hours: lookbackRaw,
+          tolerance_minutes: toleranceRaw,
         },
         timestamp: new Date().toISOString(),
       });

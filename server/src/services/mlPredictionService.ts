@@ -3,6 +3,7 @@ import { CacheService } from './cacheService.js';
 import { FeatureStoreService } from './featureStoreService.js';
 import { GeoService } from './geoService.js';
 import { WeatherService } from './weatherService.js';
+import { PredictionEvaluationService } from './predictionEvaluationService.js';
 import type { FeatureVector } from '@/types/index.js';
 
 interface MLServiceConfig {
@@ -123,6 +124,8 @@ export class MLPredictionService {
       cacheKey,
       async () => {
         try {
+          const predictedAt = new Date();
+
           // Extract features
           const featureVector = await FeatureStoreService.extractFeatures({
             roadId,
@@ -151,6 +154,23 @@ export class MLPredictionService {
           }
 
           const prediction = await response.json() as PredictionResponse;
+          const zoneId = Number(featureVector.features.geography.zone_id);
+          const safeZoneId = Number.isFinite(zoneId) ? zoneId : null;
+          const horizonMinutes = typeof horizon === 'number' && Number.isFinite(horizon) ? horizon : null;
+          const targetTime = horizonMinutes !== null
+            ? new Date(predictedAt.getTime() + horizonMinutes * 60_000)
+            : this.getPredictionTargetTime(prediction, predictedAt);
+
+          void PredictionEvaluationService.recordPrediction({
+            road_id: prediction.road_id,
+            zone_id: safeZoneId,
+            predicted_at: predictedAt,
+            target_time: targetTime,
+            horizon_minutes: horizonMinutes,
+            predicted_speed_kmh: prediction.predicted_speed_kmh,
+            model_version: prediction.model_version,
+          });
+
           return prediction;
         } catch (error) {
           logger.error(`Failed to get prediction for road ${roadId}:`, error);
@@ -172,6 +192,8 @@ export class MLPredictionService {
     timestamp?: Date
   ): Promise<PredictionResponse[]> {
     try {
+      const predictedAt = new Date();
+
       // Extract features for all roads
       const featuresPromises = roadIds.map(roadId =>
         FeatureStoreService.extractFeatures({ roadId, timestamp })
@@ -198,6 +220,26 @@ export class MLPredictionService {
       }
 
       const data = await response.json() as { predictions: PredictionResponse[] };
+
+      const zoneByRoad = new Map<number, number | null>();
+      for (const fv of featureVectors) {
+        const zoneId = Number(fv.features.geography.zone_id);
+        zoneByRoad.set(fv.road_id, Number.isFinite(zoneId) ? zoneId : null);
+      }
+
+      for (const pred of data.predictions) {
+        const targetTime = this.getPredictionTargetTime(pred, predictedAt);
+        void PredictionEvaluationService.recordPrediction({
+          road_id: pred.road_id,
+          zone_id: zoneByRoad.get(pred.road_id) ?? null,
+          predicted_at: predictedAt,
+          target_time: targetTime,
+          horizon_minutes: null,
+          predicted_speed_kmh: pred.predicted_speed_kmh,
+          model_version: pred.model_version,
+        });
+      }
+
       return data.predictions;
     } catch (error) {
       logger.error('Batch prediction failed:', error);
@@ -489,5 +531,13 @@ export class MLPredictionService {
       arroyo_risk_level_encoded: features.arroyo.risk_encoded,
       arroyo_distance_km: features.arroyo.distance_km,
     };
+  }
+
+  private static getPredictionTargetTime(prediction: PredictionResponse, fallback: Date): Date {
+    const parsed = new Date(prediction.timestamp);
+    if (Number.isNaN(parsed.getTime())) {
+      return fallback;
+    }
+    return parsed;
   }
 }

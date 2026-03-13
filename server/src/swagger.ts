@@ -1214,6 +1214,64 @@ No authentication required for this portfolio API. Rate limits apply.
         },
       },
     },
+    '/api/v1/ml/evaluation': {
+      get: {
+        tags: ['ML'],
+        summary: 'Prediction quality evaluation',
+        description: 'Returns temporal error metrics (MAE, MAPE, RMSE, p95) for prediction feedback.',
+        parameters: [
+          {
+            name: 'days',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 90, default: 14 },
+            description: 'Evaluation window in days',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Evaluation metrics',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiResponse' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/v1/ml/evaluation/sync-actuals': {
+      post: {
+        tags: ['ML'],
+        summary: 'Sync prediction feedback with observed traffic',
+        description: 'Fills actual values and computes errors by matching feedback rows with nearest traffic history samples.',
+        requestBody: {
+          required: false,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  lookback_hours: { type: 'integer', minimum: 1, maximum: 720, default: 72 },
+                  tolerance_minutes: { type: 'integer', minimum: 1, maximum: 180, default: 30 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Sync summary',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ApiResponse' },
+              },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+        },
+      },
+    },
     '/api/v1/ml/features': {
       get: {
         tags: ['ML'],

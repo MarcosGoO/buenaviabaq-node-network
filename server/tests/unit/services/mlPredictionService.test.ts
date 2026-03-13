@@ -48,11 +48,19 @@ vi.mock('@/db/index.js', () => ({
   pool: { query: vi.fn() },
 }));
 
+// Mock feedback recording service
+vi.mock('@/services/predictionEvaluationService.js', () => ({
+  PredictionEvaluationService: {
+    recordPrediction: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 import { MLPredictionService } from '@/services/mlPredictionService.js';
 import { FeatureStoreService } from '@/services/featureStoreService.js';
 import { WeatherService } from '@/services/weatherService.js';
 import { GeoService } from '@/services/geoService.js';
 import { CacheService } from '@/services/cacheService.js';
+import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
 
 // ── Fixture helpers ────────────────────────────────────────────────────────
 
@@ -93,6 +101,7 @@ const mockArroyos = [
 
 describe('MLPredictionService', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.mocked(FeatureStoreService.extractFeatures).mockResolvedValue(mockFeatureVector as never);
     vi.mocked(WeatherService.getForecast).mockResolvedValue(mockForecast as never);
     vi.mocked(GeoService.getArroyoZones).mockResolvedValue(mockArroyos as never);
@@ -201,6 +210,16 @@ describe('MLPredictionService', () => {
 
       const [url] = vi.mocked(fetch).mock.calls[0];
       expect(String(url)).toContain('/predict');
+    });
+
+    it('should record prediction feedback in background', async () => {
+      vi.mocked(fetch).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockPrediction),
+      } as never);
+
+      await MLPredictionService.predictTraffic(1, new Date('2026-03-13T10:00:00Z'), 30);
+      expect(vi.mocked(PredictionEvaluationService.recordPrediction)).toHaveBeenCalledTimes(1);
     });
   });
 
