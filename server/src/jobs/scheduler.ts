@@ -1,7 +1,7 @@
 import { logger } from '@/utils/logger.js';
 import { dataCollectionQueue, JobTypes } from './queues.js';
-import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
-import { PredictionDriftService } from '@/services/predictionDriftService.js';
+import { ModelReliabilityService } from '@/services/modelReliabilityService.js';
+import { ModelGovernanceService } from '@/services/modelGovernanceService.js';
 import { SocketService } from '@/lib/socket.js';
 
 /**
@@ -48,6 +48,9 @@ export class JobScheduler {
     this.intervals.push(alertInterval);
     this.intervals.push(driftMonitorInterval);
 
+    // Schedule daily ML quality materialization at 00:10 local time
+    this.scheduleDailyQualityMaterialization();
+
     // Schedule weekly model retraining (Sunday at 3:00 AM)
     this.scheduleWeeklyRetraining();
 
@@ -55,8 +58,9 @@ export class JobScheduler {
     await this.scheduleDataCollection();
     await this.scheduleAlertDetection();
     await this.monitorPredictionDrift();
+    await this.materializeDailyQuality();
 
-    logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes, drift monitor every 15 minutes, model retraining weekly on Sunday 3:00 AM');
+    logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes, drift monitor every 15 minutes, reliability daily quality at 00:10, model retraining weekly on Sunday 3:00 AM');
   }
 
   /**
@@ -166,7 +170,26 @@ export class JobScheduler {
 
       const timeout = setTimeout(async () => {
         try {
-          await this.scheduleModelRetraining();
+          const governanceInput = await ModelGovernanceService.buildGovernanceInput(30);
+          const decision = ModelGovernanceService.evaluateOperationalDecision(governanceInput);
+          const decisionId = await ModelGovernanceService.persistDecision({
+            decisionType: decision.decisionType,
+            reason: `[weekly_precheck] ${decision.reason}`,
+            confidenceScore: decision.confidenceScore,
+            inputs: decision.evidence,
+            modelVersionFrom: decision.modelVersionFrom,
+            modelVersionTo: decision.modelVersionTo,
+          });
+
+          if (decision.decisionType === 'retrain') {
+            await this.scheduleModelRetraining();
+            logger.info('Weekly retraining authorized by governance pre-check', { decision_id: decisionId });
+          } else {
+            logger.info('Weekly retraining skipped by governance pre-check', {
+              decision_id: decisionId,
+              decision_type: decision.decisionType,
+            });
+          }
         } catch (error) {
           logger.error('Error scheduling model retraining:', error);
         }
@@ -232,8 +255,16 @@ export class JobScheduler {
    * Sync observed values and monitor short-term model drift.
    */
   static async monitorPredictionDrift(): Promise<void> {
-    const sync = await PredictionEvaluationService.syncActualValues(72, 30);
-    const drift = await PredictionDriftService.getDriftStatus();
+    const reliability = await ModelReliabilityService.runReliabilityCheckNow({
+      lookbackHours: 72,
+      toleranceMinutes: 30,
+      recentHours: 24,
+      baselineDays: 30,
+      minSamples: 40,
+      governanceDays: 30,
+    });
+    const drift = reliability.drift;
+    const sync = reliability.sync;
 
     const payload = {
       status: drift.status,
@@ -277,6 +308,43 @@ export class JobScheduler {
     }
 
     logger.info('Model drift monitor snapshot', payload);
+  }
+
+  /**
+   * Schedule daily quality materialization at 00:10 AM local time.
+   */
+  static scheduleDailyQualityMaterialization(): void {
+    const scheduleNext = () => {
+      const msUntilNextDaily = this.msUntilNextDaily0010();
+      logger.info(`Daily reliability quality materialization scheduled in ${Math.round(msUntilNextDaily / 60_000)}m`);
+
+      const timeout = setTimeout(async () => {
+        try {
+          await this.materializeDailyQuality();
+        } catch (error) {
+          logger.error('Error running daily quality materialization:', error);
+        }
+        scheduleNext();
+      }, msUntilNextDaily);
+
+      this.intervals.push(timeout as unknown as NodeJS.Timeout);
+    };
+
+    scheduleNext();
+  }
+
+  private static msUntilNextDaily0010(): number {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(0, 10, 0, 0);
+    if (next.getTime() <= now.getTime()) {
+      next.setDate(next.getDate() + 1);
+    }
+    return next.getTime() - now.getTime();
+  }
+
+  static async materializeDailyQuality(day?: string): Promise<void> {
+    await ModelReliabilityService.materializeDailyQuality(day);
   }
 
   /**

@@ -124,6 +124,12 @@ export class SocketService {
         logger.debug(`Client ${socket.id} subscribed to prediction updates`);
       });
 
+      // Handle client subscribing to ML reliability updates
+      socket.on('subscribe:ml-reliability', () => {
+        void socket.join('ml-reliability');
+        logger.debug(`Client ${socket.id} subscribed to ML reliability updates`);
+      });
+
       // Handle disconnection
       socket.on('disconnect', (reason) => {
         logger.info(`Client disconnected: ${socket.id}, reason: ${reason}`);
@@ -237,6 +243,58 @@ export class SocketService {
     });
 
     logger.debug('Emitted prediction update to subscribers');
+  }
+
+  /**
+   * Emit ML reliability aggregate update
+   */
+  static emitReliabilityUpdate(payload: Record<string, unknown>) {
+    if (!this.io) {
+      logger.warn('Socket.IO not initialized');
+      return;
+    }
+
+    this.io.to('ml-reliability').emit('ml:reliability:update', payload);
+    logger.debug('Emitted ml:reliability:update');
+  }
+
+  /**
+   * Emit drift incident opened event
+   */
+  static emitReliabilityIncidentOpened(payload: Record<string, unknown>) {
+    if (!this.io) {
+      logger.warn('Socket.IO not initialized');
+      return;
+    }
+
+    this.io.to('ml-reliability').emit('ml:incident:opened', payload);
+    logger.debug('Emitted ml:incident:opened');
+  }
+
+  /**
+   * Emit drift incident resolved event
+   */
+  static emitReliabilityIncidentResolved(payload: Record<string, unknown>) {
+    if (!this.io) {
+      logger.warn('Socket.IO not initialized');
+      return;
+    }
+
+    this.io.to('ml-reliability').emit('ml:incident:resolved', payload);
+    logger.debug('Emitted ml:incident:resolved');
+  }
+
+  /**
+   * Emit governance recommendation event
+   */
+  static emitReliabilityDecisionRecommended(payload: Record<string, unknown>) {
+    if (!this.io) {
+      logger.warn('Socket.IO not initialized');
+      return;
+    }
+
+    this.io.to('ml-reliability').emit('ml:decision:recommended', payload);
+    logger.debug('Emitted ml:decision:recommended');
   }
 
   /**

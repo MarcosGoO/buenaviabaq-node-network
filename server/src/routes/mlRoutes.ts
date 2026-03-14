@@ -47,4 +47,19 @@ router.get('/drift-status', MLController.getDriftStatus);
 // POST /api/v1/ml/drift-status/check - Force drift check now (admin)
 router.post('/drift-status/check', requireAdminAuth, MLController.checkDriftNow);
 
+// GET /api/v1/ml/reliability/overview?days=30 - RCC overview
+router.get('/reliability/overview', MLController.getReliabilityOverview);
+
+// GET /api/v1/ml/reliability/incidents?status=open|closed|all&limit=50 - RCC incidents
+router.get('/reliability/incidents', MLController.getReliabilityIncidents);
+
+// GET /api/v1/ml/reliability/decisions?days=30 - RCC decisions
+router.get('/reliability/decisions', MLController.getReliabilityDecisions);
+
+// POST /api/v1/ml/reliability/check-now - Force reliability check now (admin)
+router.post('/reliability/check-now', requireAdminAuth, MLController.checkReliabilityNow);
+
+// POST /api/v1/ml/reliability/execute-decision - Execute decision/manual override (admin)
+router.post('/reliability/execute-decision', requireAdminAuth, MLController.executeReliabilityDecision);
+
 export default router;

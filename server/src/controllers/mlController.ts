@@ -3,9 +3,32 @@ import { FeatureStoreService } from '@/services/featureStoreService.js';
 import { MLPredictionService } from '@/services/mlPredictionService.js';
 import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
 import { PredictionDriftService } from '@/services/predictionDriftService.js';
+import { ModelReliabilityService } from '@/services/modelReliabilityService.js';
+import { ModelGovernanceService, type OperationalDecisionType } from '@/services/modelGovernanceService.js';
 import { JobScheduler } from '@/jobs/scheduler.js';
 import { logger } from '@/utils/logger.js';
 import { AppError } from '@/middleware/errorHandler.js';
+
+function parseIntInRange(value: unknown, fallback: number, min: number, max: number, field: string): number {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    throw new AppError(400, `${field} must be an integer between ${min} and ${max}`);
+  }
+  return parsed;
+}
+
+function parseBooleanStrict(value: unknown, fallback = false): boolean {
+  if (value === undefined || value === null) {
+    return fallback;
+  }
+  if (typeof value === 'boolean') return value;
+  if (value === 'true' || value === '1') return true;
+  if (value === 'false' || value === '0') return false;
+  throw new AppError(400, 'force must be a boolean');
+}
 
 export class MLController {
   /**
@@ -465,6 +488,157 @@ export class MLController {
           sync,
           drift,
         },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/ml/reliability/overview
+   * Operational reliability aggregate for recent days.
+   */
+  static async getReliabilityOverview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const days = parseIntInRange(req.query.days, 30, 1, 90, 'days');
+      const overview = await ModelReliabilityService.getOverview(days);
+
+      res.json({
+        status: 'success',
+        data: overview,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/ml/reliability/incidents
+   * List drift incidents (open/closed/all).
+   */
+  static async getReliabilityIncidents(req: Request, res: Response, next: NextFunction) {
+    try {
+      const statusRaw = typeof req.query.status === 'string' ? req.query.status : 'open';
+      const status = ['open', 'closed', 'all'].includes(statusRaw) ? statusRaw as 'open' | 'closed' | 'all' : null;
+      if (!status) {
+        throw new AppError(400, 'status must be one of: open, closed, all');
+      }
+
+      const limit = parseIntInRange(req.query.limit, 50, 1, 200, 'limit');
+      const incidents = await ModelReliabilityService.getIncidents({ status, limit });
+
+      res.json({
+        status: 'success',
+        data: {
+          count: incidents.length,
+          incidents,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/ml/reliability/decisions
+   * List governance decisions in a bounded window.
+   */
+  static async getReliabilityDecisions(req: Request, res: Response, next: NextFunction) {
+    try {
+      const days = parseIntInRange(req.query.days, 30, 1, 90, 'days');
+      const decisions = await ModelReliabilityService.getDecisions(days);
+
+      res.json({
+        status: 'success',
+        data: {
+          count: decisions.length,
+          decisions,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/ml/reliability/check-now
+   * Force sync + drift + governance recommendation + incident upsert.
+   */
+  static async checkReliabilityNow(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await ModelReliabilityService.runReliabilityCheckNow({
+        lookbackHours: parseIntInRange(req.body?.lookback_hours, 72, 1, 720, 'lookback_hours'),
+        toleranceMinutes: parseIntInRange(req.body?.tolerance_minutes, 30, 1, 180, 'tolerance_minutes'),
+        recentHours: parseIntInRange(req.body?.recent_hours, 24, 1, 336, 'recent_hours'),
+        baselineDays: parseIntInRange(req.body?.baseline_days, 30, 1, 365, 'baseline_days'),
+        minSamples: parseIntInRange(req.body?.min_samples, 40, 1, 10000, 'min_samples'),
+        governanceDays: parseIntInRange(req.body?.governance_days, 30, 7, 90, 'governance_days'),
+      });
+
+      res.json({
+        status: 'success',
+        data: {
+          forced_check: true,
+          ...result,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/ml/reliability/execute-decision
+   * Execute persisted decision or manual override decision.
+   */
+  static async executeReliabilityDecision(req: Request, res: Response, next: NextFunction) {
+    try {
+      const decisionId = req.body?.decision_id !== undefined
+        ? parseIntInRange(req.body.decision_id, 0, 1, Number.MAX_SAFE_INTEGER, 'decision_id')
+        : undefined;
+      const decisionTypeRaw = req.body?.decision_type as string | undefined;
+      const modelVersion = req.body?.model_version as string | undefined;
+      const force = parseBooleanStrict(req.body?.force, false);
+
+      const validTypes: OperationalDecisionType[] = ['keep', 'watch', 'retrain', 'rollback'];
+      const decisionType = decisionTypeRaw
+        ? (validTypes.includes(decisionTypeRaw as OperationalDecisionType)
+            ? decisionTypeRaw as OperationalDecisionType
+            : null)
+        : undefined;
+
+      if (decisionTypeRaw && !decisionType) {
+        throw new AppError(400, 'decision_type must be one of: keep, watch, retrain, rollback');
+      }
+      if (decisionId === undefined && decisionType === undefined) {
+        throw new AppError(400, 'decision_id or decision_type is required');
+      }
+
+      const execution = await ModelGovernanceService.executeDecision({
+        decisionId,
+        decisionType,
+        modelVersion,
+        force,
+      });
+
+      if (!execution.executed) {
+        if (execution.action === 'blocked_by_policy') {
+          throw new AppError(403, String(execution.details.message ?? 'Decision execution blocked by policy'));
+        }
+        if (execution.action === 'decision_not_found') {
+          throw new AppError(404, 'Decision not found');
+        }
+        throw new AppError(400, `Decision could not be executed: ${execution.action}`);
+      }
+
+      res.json({
+        status: 'success',
+        data: execution,
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
