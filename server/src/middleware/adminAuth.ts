@@ -4,20 +4,26 @@ import { logger } from '@/utils/logger.js';
 import { config } from '@/config/index.js';
 
 /**
- * Admin authentication middleware for sensitive operations
- * (model retraining, rollback, feature batch extraction).
- *
- * Validates the `x-admin-key` header against the ADMIN_API_KEY environment variable.
- * Falls back to JWT_SECRET when ADMIN_API_KEY is not set (development convenience).
- *
- * In production, always set ADMIN_API_KEY to a strong random value:
- *   openssl rand -hex 32
+ * Admin authentication middleware for sensitive operations.
+ * Validates `x-admin-key` against ADMIN_API_KEY.
+ * In non-production only, it can fall back to JWT_SECRET for local convenience.
  */
 export function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
-  const adminKey = process.env.ADMIN_API_KEY || config.JWT_SECRET;
+  const nodeEnv = process.env.NODE_ENV ?? config.NODE_ENV;
+  const runtimeAdminKey = process.env.ADMIN_API_KEY;
+  const runtimeJwtSecret = process.env.JWT_SECRET ?? config.JWT_SECRET;
+  const adminKey = runtimeAdminKey ?? (nodeEnv === 'production' ? undefined : runtimeJwtSecret);
 
   if (!adminKey) {
-    logger.error('Admin auth is not configured — set ADMIN_API_KEY or JWT_SECRET env var');
+    logger.error('Admin auth is not configured - set ADMIN_API_KEY');
+    return res.status(503).json({
+      status: 'error',
+      message: 'Admin authentication is not configured on this server',
+    });
+  }
+
+  if (nodeEnv === 'production' && adminKey.length < 32) {
+    logger.error('Admin auth rejected due to weak ADMIN_API_KEY length in production');
     return res.status(503).json({
       status: 'error',
       message: 'Admin authentication is not configured on this server',

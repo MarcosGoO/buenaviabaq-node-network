@@ -178,10 +178,10 @@ describe('ModelGovernanceService', () => {
   });
 
   it('queues retraining when execution is enabled', async () => {
-    process.env.ML_RCC_ALLOW_DECISION_EXECUTION = 'true';
     vi.mocked(dataCollectionQueue.add).mockResolvedValue({ id: 'job-1' } as never);
     const result = await ModelGovernanceService.executeDecision({
       decisionType: 'retrain',
+      force: true,
     });
     expect(result.executed).toBe(true);
     expect(result.action).toBe('queued_retrain');

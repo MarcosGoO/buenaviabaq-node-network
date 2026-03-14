@@ -4,6 +4,7 @@ import { PredictionDriftService, type DriftStatusResponse } from '@/services/pre
 import { PredictionEvaluationService } from '@/services/predictionEvaluationService.js';
 import { MLPredictionService } from '@/services/mlPredictionService.js';
 import { dataCollectionQueue, JobTypes } from '@/jobs/queues.js';
+import { config } from '@/config/index.js';
 
 export type OperationalDecisionType = 'keep' | 'watch' | 'retrain' | 'rollback';
 
@@ -41,19 +42,6 @@ interface PersistDecisionInput {
   inputs: Record<string, unknown>;
   modelVersionFrom?: string | null;
   modelVersionTo?: string | null;
-}
-
-function envFlag(name: string, fallback: boolean): boolean {
-  const raw = process.env[name];
-  if (raw === undefined) return fallback;
-  return ['1', 'true', 'yes', 'on'].includes(raw.toLowerCase());
-}
-
-function envFloat(name: string, fallback: number): number {
-  const raw = process.env[name];
-  if (!raw) return fallback;
-  const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function clamp01(input: number): number {
@@ -136,11 +124,11 @@ export class ModelGovernanceService {
   }
 
   static evaluateOperationalDecision(input: GovernanceInput): GovernanceDecision {
-    const sustainedDriftDays = Math.max(1, Math.floor(envFloat('ML_RCC_SUSTAINED_DRIFT_DAYS', 2)));
-    const rollbackCriticalRatio = envFloat('ML_RCC_ROLLBACK_CRITICAL_RATIO', 0.12);
-    const retrainMaeRatio = envFloat('ML_RCC_RETRAIN_MAE_RATIO', 0.1);
-    const minimumSamples = Math.max(1, Math.floor(envFloat('ML_RCC_MIN_SAMPLES', 40)));
-    const allowRollback = envFlag('ML_RCC_ALLOW_ROLLBACK', true);
+    const sustainedDriftDays = config.ML_RCC_SUSTAINED_DRIFT_DAYS;
+    const rollbackCriticalRatio = config.ML_RCC_ROLLBACK_CRITICAL_RATIO;
+    const retrainMaeRatio = config.ML_RCC_RETRAIN_MAE_RATIO;
+    const minimumSamples = config.ML_RCC_MIN_SAMPLES;
+    const allowRollback = config.ML_RCC_ALLOW_ROLLBACK;
 
     const hasSufficientSamples = input.recentSamples >= minimumSamples && input.baselineSamples >= minimumSamples;
     const driftStatus = input.drift.status;
@@ -236,7 +224,7 @@ export class ModelGovernanceService {
     modelVersion?: string;
     force?: boolean;
   }): Promise<{ executed: boolean; action: string; decisionId: number | null; details: Record<string, unknown> }> {
-    const allowExecution = envFlag('ML_RCC_ALLOW_DECISION_EXECUTION', false);
+    const allowExecution = config.ML_RCC_ALLOW_DECISION_EXECUTION;
     if (!allowExecution && !params.force) {
       return {
         executed: false,

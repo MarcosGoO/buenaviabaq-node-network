@@ -6,14 +6,17 @@ import { requireAdminAuth } from '@/middleware/adminAuth.js';
 describe('requireAdminAuth middleware', () => {
   const originalAdminApiKey = process.env.ADMIN_API_KEY;
   const originalJwtSecret = process.env.JWT_SECRET;
+  const originalNodeEnv = process.env.NODE_ENV;
 
   beforeEach(() => {
     process.env.ADMIN_API_KEY = 'super-secret-key';
+    process.env.NODE_ENV = 'test';
   });
 
   afterEach(() => {
     process.env.ADMIN_API_KEY = originalAdminApiKey;
     process.env.JWT_SECRET = originalJwtSecret;
+    process.env.NODE_ENV = originalNodeEnv;
   });
 
   function buildApp() {
@@ -46,5 +49,29 @@ describe('requireAdminAuth middleware', () => {
     expect(response.status).toBe(200);
     expect(response.body.ok).toBe(true);
   });
-});
 
+  it('allows fallback to JWT_SECRET only in non-production', async () => {
+    delete process.env.ADMIN_API_KEY;
+    process.env.JWT_SECRET = 'jwt-fallback-secret';
+
+    const app = buildApp();
+    const response = await request(app)
+      .get('/admin')
+      .set('x-admin-key', 'jwt-fallback-secret');
+
+    expect(response.status).toBe(200);
+  });
+
+  it('rejects fallback to JWT_SECRET in production without ADMIN_API_KEY', async () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.ADMIN_API_KEY;
+    process.env.JWT_SECRET = 'jwt-fallback-secret';
+
+    const app = buildApp();
+    const response = await request(app)
+      .get('/admin')
+      .set('x-admin-key', 'jwt-fallback-secret');
+
+    expect(response.status).toBe(503);
+  });
+});

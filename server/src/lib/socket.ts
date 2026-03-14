@@ -4,6 +4,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { redis } from './redis.js';
 import { logger } from '@/utils/logger.js';
 import Redis from 'ioredis';
+import { config } from '@/config/index.js';
 
 export class SocketService {
   private static io: SocketIOServer | null = null;
@@ -18,7 +19,7 @@ export class SocketService {
     // Create Socket.IO server
     this.io = new SocketIOServer(httpServer, {
       cors: {
-        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        origin: config.FRONTEND_URL,
         methods: ['GET', 'POST'],
         credentials: true,
       },
