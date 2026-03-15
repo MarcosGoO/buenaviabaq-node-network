@@ -11,7 +11,9 @@ const steps = [
   { name: 'backend:typecheck', cmd: 'npm', args: ['run', 'typecheck'], cwd: serverDir },
   { name: 'backend:lint', cmd: 'npm', args: ['run', 'lint'], cwd: serverDir },
   { name: 'backend:build', cmd: 'npm', args: ['run', 'build'], cwd: serverDir },
-  { name: 'frontend:build', cmd: 'npm', args: ['run', 'build'], cwd: rootDir },
+  ...(process.env.PREFLIGHT_SKIP_FRONTEND_BUILD === '1'
+    ? []
+    : [{ name: 'frontend:build', cmd: 'npm', args: ['run', 'build'], cwd: rootDir }]),
   { name: 'smoke', cmd: 'npm', args: ['run', 'smoke'], cwd: rootDir },
 ];
 
@@ -31,4 +33,6 @@ for (const step of steps) {
 }
 
 console.log('\n[preflight] all checks passed');
-
+if (process.env.PREFLIGHT_SKIP_FRONTEND_BUILD === '1') {
+  console.log('[preflight] note: frontend build was skipped by PREFLIGHT_SKIP_FRONTEND_BUILD=1');
+}

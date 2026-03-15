@@ -36,6 +36,14 @@ Preflight runs:
 5. Frontend build
 6. Smoke checks
 
+If your local Windows environment hits `spawn EPERM` during `next build`, you can run:
+
+```bash
+PREFLIGHT_SKIP_FRONTEND_BUILD=1 npm run preflight
+```
+
+Use this only for local diagnosis. Keep full preflight in CI.
+
 ## Smoke checks
 
 Smoke is optional by default.
@@ -50,4 +58,3 @@ Example:
 ```bash
 SMOKE_BASE_URL=http://localhost:4000 npm run smoke
 ```
-

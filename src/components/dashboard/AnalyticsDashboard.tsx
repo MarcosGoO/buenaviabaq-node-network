@@ -143,7 +143,8 @@ export default function AnalyticsDashboard() {
         const res = await fetch(`${API_BASE}/traffic/realtime`);
         if (res.ok) {
           const json = await parseJsonIfAvailable(res);
-          const list = (json.data || []).map((r: { id: number; name: string }) => ({ id: r.id, name: r.name }));
+          const rows = Array.isArray(json?.data) ? (json.data as Array<{ id: number; name: string }>) : [];
+          const list = rows.map((r) => ({ id: r.id, name: r.name }));
           setRoads(list);
         }
       } catch { /* ignore */ }
