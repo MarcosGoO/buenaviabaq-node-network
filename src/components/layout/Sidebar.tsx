@@ -280,7 +280,7 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavIte
         collapsed ? "h-12 w-12 mx-auto justify-center" : "h-12 w-full px-3",
         active
             ? "bg-primary/10"
-            : "hover:bg-accent/50"
+            : "hover:bg-muted/60"
     );
 
     if (href) {
