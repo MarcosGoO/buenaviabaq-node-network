@@ -74,7 +74,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
             </div>
 
             {/* Navigation */}
-            <div className="flex-1 py-6 flex flex-col gap-6 overflow-y-auto overflow-x-hidden">
+            <div className="minimal-scrollbar flex flex-1 flex-col gap-6 overflow-x-hidden overflow-y-auto py-6">
                 <nav className="flex flex-col gap-2 px-3">
                     <NavItem icon={Gauge} label="Traffic Flow" collapsed={collapsed} active={pathname === '/'} href="/" />
                     <NavItem icon={BarChart3} label="Analytics" collapsed={collapsed} active={pathname === '/analytics'} href="/analytics" />

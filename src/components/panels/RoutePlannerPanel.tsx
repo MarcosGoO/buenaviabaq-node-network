@@ -240,9 +240,10 @@ function RouteCard({
 // ─── Main panel ────────────────────────────────────────────────────────────────
 interface RoutePlannerPanelProps {
   onRouteSelect?: (route: CalcRoute | null) => void
+  className?: string
 }
 
-export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
+export function RoutePlannerPanel({ onRouteSelect, className }: RoutePlannerPanelProps) {
   const [isOpen, setIsOpen] = React.useState(false)
   const [origin, setOrigin] = React.useState<RouteCoord | null>(null)
   const [destination, setDestination] = React.useState<RouteCoord | null>(null)
@@ -325,7 +326,7 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
   const canCalculate = !!origin && !!destination && !isLoading
 
   return (
-    <div className="absolute top-4 right-16 z-40 pointer-events-auto" suppressHydrationWarning>
+    <div className={cn("pointer-events-auto", className)} suppressHydrationWarning>
       {/* Toggle button */}
       {!isOpen && (
         <Button
