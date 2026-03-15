@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useSocketIO } from "./useSocketIO";
@@ -40,7 +40,7 @@ interface UseAlertsReturn {
 }
 
 export function useAlerts(): UseAlertsReturn {
-  const { socket, isConnected, subscribe } = useSocketIO();
+  const { socket, isConnected, subscribe, unsubscribe } = useSocketIO();
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   useEffect(() => {
@@ -94,9 +94,10 @@ export function useAlerts(): UseAlertsReturn {
       });
 
     return () => {
+      unsubscribe("alerts");
       socket.off("alert:notification", handleAlertNotification);
     };
-  }, [socket, subscribe]);
+  }, [socket, subscribe, unsubscribe]);
 
   const dismissAlert = useCallback((alertId: string) => {
     setAlerts((prev) => prev.filter((a) => a.id !== alertId));
@@ -113,3 +114,4 @@ export function useAlerts(): UseAlertsReturn {
     clearAll,
   };
 }
+

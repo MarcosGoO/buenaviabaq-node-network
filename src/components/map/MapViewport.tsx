@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import Map, { NavigationControl, Source, Layer, type ViewStateChangeEvent, type MapRef } from 'react-map-gl/maplibre'
@@ -21,7 +21,7 @@ const BARRANQUILLA_COORDS = {
 }
 
 const ATLANTICO_BOUNDS: [number, number, number, number] = [
-    -75.25, 10.15, // Southwest (Long, Lat) - Near Galapa/Usiacurí
+    -75.25, 10.15, // Southwest (Long, Lat) - Near Galapa/UsiacurÃ­
     -74.55, 11.15  // Northeast (Long, Lat) - Past Puerto Colombia/River
 ]
 
@@ -57,7 +57,7 @@ export function MapViewport() {
     const routeGeoJSON = activeRoute ? routeToGeoJSON(activeRoute) : null
 
     return (
-        <div className="relative h-full w-full overflow-hidden bg-slate-100">
+        <div className="relative h-full w-full overflow-hidden bg-background">
             <Map
                 ref={mapRef}
                 {...viewState}
@@ -73,7 +73,7 @@ export function MapViewport() {
             >
                 <TrafficLayer simulatedHour={simulatedHour} />
 
-                {/* Route overlay — drawn on top of traffic layer */}
+                {/* Route overlay â€” drawn on top of traffic layer */}
                 {routeGeoJSON && (
                     <Source id="active-route" type="geojson" data={routeGeoJSON}>
                         {/* Casing (white outline for contrast) */}
@@ -108,7 +108,7 @@ export function MapViewport() {
             <Button
                 size="icon"
                 variant="outline"
-                className="absolute bottom-32 right-4 h-10 w-10 rounded-full shadow-lg bg-background/90 backdrop-blur-md border-2 hover:scale-110 transition-all z-10"
+                className="absolute bottom-32 right-4 h-10 w-10 rounded-full border bg-card/95 shadow-sm transition-colors z-10"
                 onClick={recenterMap}
                 title="Recenter map"
             >
@@ -121,8 +121,8 @@ export function MapViewport() {
 
             {/* Time simulation indicator */}
             {simulatedHour !== null && (
-                <div className="absolute top-4 right-4 z-10 bg-amber-500/90 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm tracking-wider uppercase">
-                    Historical — {simulatedHour}:00
+                <div className="absolute right-4 top-4 z-10 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 shadow-sm dark:text-amber-300">
+                    Historical - {simulatedHour}:00
                 </div>
             )}
 
@@ -134,8 +134,14 @@ export function MapViewport() {
 
             {/* Bottom left branding - fixed positioning */}
             <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none" suppressHydrationWarning>
-                BUENAVIA-BAQ © 2026
+                BUENAVIA-BAQ (C) 2026
             </div>
         </div>
     )
 }
+
+
+
+
+
+

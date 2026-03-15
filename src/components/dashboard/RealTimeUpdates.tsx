@@ -1,225 +1,137 @@
-"use client";
+﻿"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useSocketIO } from '@/hooks/useSocketIO';
-import { Bell, WifiOff, Wifi, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useState } from "react";
+import { useSocketIO } from "@/hooks/useSocketIO";
+import { BellRing, Wifi, WifiOff, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Update {
   id: string;
-  type: 'traffic' | 'weather' | 'event';
+  level: "info" | "success" | "warning";
+  source: "traffic" | "weather" | "event";
   message: string;
   timestamp: string;
 }
 
+const SOURCE_LABEL: Record<Update["source"], string> = {
+  traffic: "Tráfico",
+  weather: "Clima",
+  event: "Eventos",
+};
+
+const LEVEL_CLASS: Record<Update["level"], string> = {
+  info: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+  success: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  warning: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+};
+
 export default function RealTimeUpdates() {
   const { socket, isConnected, subscribe, unsubscribe } = useSocketIO();
   const [updates, setUpdates] = useState<Update[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  const getUpdateTypeLabel = React.useCallback((type: string) => {
-    switch (type) {
-      case 'traffic':
-        return 'Actualización de Tráfico';
-      case 'weather':
-        return 'Actualización de Clima';
-      case 'event':
-        return 'Nuevo Evento';
-      default:
-        return 'Actualización';
-    }
-  }, []);
-
-  const showToast = React.useCallback((update: Update) => {
-    const toast = document.createElement('div');
-    toast.className = cn(
-      'fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg',
-      'bg-background border-2 border-primary',
-      'transform transition-all duration-300',
-      'animate-in slide-in-from-bottom-5'
-    );
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'flex items-center gap-3';
-
-    const indicator = document.createElement('div');
-    indicator.className = 'h-2 w-2 rounded-full bg-green-500 animate-pulse';
-
-    const content = document.createElement('div');
-    const title = document.createElement('p');
-    title.className = 'font-semibold text-sm';
-    title.textContent = getUpdateTypeLabel(update.type);
-
-    const message = document.createElement('p');
-    message.className = 'text-xs text-muted-foreground';
-    message.textContent = update.message;
-
-    content.appendChild(title);
-    content.appendChild(message);
-    wrapper.appendChild(indicator);
-    wrapper.appendChild(content);
-    toast.appendChild(wrapper);
-
-    document.body.appendChild(toast);
-
-    // Remove after 4 seconds
-    setTimeout(() => {
-      toast.classList.add('animate-out', 'slide-out-to-bottom-5');
-      setTimeout(() => toast.remove(), 300);
-    }, 4000);
-  }, [getUpdateTypeLabel]);
 
   const addUpdate = React.useCallback((update: Update) => {
-    setUpdates((prev) => [update, ...prev].slice(0, 10)); // Keep only last 10
-    setShowNotifications(true);
-
-    // Show toast notification
-    showToast(update);
-
-    // Auto-hide notification indicator after 3 seconds
-    setTimeout(() => {
-      setShowNotifications(false);
-    }, 3000);
-  }, [showToast]);
+    setUpdates((prev) => [update, ...prev].slice(0, 8));
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
 
-    // Subscribe to all channels
-    subscribe('traffic');
-    subscribe('weather');
-    subscribe('events');
+    subscribe("traffic");
+    subscribe("weather");
+    subscribe("events");
 
-    // Listen for traffic updates
-    socket.on('traffic:update', (data) => {
-      const update: Update = {
+    const onTraffic = (data: { data?: { summary?: { status?: string } }; timestamp: string }) => {
+      addUpdate({
         id: `traffic-${Date.now()}`,
-        type: 'traffic',
-        message: `Actualización de tráfico: ${data.data.summary.status}`,
+        source: "traffic",
+        level: "info",
+        message: data.data?.summary?.status ? `Estado vial: ${data.data.summary.status}` : "Actualización vial recibida",
         timestamp: data.timestamp,
-      };
-      addUpdate(update);
-    });
+      });
+    };
 
-    // Listen for weather updates
-    socket.on('weather:update', (data) => {
-      const update: Update = {
+    const onWeather = (data: { data?: { temperature?: number; condition?: string }; timestamp: string }) => {
+      const condition = data.data?.condition ?? "sin detalle";
+      const temperature = data.data?.temperature;
+      addUpdate({
         id: `weather-${Date.now()}`,
-        type: 'weather',
-        message: `Clima actualizado: ${data.data.temperature}°C, ${data.data.condition}`,
+        source: "weather",
+        level: "success",
+        message: temperature != null ? `Clima: ${temperature}°C, ${condition}` : `Clima actualizado: ${condition}`,
         timestamp: data.timestamp,
-      };
-      addUpdate(update);
-    });
+      });
+    };
 
-    // Listen for event notifications
-    socket.on('event:notification', (data) => {
-      const update: Update = {
+    const onEvent = (data: { event?: { title?: string }; timestamp: string }) => {
+      addUpdate({
         id: `event-${Date.now()}`,
-        type: 'event',
-        message: `Evento: ${data.event.title}`,
+        source: "event",
+        level: "warning",
+        message: data.event?.title ? `Evento: ${data.event.title}` : "Nuevo evento detectado",
         timestamp: data.timestamp,
-      };
-      addUpdate(update);
-    });
+      });
+    };
+
+    socket.on("traffic:update", onTraffic);
+    socket.on("weather:update", onWeather);
+    socket.on("event:notification", onEvent);
 
     return () => {
-      unsubscribe('traffic');
-      unsubscribe('weather');
-      unsubscribe('events');
-      socket.off('traffic:update');
-      socket.off('weather:update');
-      socket.off('event:notification');
+      unsubscribe("traffic");
+      unsubscribe("weather");
+      unsubscribe("events");
+      socket.off("traffic:update", onTraffic);
+      socket.off("weather:update", onWeather);
+      socket.off("event:notification", onEvent);
     };
   }, [socket, subscribe, unsubscribe, addUpdate]);
 
-  const getUpdateTypeColor = (type: string) => {
-    switch (type) {
-      case 'traffic':
-        return 'bg-blue-500/10 text-blue-500';
-      case 'weather':
-        return 'bg-green-500/10 text-green-500';
-      case 'event':
-        return 'bg-orange-500/10 text-orange-500';
-      default:
-        return 'bg-gray-500/10 text-gray-500';
-    }
-  };
-
-  const deleteUpdate = (id: string) => {
-    setUpdates((prev) => prev.filter((update) => update.id !== id));
-  };
+  if (updates.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="fixed top-4 right-4 z-40" suppressHydrationWarning>
-      {/* Connection Status */}
-      <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-background/95 backdrop-blur shadow-lg border" suppressHydrationWarning>
-        {isConnected ? (
-          <>
-            <Wifi className="h-4 w-4 text-green-500" />
-            <span className="text-xs font-medium">En vivo</span>
-          </>
-        ) : (
-          <>
-            <WifiOff className="h-4 w-4 text-red-500" />
-            <span className="text-xs font-medium">Desconectado</span>
-          </>
-        )}
-
-        {showNotifications && (
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse ml-2"></div>
-        )}
-      </div>
-
-      {/* Updates List */}
-      {updates.length > 0 && (
-        <div className="w-80 max-h-96 overflow-y-auto rounded-lg bg-background/95 backdrop-blur shadow-lg border p-4 space-y-2">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              Actualizaciones Recientes
-            </h3>
-            <button
-              onClick={() => setUpdates([])}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Limpiar
-            </button>
+    <div className="fixed right-4 top-4 z-40 w-80 max-w-[calc(100vw-2rem)]" suppressHydrationWarning>
+      <div className="rounded-xl border bg-card/95 p-3 shadow-sm backdrop-blur">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BellRing className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">Actualizaciones en vivo</span>
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              {isConnected ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
+              {isConnected ? "Conectado" : "Reconectando"}
+            </span>
           </div>
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setUpdates([])}>
+            Limpiar
+          </Button>
+        </div>
 
+        <div className="space-y-2">
           {updates.map((update) => (
-            <div
-              key={update.id}
-              className="group p-3 rounded-md bg-muted/50 border border-border/50 space-y-1 hover:bg-muted/70 transition-colors relative"
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    'px-2 py-0.5 rounded text-xs font-medium',
-                    getUpdateTypeColor(update.type)
-                  )}
-                >
-                  {getUpdateTypeLabel(update.type)}
+            <div key={update.id} className="group rounded-lg border bg-background/80 p-2.5">
+              <div className="mb-1 flex items-center gap-2">
+                <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide", LEVEL_CLASS[update.level])}>
+                  {SOURCE_LABEL[update.source]}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(update.timestamp).toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                <span className="text-[11px] text-muted-foreground">
+                  {new Date(update.timestamp).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
                 </span>
                 <button
-                  onClick={() => deleteUpdate(update.id)}
-                  className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
-                  title="Eliminar notificación"
+                  onClick={() => setUpdates((prev) => prev.filter((item) => item.id !== update.id))}
+                  className="ml-auto rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted"
+                  title="Eliminar actualización"
                 >
-                  <X className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              <p className="text-sm pr-6">{update.message}</p>
+              <p className="text-xs text-foreground/90">{update.message}</p>
             </div>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
+

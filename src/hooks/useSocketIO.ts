@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useCallback, useSyncExternalStore } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -74,17 +74,17 @@ export function useSocketIO(): UseSocketIOReturn {
 
     // Connection events
     newSocket.on('connect', () => {
-      console.log('✅ Socket.IO connected to', SOCKET_URL);
+      console.log('Socket.IO connected to', SOCKET_URL);
       setConnectionState(true);
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('❌ Socket.IO disconnected:', reason);
+      console.log('Socket.IO disconnected:', reason);
       setConnectionState(false);
     });
 
     newSocket.on('connect_error', (error) => {
-      console.error('❌ Socket.IO connection error:', error.message);
+      console.error('Socket.IO connection error:', error.message);
       setConnectionState(false);
     });
 
@@ -93,7 +93,7 @@ export function useSocketIO(): UseSocketIOReturn {
     // Cleanup only when no more subscribers
     return () => {
       if (subscribers === 0 && socketInstance) {
-        console.log('🔌 Closing socket connection');
+        console.log('Closing socket connection');
         socketInstance.disconnect();
         socketInstance = null;
         setConnectionState(false);
@@ -166,3 +166,5 @@ export function useSocketIO(): UseSocketIOReturn {
     unsubscribe,
   };
 }
+
+

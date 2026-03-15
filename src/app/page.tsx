@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import dynamic from "next/dynamic"
 
@@ -8,7 +8,7 @@ const RealTimeUpdates = dynamic(() => import("@/components/dashboard/RealTimeUpd
 
 export default function Home() {
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-100 fixed inset-0">
+    <div className="fixed inset-0 flex h-screen w-screen overflow-hidden bg-background">
       <Sidebar />
       <main className="flex-1 relative overflow-hidden">
         <MapViewport />
@@ -17,3 +17,4 @@ export default function Home() {
     </div>
   )
 }
+

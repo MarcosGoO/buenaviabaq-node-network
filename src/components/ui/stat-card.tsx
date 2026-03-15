@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
@@ -27,7 +27,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-lg border bg-background/60 backdrop-blur-sm p-4 transition-all hover:bg-background/80 hover:shadow-lg",
+        "group relative overflow-hidden rounded-lg border bg-card/80 p-4 transition-colors hover:bg-card",
         className
       )}
       {...props}
@@ -52,7 +52,7 @@ export function StatCard({
                 trend.isPositive ? "text-emerald-600" : "text-red-600"
               )}
             >
-              {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
+              {trend.isPositive ? "Up" : "Down"} {Math.abs(trend.value)}%
             </p>
           )}
         </div>
@@ -65,3 +65,5 @@ export function StatCard({
     </div>
   )
 }
+
+

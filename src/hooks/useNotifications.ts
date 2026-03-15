@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { type Alert } from './useAlerts';
-import { type AppSettings } from './useSettings';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { type Alert } from "./useAlerts";
+import { type AppSettings } from "./useSettings";
 
 export interface Toast {
   id: string;
@@ -12,103 +12,105 @@ export interface Toast {
 
 const SEVERITY_ORDER = { low: 0, medium: 1, high: 2, critical: 3 } as const;
 
-function meetsMinSeverity(
-  alertSeverity: Alert['severity'],
-  minSeverity: AppSettings['minAlertSeverity']
-): boolean {
+function meetsMinSeverity(alertSeverity: Alert["severity"], minSeverity: AppSettings["minAlertSeverity"]): boolean {
   return SEVERITY_ORDER[alertSeverity] >= SEVERITY_ORDER[minSeverity];
 }
 
-// Duration (ms) for auto-dismiss by severity
-const TOAST_DURATION: Record<Alert['severity'], number> = {
+const TOAST_DURATION: Record<Alert["severity"], number> = {
   low: 4000,
   medium: 6000,
   high: 8000,
-  critical: 0, // critical → Web Notification only, no auto-dismiss toast
+  critical: 0,
 };
 
 interface UseNotificationsReturn {
   toasts: Toast[];
   dismissToast: (id: string) => void;
-  permissionState: NotificationPermission | 'unsupported';
+  permissionState: NotificationPermission | "unsupported";
   requestPermission: () => Promise<void>;
 }
 
 export function useNotifications(
   alerts: Alert[],
-  minAlertSeverity: AppSettings['minAlertSeverity'],
+  minAlertSeverity: AppSettings["minAlertSeverity"],
   showAlerts: boolean
 ): UseNotificationsReturn {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [permissionState, setPermissionState] = useState<NotificationPermission | 'unsupported'>(() => {
-    if (typeof window === 'undefined') return 'default';
-    if (!('Notification' in window)) return 'unsupported';
+  const [permissionState, setPermissionState] = useState<NotificationPermission | "unsupported">(() => {
+    if (typeof window === "undefined") return "default";
+    if (!("Notification" in window)) return "unsupported";
     return Notification.permission;
   });
+
   const seenIds = useRef<Set<string>>(new Set());
+  const timeoutMap = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const requestPermission = useCallback(async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (typeof window === "undefined" || !("Notification" in window)) return;
     const result = await Notification.requestPermission();
     setPermissionState(result);
   }, []);
 
-  // React to new alerts
   useEffect(() => {
     if (!showAlerts) return;
 
     alerts.forEach((alert) => {
-      // Skip already-processed alerts
       if (seenIds.current.has(alert.id)) return;
-
-      // Skip if below minAlertSeverity
       if (!meetsMinSeverity(alert.severity, minAlertSeverity)) return;
 
       seenIds.current.add(alert.id);
 
-      if (alert.severity === 'critical') {
-        // Web Notification for critical alerts
-        if (
-          typeof window !== 'undefined' &&
-          'Notification' in window &&
-          Notification.permission === 'granted'
-        ) {
+      if (alert.severity === "critical") {
+        if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
           try {
-            new Notification(`VíaBaq — ${alert.title}`, {
+            new Notification(`ViaBaq - ${alert.title}`, {
               body: alert.description,
-              icon: '/favicon.ico',
+              icon: "/favicon.ico",
               tag: alert.id,
               requireInteraction: true,
             });
           } catch {
-            // Silently ignore (e.g. service worker not registered in dev)
+            // Ignore notification API errors in unsupported environments.
           }
         }
-      } else {
-        // Toast notification for low/medium/high
-        const duration = TOAST_DURATION[alert.severity];
-        const toast: Toast = {
-          id: alert.id,
-          alert,
-          dismissAt: Date.now() + duration,
-        };
-
-        setToasts((prev) => {
-          if (prev.some((t) => t.id === alert.id)) return prev;
-          return [toast, ...prev];
-        });
-
-        // Auto-dismiss after duration
-        setTimeout(() => {
-          setToasts((prev) => prev.filter((t) => t.id !== alert.id));
-        }, duration);
+        return;
       }
+
+      const duration = TOAST_DURATION[alert.severity];
+      const toast: Toast = {
+        id: alert.id,
+        alert,
+        dismissAt: Date.now() + duration,
+      };
+
+      setToasts((prev) => (prev.some((item) => item.id === alert.id) ? prev : [toast, ...prev]));
+
+      const timeout = setTimeout(() => {
+        setToasts((prev) => prev.filter((item) => item.id !== alert.id));
+        timeoutMap.current.delete(alert.id);
+      }, duration);
+
+      timeoutMap.current.set(alert.id, timeout);
     });
   }, [alerts, minAlertSeverity, showAlerts]);
 
+  useEffect(() => {
+    const timeouts = timeoutMap.current;
+    return () => {
+      timeouts.forEach((timer) => clearTimeout(timer));
+      timeouts.clear();
+    };
+  }, []);
+
   const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    const timer = timeoutMap.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      timeoutMap.current.delete(id);
+    }
+    setToasts((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
   return { toasts, dismissToast, permissionState, requestPermission };
 }
+

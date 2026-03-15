@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import Link from "next/link"
@@ -36,7 +36,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
     return (
         <div
             className={cn(
-                "relative flex flex-col border-r bg-background shadow-xl z-20",
+                "relative flex flex-col border-r bg-background z-20",
                 "transition-[width] duration-300 ease-in-out will-change-[width]",
                 collapsed ? "w-20" : "w-72",
                 className
@@ -44,17 +44,17 @@ export function Sidebar({ className, ...props }: SidebarProps) {
             {...props}
         >
             {/* Header */}
-            <div className="flex h-16 items-center justify-between px-4 border-b bg-background/95 backdrop-blur-sm">
+            <div className="flex h-16 items-center justify-between px-4 border-b bg-background/95">
                 <div className={cn(
                     "transition-opacity duration-200",
                     collapsed ? "opacity-0 w-0" : "opacity-100"
                 )}>
                     {!collapsed && (
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-                                <Car className="h-4 w-4 text-primary-foreground" />
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Car className="h-4 w-4 text-primary" />
                             </div>
-                            <span className="font-extrabold tracking-tight text-lg text-foreground">
+                            <span className="text-lg font-bold tracking-tight text-foreground">
                                 BUENA<span className="text-primary">VIA</span>
                             </span>
                         </div>
@@ -65,11 +65,11 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     size="icon"
                     onClick={() => setCollapsed(!collapsed)}
                     className={cn(
-                        "h-9 w-9 rounded-lg hover:bg-accent transition-all hover:scale-105",
+                        "h-9 w-9 rounded-lg hover:bg-accent transition-colors",
                         collapsed && "mx-auto"
                     )}
                 >
-                    {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                    {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </Button>
             </div>
 
@@ -91,7 +91,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     {!collapsed && (
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
-                                <div className="h-1 w-1 bg-blue-500 rounded-full animate-pulse" />
+                                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
                                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
                                     Weather
                                 </span>
@@ -109,7 +109,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     {!collapsed && (
                         <div className="px-3 space-y-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
-                                <div className="h-1 w-1 bg-primary rounded-full animate-pulse" />
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
                                     Live Metrics
                                 </span>
@@ -137,15 +137,15 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     {!collapsed && plan && (
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
-                                <div className="h-1 w-1 bg-sky-500 rounded-full animate-pulse" />
+                                <div className="h-1.5 w-1.5 rounded-full bg-sky-500" />
                                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
                                     Planned Departure
                                 </span>
                             </div>
-                            <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4 space-y-3">
+                            <div className="rounded-xl border border-sky-500/25 bg-sky-500/10 p-4 space-y-3">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
-                                        <div className="flex items-center gap-2 text-sky-700">
+                                        <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300">
                                             <Clock3 className="h-4 w-4" />
                                             <span className="text-xs font-bold uppercase tracking-wider">Salida guardada</span>
                                         </div>
@@ -182,14 +182,14 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     {!collapsed && favoriteRoutePlan && (
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
-                                <div className="h-1 w-1 bg-violet-500 rounded-full animate-pulse" />
+                                <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
                                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
                                     Favorite Trip
                                 </span>
                             </div>
-                            <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-3">
+                            <div className="rounded-xl border border-violet-500/25 bg-violet-500/10 p-4 space-y-3">
                                 <div className="flex items-start justify-between gap-3">
-                                    <div className="flex items-center gap-2 text-violet-700">
+                                    <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
                                         <Bookmark className="h-4 w-4" />
                                         <span className="text-xs font-bold uppercase tracking-wider">Trayecto guardado</span>
                                     </div>
@@ -220,7 +220,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                 )}>
                     {!collapsed && (
                         <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold" suppressHydrationWarning>
-                            <span className="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-sm shadow-emerald-500/50" />
+                            <span className="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full " />
                             <span>System Online</span>
                         </div>
                     )}
@@ -253,12 +253,12 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavIte
             )}>
                 <div className={cn(
                     "flex items-center justify-center rounded-lg transition-all flex-shrink-0",
-                    "w-9 h-9",
+                    "h-9 w-9",
                     active
                         ? "bg-primary/10 text-primary"
                         : "text-muted-foreground group-hover:text-primary group-hover:bg-primary/5"
                 )}>
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4" />
                 </div>
 
                 {!collapsed && (
@@ -275,10 +275,9 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavIte
 
     const className = cn(
         "relative group rounded-xl transition-all duration-200 flex items-center",
-        "hover:scale-[1.02] active:scale-[0.98]",
         collapsed ? "h-12 w-12 mx-auto justify-center" : "h-12 w-full px-3",
         active
-            ? "bg-gradient-to-r from-primary/10 to-transparent shadow-sm"
+            ? "bg-primary/10"
             : "hover:bg-accent/50"
     );
 
@@ -296,3 +295,5 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavIte
         </button>
     )
 }
+
+
