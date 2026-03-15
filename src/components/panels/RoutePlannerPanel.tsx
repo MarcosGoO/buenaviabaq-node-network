@@ -241,9 +241,11 @@ function RouteCard({
 interface RoutePlannerPanelProps {
   onRouteSelect?: (route: CalcRoute | null) => void
   className?: string
+  panelClassName?: string
+  style?: React.CSSProperties
 }
 
-export function RoutePlannerPanel({ onRouteSelect, className }: RoutePlannerPanelProps) {
+export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, style }: RoutePlannerPanelProps) {
   const [isOpen, setIsOpen] = React.useState(false)
   const [origin, setOrigin] = React.useState<RouteCoord | null>(null)
   const [destination, setDestination] = React.useState<RouteCoord | null>(null)
@@ -326,22 +328,33 @@ export function RoutePlannerPanel({ onRouteSelect, className }: RoutePlannerPane
   const canCalculate = !!origin && !!destination && !isLoading
 
   return (
-    <div className={cn("pointer-events-auto", className)} suppressHydrationWarning>
+    <div className={cn("pointer-events-auto relative", className)} style={style} suppressHydrationWarning>
       {/* Toggle button */}
-      {!isOpen && (
-        <Button
-          size="icon"
-          className="h-11 w-11 rounded-full shadow-2xl bg-background/90 backdrop-blur-md hover:bg-background border-2 border-primary/20 transition-all hover:scale-110 active:scale-95"
-          onClick={() => setIsOpen(true)}
-          title="Planificar ruta"
-        >
-          <Navigation2 className="h-5 w-5 text-primary" />
-        </Button>
-      )}
+      <Button
+        size="icon"
+        className={cn(
+          "h-11 w-11 rounded-full border bg-background/90 backdrop-blur-md transition-colors",
+          "hover:bg-background",
+          isOpen ? "border-primary/40 shadow-md" : "border-primary/20 shadow-sm"
+        )}
+        onClick={() => setIsOpen((prev) => !prev)}
+        title="Planificar ruta"
+        aria-expanded={isOpen}
+        aria-controls="route-planner-panel"
+      >
+        <Navigation2 className="h-5 w-5 text-primary" />
+      </Button>
 
       {/* Panel */}
       {isOpen && (
-        <Card className="w-80 bg-background/95 backdrop-blur-xl shadow-2xl border border-border/50">
+        <Card
+          id="route-planner-panel"
+          className={cn(
+            "absolute left-0 top-14 w-[min(20rem,calc(100vw-2rem))] border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl",
+            "sm:left-[calc(100%+0.75rem)] sm:top-0",
+            panelClassName
+          )}
+        >
           <CardHeader className="p-4 pb-3">
             <CardTitle className="text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground flex items-center justify-between">
               <div className="flex items-center gap-2">

@@ -99,8 +99,18 @@ function AlertCard({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
   );
 }
 
-export function AlertsPanel() {
+interface AlertsPanelLayout {
+  isOpen: boolean;
+  height: number;
+}
+
+interface AlertsPanelProps {
+  onLayoutChange?: (layout: AlertsPanelLayout) => void;
+}
+
+export function AlertsPanel({ onLayoutChange }: AlertsPanelProps = {}) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const { alerts, dismissAlert, clearAll } = useAlerts();
   const { settings } = useSettings();
   const { toasts, dismissToast, permissionState, requestPermission } = useNotifications(
@@ -112,6 +122,25 @@ export function AlertsPanel() {
   const hasAlerts = alerts.length > 0;
   const visibleAlerts = alerts.slice(0, 4);
 
+  React.useEffect(() => {
+    if (!containerRef.current || !onLayoutChange) return;
+
+    const element = containerRef.current;
+    const emitLayout = () => {
+      onLayoutChange({
+        isOpen,
+        height: Math.round(element.getBoundingClientRect().height),
+      });
+    };
+
+    emitLayout();
+
+    const observer = new ResizeObserver(() => emitLayout());
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [isOpen, visibleAlerts.length, onLayoutChange]);
+
   return (
     <>
       <ToastContainer
@@ -121,20 +150,25 @@ export function AlertsPanel() {
         onRequestPermission={requestPermission}
       />
 
-      <div className="pointer-events-auto absolute left-4 top-4 z-50 flex flex-col gap-2" suppressHydrationWarning>
+      <div
+        ref={containerRef}
+        className="pointer-events-auto absolute left-4 top-4 z-50 flex flex-col gap-2"
+        suppressHydrationWarning
+      >
         <div
           className={cn(
             "transition-all duration-300",
-            isOpen ? "pointer-events-none h-0 w-0 scale-95 opacity-0" : "h-10 w-10 scale-100 opacity-100"
+            isOpen ? "pointer-events-none h-0 w-0 scale-95 opacity-0" : "h-11 w-11 scale-100 opacity-100"
           )}
         >
           <Button
+            variant="outline"
             size="icon"
-            className="h-10 w-10 rounded-full border border-border bg-card/95 shadow-sm backdrop-blur"
+            className="h-11 w-11 rounded-full border border-border/70 bg-background/90 shadow-sm backdrop-blur transition-colors hover:bg-background"
             onClick={() => setIsOpen(true)}
           >
             <div className="relative">
-              <Bell className="h-4 w-4 text-primary" />
+              <Bell className="h-5 w-5 text-primary" />
               {hasAlerts && <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-500" />}
             </div>
           </Button>

@@ -45,9 +45,21 @@ export function MapViewport() {
     const [activeRoute, setActiveRoute] = React.useState<Route | null>(null)
     const [isTimeTravelerOpen, setIsTimeTravelerOpen] = React.useState(true)
     const [isTimePanelReady, setIsTimePanelReady] = React.useState(false)
+    const [alertsLayout, setAlertsLayout] = React.useState({ isOpen: false, height: 40 })
     const mapRef = React.useRef<MapRef>(null)
 
     const recenterMap = () => {
+        if (mapRef.current) {
+            mapRef.current.flyTo({
+                center: [BARRANQUILLA_COORDS.longitude, BARRANQUILLA_COORDS.latitude],
+                zoom: BARRANQUILLA_COORDS.zoom,
+                pitch: BARRANQUILLA_COORDS.pitch,
+                bearing: BARRANQUILLA_COORDS.bearing,
+                duration: 900,
+                essential: true,
+            })
+            return
+        }
         setViewState(BARRANQUILLA_COORDS)
     }
 
@@ -83,6 +95,7 @@ export function MapViewport() {
     }, [isTimeTravelerOpen, isTimePanelReady])
 
     const routeGeoJSON = activeRoute ? routeToGeoJSON(activeRoute) : null
+    const plannerOffsetY = alertsLayout.isOpen ? Math.max(0, alertsLayout.height - 44 + 8) : 0
 
     return (
         <div className="relative h-full w-full overflow-hidden bg-background">
@@ -136,7 +149,7 @@ export function MapViewport() {
             <Button
                 size="icon"
                 variant="outline"
-                className="absolute bottom-32 right-4 h-10 w-10 rounded-full border bg-card/95 shadow-sm transition-colors z-10"
+                className="absolute bottom-[5.625rem] right-2 h-10 w-10 rounded-full border bg-card/95 shadow-sm transition-colors z-10"
                 onClick={recenterMap}
                 title="Recentrar mapa"
                 aria-label="Recentrar mapa"
@@ -175,17 +188,21 @@ export function MapViewport() {
             </div>
 
             {/* Top Left Overlay for Alerts */}
-            <AlertsPanel />
+            <AlertsPanel onLayoutChange={setAlertsLayout} />
 
-            {/* Top Right Overlay Stack */}
-            <div className="pointer-events-none absolute right-4 top-4 z-40 flex flex-col items-end gap-2">
-                <RoutePlannerPanel className="pointer-events-auto" onRouteSelect={setActiveRoute} />
-                {simulatedHour !== null && (
-                    <div className="pointer-events-auto rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 shadow-sm dark:text-amber-300">
-                        Historical - {simulatedHour}:00
-                    </div>
-                )}
-            </div>
+            {/* Route planner placed below alerts trigger; panel opens to the right on larger screens */}
+            <RoutePlannerPanel
+                className="absolute left-4 top-16 z-[52] transition-transform duration-300 ease-out"
+                onRouteSelect={setActiveRoute}
+                style={{ transform: `translateY(${plannerOffsetY}px)` }}
+            />
+
+            {/* Historical badge in top-left corner */}
+            {simulatedHour !== null && (
+                <div className="absolute left-16 top-4 z-30 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 shadow-sm dark:text-amber-300">
+                    Historical - {simulatedHour}:00
+                </div>
+            )}
 
             {/* Bottom left branding - fixed positioning */}
             <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none" suppressHydrationWarning>
