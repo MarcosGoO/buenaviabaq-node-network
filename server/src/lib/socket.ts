@@ -16,10 +16,28 @@ export class SocketService {
       return this.io;
     }
 
+    const isProduction = config.NODE_ENV === 'production';
+    const allowedOrigins = new Set<string>([
+      config.FRONTEND_URL,
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://192.168.64.1:3000',
+    ]);
+
     // Create Socket.IO server
     this.io = new SocketIOServer(httpServer, {
       cors: {
-        origin: config.FRONTEND_URL,
+        origin: (origin, callback) => {
+          if (!origin) {
+            callback(null, true);
+            return;
+          }
+          if (!isProduction) {
+            callback(null, true);
+            return;
+          }
+          callback(null, allowedOrigins.has(origin));
+        },
         methods: ['GET', 'POST'],
         credentials: true,
       },

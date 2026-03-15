@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { logger } from '@/utils/logger.js';
 import { config } from '@/config/index.js';
+import { getAdminSessionFromCookie, verifyAdminSessionToken } from '@/lib/adminSession.js';
 
 /**
  * Admin authentication middleware for sensitive operations.
@@ -9,6 +10,11 @@ import { config } from '@/config/index.js';
  * In non-production only, it can fall back to JWT_SECRET for local convenience.
  */
 export function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
+  const cookieToken = getAdminSessionFromCookie(req.headers.cookie);
+  if (cookieToken && verifyAdminSessionToken(cookieToken)) {
+    return next();
+  }
+
   const nodeEnv = process.env.NODE_ENV ?? config.NODE_ENV;
   const runtimeAdminKey = process.env.ADMIN_API_KEY;
   const runtimeJwtSecret = process.env.JWT_SECRET ?? config.JWT_SECRET;
@@ -37,7 +43,7 @@ export function requireAdminAuth(req: Request, res: Response, next: NextFunction
     logger.warn(`Rejected unauthorized admin request from ${req.ip} to ${req.path}`);
     return res.status(401).json({
       status: 'error',
-      message: 'Unauthorized: valid x-admin-key header required',
+      message: 'Unauthorized: admin session or valid x-admin-key header required',
     });
   }
 
@@ -51,7 +57,7 @@ export function requireAdminAuth(req: Request, res: Response, next: NextFunction
     logger.warn(`Rejected unauthorized admin request from ${req.ip} to ${req.path}`);
     return res.status(401).json({
       status: 'error',
-      message: 'Unauthorized: valid x-admin-key header required',
+      message: 'Unauthorized: admin session or valid x-admin-key header required',
     });
   }
 

@@ -119,9 +119,13 @@ export default function AdminDashboard() {
   const {
     modelHistory,
     health,
+    isAuthenticated,
     retrainStatus,
     isLoading,
     error,
+    checkSession,
+    loginWithAdminKey,
+    logout,
     fetchAll,
     triggerRetrain,
     rollbackModel,
@@ -134,10 +138,15 @@ export default function AdminDashboard() {
     { name: 'WebSocket (Socket.IO)', status: 'checking', icon: Wifi },
   ]);
 
-  // Fetch data on mount
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    async function bootstrap() {
+      const authenticated = await checkSession();
+      if (authenticated) {
+        await fetchAll();
+      }
+    }
+    void bootstrap();
+  }, [checkSession, fetchAll]);
 
   // Check all services health
   useEffect(() => {
@@ -197,8 +206,14 @@ export default function AdminDashboard() {
   }, []);
 
   const [confirmRollback, setConfirmRollback] = useState<string | null>(null);
+  const [adminKeyInput, setAdminKeyInput] = useState('');
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
 
   const handleRollback = (version: string) => {
+    if (!isAuthenticated) {
+      setAuthMessage('Inicia sesion admin para ejecutar rollback');
+      return;
+    }
     if (confirmRollback === version) {
       rollbackModel(version);
       setConfirmRollback(null);
@@ -217,7 +232,17 @@ export default function AdminDashboard() {
             Gestion de modelos, reentrenamiento y estado del sistema
           </p>
         </div>
-        <Button onClick={fetchAll} variant="outline" className="gap-2">
+        <Button
+          onClick={async () => {
+            if (!isAuthenticated) {
+              setAuthMessage('Inicia sesion admin para cargar operaciones sensibles');
+              return;
+            }
+            await fetchAll();
+          }}
+          variant="outline"
+          className="gap-2"
+        >
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           Actualizar
         </Button>
@@ -229,6 +254,55 @@ export default function AdminDashboard() {
           {error}
         </div>
       )}
+
+      <Card>
+        <CardContent className="p-4 flex flex-col gap-3 md:flex-row md:items-end">
+          <div className="flex-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Admin API Key</p>
+            <input
+              type="password"
+              value={adminKeyInput}
+              onChange={(e) => {
+                setAuthMessage(null);
+                setAdminKeyInput(e.target.value);
+              }}
+              placeholder="Pega aqui tu ADMIN_API_KEY"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          {!isAuthenticated ? (
+            <Button
+              variant="outline"
+              onClick={async () => {
+                const ok = await loginWithAdminKey(adminKeyInput);
+                if (!ok) {
+                  setAuthMessage('Credenciales invalidas o sesion no disponible');
+                  return;
+                }
+                setAdminKeyInput('');
+                setAuthMessage('Sesion iniciada');
+                await fetchAll();
+              }}
+            >
+              Iniciar Sesion
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                await logout();
+                setAuthMessage('Sesion cerrada');
+              }}
+            >
+              Cerrar Sesion
+            </Button>
+          )}
+          <span className={`text-xs font-medium ${isAuthenticated ? 'text-green-600' : 'text-muted-foreground'}`}>
+            {isAuthenticated ? 'Autenticado' : 'No autenticado'}
+          </span>
+          {authMessage && <span className="text-xs text-muted-foreground">{authMessage}</span>}
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="models" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -308,7 +382,7 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-4">
                 <Button
                   onClick={triggerRetrain}
-                  disabled={retrainStatus === 'queued'}
+                  disabled={retrainStatus === 'queued' || !isAuthenticated}
                   className="gap-2"
                 >
                   {retrainStatus === 'queued' ? (

@@ -93,9 +93,10 @@ export function AlertsPanel() {
             {/* Toggle Button when closed */}
             <div
                 className={cn(
-                    "transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+                    "transform transition-all duration-500",
                     isOpen ? "opacity-0 scale-90 h-0 w-0 overflow-hidden" : "opacity-100 scale-100 h-11 w-11"
                 )}
+                style={{ transitionTimingFunction: "cubic-bezier(0.34,1.56,0.64,1)" }}
                 suppressHydrationWarning
             >
                 <Button
@@ -115,9 +116,10 @@ export function AlertsPanel() {
             {/* Expanded Panel */}
             <div
                 className={cn(
-                    "flex flex-col gap-3 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-top-left",
+                    "flex flex-col gap-3 transition-all duration-500 origin-top-left",
                     isOpen ? "opacity-100 scale-100 translate-x-0" : "opacity-0 scale-95 -translate-x-4 pointer-events-none h-0"
                 )}
+                style={{ transitionTimingFunction: "cubic-bezier(0.34,1.56,0.64,1)" }}
                 suppressHydrationWarning
             >
                 <div className="flex items-center justify-between px-2 mb-1" suppressHydrationWarning>

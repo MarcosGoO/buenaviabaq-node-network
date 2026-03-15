@@ -37,7 +37,10 @@ function riskTone(score: number) {
 }
 
 export default function DepartureAdviceCard() {
-  const { advice, loading, error, refetch } = useDepartureAdvice(4, 30);
+  const { advice, loading, error, refetch } = useDepartureAdvice(4, 30, {
+    enabled: true,
+    pollMs: 5 * 60 * 1000,
+  });
 
   if (loading) {
     return (
@@ -192,4 +195,3 @@ export default function DepartureAdviceCard() {
     </Card>
   );
 }
-

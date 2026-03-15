@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { useSocketIO } from './useSocketIO';
+import { useEffect, useState, useCallback } from "react";
+import { useSocketIO } from "./useSocketIO";
 
 export interface Alert {
   id: string;
-  type: 'arroyo_flood_risk' | 'severe_congestion' | 'weather_traffic_impact' | 'event_traffic_impact';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "arroyo_flood_risk" | "severe_congestion" | "weather_traffic_impact" | "event_traffic_impact";
+  severity: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   affectedZones: number[];
@@ -27,6 +27,11 @@ interface AlertNotification {
   alert: Alert;
 }
 
+interface AlertsApiResponse {
+  success: boolean;
+  alerts?: Alert[];
+}
+
 interface UseAlertsReturn {
   alerts: Alert[];
   isConnected: boolean;
@@ -40,67 +45,61 @@ export function useAlerts(): UseAlertsReturn {
 
   useEffect(() => {
     if (!socket) {
-      console.log('⚠️ Socket not available for alerts');
       return;
     }
 
-    console.log('🚨 Setting up alerts subscription');
+    subscribe("alerts");
 
-    // Subscribe to alerts channel
-    subscribe('alerts');
-
-    // Handle alert notifications
     const handleAlertNotification = (data: AlertNotification) => {
-      console.log('🚨 Alert received:', data.alert);
-      console.log('🚨 Alert details:', {
-        id: data.alert.id,
-        title: data.alert.title,
-        severity: data.alert.severity,
-        timestamp: data.alert.timestamp
-      });
-
       setAlerts((prev) => {
-        // Check if alert already exists
-        const exists = prev.some(a => a.id === data.alert.id);
-        if (exists) {
-          console.log('ℹ️ Alert already exists, skipping');
-          return prev;
-        }
-
-        // Add new alert at the beginning
-        console.log('✅ Adding new alert to list. Total alerts:', prev.length + 1);
-        return [data.alert, ...prev];
+        const exists = prev.some((a) => a.id === data.alert.id);
+        return exists ? prev : [data.alert, ...prev];
       });
     };
 
-    socket.on('alert:notification', handleAlertNotification);
+    socket.on("alert:notification", handleAlertNotification);
 
-    // Fetch initial alerts from REST API
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-    console.log('🚨 Fetching initial alerts from:', `${apiUrl}/alerts/active`);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
     fetch(`${apiUrl}/alerts/active`)
-      .then(res => res.json())
-      .then(data => {
-        console.log('🚨 Initial alerts response:', data);
-        if (data.success && data.alerts) {
-          console.log('✅ Loaded', data.alerts.length, 'active alerts');
+      .then(async (res): Promise<AlertsApiResponse | null> => {
+        if (!res.ok) {
+          const rawError = await res.text();
+          console.warn("Alerts endpoint returned non-OK status", {
+            status: res.status,
+            body: rawError.slice(0, 120),
+          });
+          return null;
+        }
+
+        const contentType = res.headers.get("content-type") ?? "";
+        if (!contentType.includes("application/json")) {
+          const rawBody = await res.text();
+          console.warn("Alerts endpoint returned non-JSON payload", {
+            contentType,
+            body: rawBody.slice(0, 120),
+          });
+          return null;
+        }
+
+        return (await res.json()) as AlertsApiResponse;
+      })
+      .then((data) => {
+        if (data?.success && Array.isArray(data.alerts)) {
           setAlerts(data.alerts);
-        } else {
-          console.log('ℹ️ No active alerts found');
         }
       })
-      .catch(error => {
-        console.error('❌ Failed to fetch initial alerts:', error);
+      .catch((error) => {
+        console.warn("Failed to fetch initial alerts:", error);
       });
 
     return () => {
-      socket.off('alert:notification', handleAlertNotification);
+      socket.off("alert:notification", handleAlertNotification);
     };
   }, [socket, subscribe]);
 
   const dismissAlert = useCallback((alertId: string) => {
-    setAlerts((prev) => prev.filter(a => a.id !== alertId));
+    setAlerts((prev) => prev.filter((a) => a.id !== alertId));
   }, []);
 
   const clearAll = useCallback(() => {

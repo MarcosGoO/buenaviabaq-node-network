@@ -31,11 +31,55 @@ export function useMLAdmin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const checkSession = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/admin/session`, {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        setIsAuthenticated(false);
+        return false;
+      }
+      const json = (await res.json()) as { data?: { authenticated?: boolean } };
+      const authenticated = Boolean(json.data?.authenticated);
+      setIsAuthenticated(authenticated);
+      return authenticated;
+    } catch {
+      setIsAuthenticated(false);
+      return false;
+    }
+  }, []);
+
+  const loginWithAdminKey = useCallback(async (adminKey: string) => {
+    const key = adminKey.trim();
+    if (!key) return false;
+    const res = await fetch(`${API_BASE}/auth/admin/login`, {
+      method: 'POST',
+      headers: { 'x-admin-key': key },
+      credentials: 'include',
+    });
+    const ok = res.ok;
+    if (ok) setIsAuthenticated(true);
+    return ok;
+  }, []);
+
+  const logout = useCallback(async () => {
+    await fetch(`${API_BASE}/auth/admin/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(() => null);
+    setIsAuthenticated(false);
+  }, []);
+
   const fetchModelHistory = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await fetch(`${API_BASE}/ml/model-history`);
+      const res = await fetch(`${API_BASE}/ml/model-history`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setModelHistory(json.data || null);
@@ -61,7 +105,10 @@ export function useMLAdmin() {
     try {
       setRetrainStatus('queued');
       setError(null);
-      const res = await fetch(`${API_BASE}/ml/retrain`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/ml/retrain`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       // After triggering, refresh history after a delay
       setTimeout(() => fetchModelHistory(), 5000);
@@ -74,7 +121,10 @@ export function useMLAdmin() {
   const rollbackModel = useCallback(async (version: string) => {
     try {
       setError(null);
-      const res = await fetch(`${API_BASE}/ml/rollback/${version}`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/ml/rollback/${version}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await fetchModelHistory();
     } catch (err) {
@@ -91,9 +141,13 @@ export function useMLAdmin() {
   return {
     modelHistory,
     health,
+    isAuthenticated,
     retrainStatus,
     isLoading,
     error,
+    checkSession,
+    loginWithAdminKey,
+    logout,
     fetchModelHistory,
     fetchHealth,
     triggerRetrain,

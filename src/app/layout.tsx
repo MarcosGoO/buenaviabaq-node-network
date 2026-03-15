@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AlertNotifications } from "@/components/alerts/AlertNotifications";
 import { ConnectionStatus } from "@/components/alerts/ConnectionStatus";
 
 export const metadata: Metadata = {
@@ -20,7 +19,6 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         {children}
-        <AlertNotifications />
         <ConnectionStatus />
       </body>
     </html>

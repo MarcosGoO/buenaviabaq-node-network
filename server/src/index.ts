@@ -32,15 +32,37 @@ import alertsRoutes from '@/routes/alertsRoutes.js';
 import insightsRoutes from '@/routes/insightsRoutes.js';
 import routingRoutes from '@/routes/routingRoutes.js';
 import metricsRoutes from '@/routes/metricsRoutes.js';
+import authRoutes from '@/routes/authRoutes.js';
 import { CacheWarmupService } from '@/services/cacheWarmupService.js';
 
 const app: Application = express();
 const httpServer = createServer(app);
+const isProduction = config.NODE_ENV === 'production';
+const allowedOrigins = new Set<string>([
+  config.FRONTEND_URL,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://192.168.64.1:3000',
+]);
+
+const corsOriginValidator: cors.CorsOptions['origin'] = (origin, callback) => {
+  if (!origin) {
+    callback(null, true);
+    return;
+  }
+
+  if (!isProduction) {
+    callback(null, true);
+    return;
+  }
+
+  callback(null, allowedOrigins.has(origin));
+};
 
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: config.FRONTEND_URL,
+  origin: corsOriginValidator,
   credentials: true,
 }));
 
@@ -114,6 +136,7 @@ app.use(`/api/${config.API_VERSION}/alerts`, alertsLimiter, alertsRoutes);
 app.use(`/api/${config.API_VERSION}/insights`, insightsLimiter, insightsRoutes);
 app.use(`/api/${config.API_VERSION}/routes`, routingLimiter, routingRoutes);
 app.use(`/api/${config.API_VERSION}/metrics`, metricsLimiter, metricsRoutes);
+app.use(`/api/${config.API_VERSION}/auth`, authRoutes);
 
 // Error handling
 app.use(notFoundHandler);

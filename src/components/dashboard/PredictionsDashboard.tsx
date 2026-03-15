@@ -94,10 +94,17 @@ export default function PredictionsDashboard() {
         const res = await fetch(`${API_BASE}/traffic/realtime`);
         if (res.ok) {
           const json = await res.json();
-          const roadList = json.data || [];
-          setRoads(roadList);
-          if (roadList.length > 0) {
-            setSelectedRoad(roadList[0].id);
+          const roadList = (json.data || []) as TrafficRoad[];
+          const dedupedRoads = Array.from(
+            new Map(
+              roadList
+                .filter((road) => Number.isFinite(road.id) && typeof road.name === 'string' && road.name.length > 0)
+                .map((road) => [road.id, road])
+            ).values()
+          );
+          setRoads(dedupedRoads);
+          if (dedupedRoads.length > 0) {
+            setSelectedRoad(dedupedRoads[0].id);
           }
         }
       } catch {
@@ -178,7 +185,7 @@ export default function PredictionsDashboard() {
           </button>
           {dropdownOpen && (
             <div className="absolute right-0 top-full mt-1 w-64 max-h-64 overflow-y-auto bg-background border rounded-lg shadow-xl z-50">
-              {roads.map(road => (
+              {roads.map((road) => (
                 <button
                   key={road.id}
                   onClick={() => {

@@ -339,7 +339,7 @@ export class InsightsService {
         WHERE time >= NOW() - INTERVAL '1 hour'
       `;
 
-      const zonesQuery = `SELECT COUNT(*) as zone_count FROM zones`;
+      const zonesQuery = `SELECT COUNT(*) as zone_count FROM geo.zones`;
 
       const [trafficResult, zonesResult] = await Promise.all([
         pool.query(query),
@@ -637,13 +637,26 @@ export class InsightsService {
           ROUND(AVG(th.speed_kmh)) as avg_speed,
           MODE() WITHIN GROUP (ORDER BY th.congestion_level) as congestion_level,
           COUNT(DISTINCT th.road_id) as total_roads,
-          COALESCE(a.risk_level, 'none') as arroyo_risk_level
-        FROM zones z
-        LEFT JOIN traffic_history th ON ST_Contains(z.geom, th.location::geometry)
+          COALESCE(ar.risk_level, 'none') as arroyo_risk_level
+        FROM geo.zones z
+        LEFT JOIN traffic_history th ON th.zone_id = z.id
           AND th.time >= NOW() - INTERVAL '1 hour'
-        LEFT JOIN arroyos a ON ST_Intersects(z.geom, a.geom)
+        LEFT JOIN LATERAL (
+          SELECT az.risk_level
+          FROM geo.arroyo_zones az
+          WHERE az.zone_id = z.id
+          ORDER BY
+            CASE az.risk_level
+              WHEN 'critical' THEN 4
+              WHEN 'high' THEN 3
+              WHEN 'medium' THEN 2
+              WHEN 'low' THEN 1
+              ELSE 0
+            END DESC
+          LIMIT 1
+        ) ar ON true
         ${zoneId ? 'WHERE z.id = $1' : ''}
-        GROUP BY z.id, z.name, a.risk_level
+        GROUP BY z.id, z.name, ar.risk_level
         ORDER BY z.id
       `;
 

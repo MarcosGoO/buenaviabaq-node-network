@@ -22,14 +22,39 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
     const [loading, setLoading] = React.useState(true)
 
     React.useEffect(() => {
+        const configuredApiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+        const apiBase = configuredApiBase.replace(/\/$/, '')
+        const weatherUrl = apiBase.endsWith('/api/v1')
+            ? `${apiBase}/weather/current`
+            : `${apiBase}/api/v1/weather/current`
+
         async function fetchWeather() {
             try {
-                const response = await fetch('http://localhost:4000/api/v1/weather/current')
-                if (!response.ok) throw new Error('Failed to fetch weather')
+                const response = await fetch(weatherUrl)
+
+                if (!response.ok) {
+                    const errorBody = await response.text()
+                    console.warn('Weather endpoint returned non-OK status', {
+                        status: response.status,
+                        body: errorBody.slice(0, 120),
+                    })
+                    return
+                }
+
+                const contentType = response.headers.get('content-type') ?? ''
+                if (!contentType.includes('application/json')) {
+                    const rawBody = await response.text()
+                    console.warn('Weather endpoint returned non-JSON payload', {
+                        contentType,
+                        body: rawBody.slice(0, 120),
+                    })
+                    return
+                }
+
                 const data = await response.json()
                 setWeather(data.data)
             } catch (error) {
-                console.error('Weather fetch error:', error)
+                console.warn('Weather fetch error:', error)
             } finally {
                 setLoading(false)
             }

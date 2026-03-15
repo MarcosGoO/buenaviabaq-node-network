@@ -19,7 +19,8 @@
     "test:ui": "vitest --ui",
     "test:unit": "vitest run --dir tests/unit",
     "test:integration": "vitest run --dir tests/integration",
-    "test:e2e": "vitest run --dir tests/e2e"
+    "test:e2e": "vitest run --dir tests/e2e",
+    "preflight": "npm run typecheck && npm run lint && npm run build"
   },
   "keywords": [
     "traffic",

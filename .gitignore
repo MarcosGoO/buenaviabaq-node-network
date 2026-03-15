@@ -15,6 +15,9 @@ node_modules/
 # ============ ENVIRONMENT ============
 # Never commit environment files
 .env
+.env.*
+/server/.env
+/server/.env.*
 .env.local
 .env.development.local
 .env.test.local
@@ -132,7 +135,6 @@ out/
 
 # ============ TYPESCRIPT ============
 *.tsbuildinfo
-next-env.d.ts
 
 # ============ DOCUMENTATION ============
 # Only keep README.md and service READMEs in root/service dirs
@@ -196,13 +198,11 @@ docs/planning/BACKEND_PLAN.md
 docker-compose.override.yml
 
 # ============ PACKAGE MANAGERS ============
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 .pnpm-debug.log
 
 # Keep the lockfiles for production
-!package-lock.json
 !yarn.lock
 
 # ============ MISC ============

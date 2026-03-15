@@ -12,7 +12,11 @@ interface TimeTravelerProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function TimeTraveler({ className, onTimeChange, ...props }: TimeTravelerProps) {
     const [isPlaying, setIsPlaying] = React.useState(false)
-    const [hour, setHour] = React.useState(new Date().getHours())
+    const [hour, setHour] = React.useState(12)
+
+    React.useEffect(() => {
+        setHour(new Date().getHours())
+    }, [])
 
     // Auto-advance hour when playing
     React.useEffect(() => {

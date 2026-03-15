@@ -376,6 +376,11 @@ export class MLPredictionService {
         signal: AbortSignal.timeout(this.config.timeout),
       });
 
+      if (response.status === 404) {
+        logger.warn('ML service does not expose /models/history; returning null history');
+        return null;
+      }
+
       if (!response.ok) {
         const error = await response.text();
         throw new Error(`Model history error: ${response.status} - ${error}`);

@@ -25,6 +25,12 @@ export class WeatherHistoryService {
   static async storeWeatherSnapshot(): Promise<void> {
     try {
       const weather = await WeatherService.getCurrentWeather();
+      const weatherTimestamp = weather.timestamp instanceof Date
+        ? weather.timestamp
+        : new Date(weather.timestamp);
+      const safeTimestamp = Number.isNaN(weatherTimestamp.getTime())
+        ? new Date()
+        : weatherTimestamp;
 
       const query = `
         INSERT INTO weather_history (
@@ -58,7 +64,7 @@ export class WeatherHistoryService {
       `;
 
       const values = [
-        weather.timestamp.toISOString(),
+        safeTimestamp.toISOString(),
         weather.temperature,
         weather.feels_like,
         weather.humidity,
@@ -75,7 +81,7 @@ export class WeatherHistoryService {
 
       await pool.query(query, values);
 
-      logger.info(`Stored weather snapshot at ${weather.timestamp.toISOString()}`);
+      logger.info(`Stored weather snapshot at ${safeTimestamp.toISOString()}`);
     } catch (error) {
       logger.error('Error storing weather snapshot:', error);
       throw error;

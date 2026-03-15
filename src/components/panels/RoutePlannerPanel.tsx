@@ -250,7 +250,10 @@ export function RoutePlannerPanel({ onRouteSelect }: RoutePlannerPanelProps) {
   const [avoidCongestion, setAvoidCongestion] = React.useState(true)
 
   const { routes, selectedRoute, isLoading, error, calculateRoutes, selectRoute, clearRoutes } = useRouting()
-  const { advice, loading: adviceLoading } = useDepartureAdvice(4, 30)
+  const { advice, loading: adviceLoading } = useDepartureAdvice(4, 30, {
+    enabled: isOpen,
+    pollMs: 5 * 60 * 1000,
+  })
   const { plan, savePlan, clearPlan } = useDeparturePlan()
   const {
     plan: favoriteRoutePlan,

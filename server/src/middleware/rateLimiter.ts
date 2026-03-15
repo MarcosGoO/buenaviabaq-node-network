@@ -4,6 +4,14 @@ import { config } from '@/config/index.js';
 import { redis } from '@/lib/redis.js';
 
 const isTest = config.NODE_ENV === 'test';
+const isDev = config.NODE_ENV === 'development';
+
+function withDevHeadroom(max: number): number {
+  // In development we intentionally raise limits to avoid noisy local 429s
+  // produced by multiple dashboard widgets polling in parallel.
+  if (!isDev) return max;
+  return Math.max(max * 20, 1000);
+}
 
 function createLimiter(options: {
   windowMs: number;
@@ -13,7 +21,7 @@ function createLimiter(options: {
 }) {
   const baseConfig: Partial<Options> = {
     windowMs: options.windowMs,
-    max: options.max,
+    max: withDevHeadroom(options.max),
     message: options.message,
     standardHeaders: true,
     legacyHeaders: false,
@@ -32,7 +40,7 @@ function createLimiter(options: {
 
 export const globalApiLimiter = createLimiter({
   windowMs: config.RATE_LIMIT_WINDOW_MS,
-  max: config.NODE_ENV === 'development' ? 500 : config.RATE_LIMIT_MAX_REQUESTS,
+  max: config.NODE_ENV === 'development' ? 2000 : config.RATE_LIMIT_MAX_REQUESTS,
   message: 'Too many requests from this IP, please try again later.',
   keyPrefix: 'rl:global:',
 });
@@ -71,4 +79,3 @@ export const metricsLimiter = createLimiter({
   message: 'Too many metrics requests, please try again later.',
   keyPrefix: 'rl:metrics:',
 });
-

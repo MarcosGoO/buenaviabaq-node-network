@@ -94,17 +94,38 @@ export function useRouting(): UseRoutingReturn {
           },
         }),
       });
+      const contentType = response.headers.get('content-type') ?? '';
+      let data: unknown = null;
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || `Error ${response.status}`);
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const bodyText = await response.text();
+        if (!response.ok) {
+          throw new Error(bodyText || `Error ${response.status}`);
+        }
       }
 
-      if ((data.success || data.status === 'success') && Array.isArray(data.data)) {
-        setRoutes(data.data);
+      if (!response.ok) {
+        const message =
+          typeof data === 'object' &&
+          data !== null &&
+          'message' in data &&
+          typeof (data as { message?: unknown }).message === 'string'
+            ? (data as { message: string }).message
+            : `Error ${response.status}`;
+        throw new Error(message);
+      }
+
+      const payload =
+        typeof data === 'object' && data !== null
+          ? (data as { success?: boolean; status?: string; data?: Route[] })
+          : null;
+
+      if (payload && (payload.success || payload.status === 'success') && Array.isArray(payload.data)) {
+        setRoutes(payload.data);
         // Auto-select the best route (first = highest score)
-        setSelectedRoute(data.data[0] ?? null);
+        setSelectedRoute(payload.data[0] ?? null);
       } else {
         throw new Error('Unexpected response format');
       }

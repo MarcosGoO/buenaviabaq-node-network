@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { useSocketIO } from './useSocketIO';
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useSocketIO } from "./useSocketIO";
 
 export interface TrafficRoad {
   id: number;
   name: string;
-  congestion_level: 'free' | 'light' | 'moderate' | 'heavy' | 'severe';
+  congestion_level: "free" | "light" | "moderate" | "heavy" | "severe";
   speed_kmh: number;
   travel_time_minutes: number;
 }
@@ -38,80 +38,81 @@ export function useTrafficData(): UseTrafficDataReturn {
   const [summary, setSummary] = useState<TrafficSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cooldownUntilRef = useRef(0);
 
   const fetchTrafficData = useCallback(async () => {
+    if (Date.now() < cooldownUntilRef.current) return;
+
     try {
       setIsLoading(true);
       setError(null);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-      const [response, summaryResponse] = await Promise.all([
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+      const [roadsRes, summaryRes] = await Promise.all([
         fetch(`${apiUrl}/traffic/realtime`),
         fetch(`${apiUrl}/traffic/summary`),
       ]);
 
-      if (!response.ok) {
-        // If rate limited, just log and continue with existing state
-        if (response.status === 429) {
-          console.warn('Rate limited - traffic will load on next retry');
-          setError('Rate limited - retrying soon');
-          setIsLoading(false);
+      if (!roadsRes.ok) {
+        if (roadsRes.status === 429) {
+          cooldownUntilRef.current = Date.now() + 60_000;
+          setError("Rate limited - retrying soon");
           return;
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${roadsRes.status}`);
       }
 
-      const data = await response.json();
-
-      // Backend returns status: "success" not success: true
-      if ((data.success || data.status === 'success') && data.data) {
-        setRoads(data.data);
-      }
-
-      if (summaryResponse.ok) {
-        const summaryData = await summaryResponse.json();
-        if ((summaryData.success || summaryData.status === 'success') && summaryData.data) {
-          setSummary(summaryData.data);
+      const roadsContentType = roadsRes.headers.get("content-type") ?? "";
+      if (roadsContentType.includes("application/json")) {
+        const roadsData = (await roadsRes.json()) as { success?: boolean; status?: string; data?: TrafficRoad[] };
+        if ((roadsData.success || roadsData.status === "success") && Array.isArray(roadsData.data)) {
+          setRoads(roadsData.data);
         }
-      } else if (summaryResponse.status === 429) {
-        console.warn('Rate limited on traffic summary');
+      }
+
+      if (summaryRes.ok) {
+        const summaryContentType = summaryRes.headers.get("content-type") ?? "";
+        if (summaryContentType.includes("application/json")) {
+          const summaryData = (await summaryRes.json()) as {
+            success?: boolean;
+            status?: string;
+            data?: TrafficSummary;
+          };
+          if ((summaryData.success || summaryData.status === "success") && summaryData.data) {
+            setSummary(summaryData.data);
+          }
+        }
+      } else if (summaryRes.status === 429) {
+        cooldownUntilRef.current = Date.now() + 60_000;
       }
     } catch (err) {
-      console.error('Failed to fetch traffic data:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    // Fetch initial data
     fetchTrafficData();
   }, [fetchTrafficData]);
 
   useEffect(() => {
     if (!socket) return;
 
-    // Subscribe to traffic updates
-    subscribe('traffic');
+    subscribe("traffic");
 
-    // Handle traffic updates via WebSocket
     const handleTrafficUpdate = (data: TrafficUpdate) => {
-      console.log('🚗 Traffic update received:', data);
-
-      if (data.roads) {
+      if (Array.isArray(data.roads)) {
         setRoads(data.roads);
       }
-
       if (data.summary) {
         setSummary(data.summary);
       }
     };
 
-    socket.on('traffic:update', handleTrafficUpdate);
-
+    socket.on("traffic:update", handleTrafficUpdate);
     return () => {
-      socket.off('traffic:update', handleTrafficUpdate);
+      socket.off("traffic:update", handleTrafficUpdate);
     };
   }, [socket, subscribe]);
 

@@ -125,6 +125,14 @@ curl http://localhost:4000/health
 **Frontend:**
 Open browser → `http://localhost:3000`
 
+### Preflight Before Push
+
+```bash
+npm run preflight
+```
+
+See [docs/ADMIN_AUTH_AND_PREFLIGHT.md](docs/ADMIN_AUTH_AND_PREFLIGHT.md) for admin session auth and smoke checks.
+
 ---
 
 ## Project Structure

@@ -70,6 +70,13 @@ const TREND_ICON = { improving: TrendingUp, stable: Minus, worsening: TrendingDo
 const TREND_COLOR = { improving: 'text-green-600', stable: 'text-muted-foreground', worsening: 'text-red-600' }
 const CONGESTION_COLOR: Record<string, string> = { low: '#22c55e', moderate: '#eab308', high: '#f97316', severe: '#ef4444' }
 
+async function parseJsonIfAvailable(response: Response): Promise<{ data?: unknown } | null> {
+  if (!response.ok) return null;
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) return null;
+  return (await response.json()) as { data?: unknown };
+}
+
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
@@ -108,17 +115,19 @@ export default function AnalyticsDashboard() {
         fetch(`${API_BASE}/insights/summary`).catch(() => null),
       ]);
 
-      const hourlyData = await hourlyRes.json();
-      const hotspotsData = await hotspotsRes.json();
-      const weatherData = await weatherRes.json();
+      const [hourlyData, hotspotsData, weatherData] = await Promise.all([
+        parseJsonIfAvailable(hourlyRes),
+        parseJsonIfAvailable(hotspotsRes),
+        parseJsonIfAvailable(weatherRes),
+      ]);
 
-      setHourlyPattern(hourlyData.data || []);
-      setHotspots(hotspotsData.data || []);
-      setWeatherImpact(weatherData.data || []);
+      setHourlyPattern((hourlyData?.data as HourlyPattern[]) || []);
+      setHotspots((hotspotsData?.data as Hotspot[]) || []);
+      setWeatherImpact((weatherData?.data as WeatherImpact[]) || []);
 
       if (summaryRes?.ok) {
-        const summaryData = await summaryRes.json();
-        setSummary(summaryData.data ?? null);
+        const summaryData = await parseJsonIfAvailable(summaryRes);
+        setSummary((summaryData?.data as ExecutiveSummary | undefined) ?? null);
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -133,7 +142,7 @@ export default function AnalyticsDashboard() {
       try {
         const res = await fetch(`${API_BASE}/traffic/realtime`);
         if (res.ok) {
-          const json = await res.json();
+          const json = await parseJsonIfAvailable(res);
           const list = (json.data || []).map((r: { id: number; name: string }) => ({ id: r.id, name: r.name }));
           setRoads(list);
         }

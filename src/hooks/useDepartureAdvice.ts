@@ -29,12 +29,27 @@ export interface DepartureAdvice {
   };
 }
 
-export function useDepartureAdvice(hours = 4, interval = 30) {
+interface UseDepartureAdviceOptions {
+  enabled?: boolean;
+  pollMs?: number;
+}
+
+export function useDepartureAdvice(
+  hours = 4,
+  interval = 30,
+  options: UseDepartureAdviceOptions = {}
+) {
+  const { enabled = true, pollMs = 2 * 60 * 1000 } = options;
   const [advice, setAdvice] = useState<DepartureAdvice | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchAdvice = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -44,24 +59,38 @@ export function useDepartureAdvice(hours = 4, interval = 30) {
       );
 
       if (!response.ok) {
+        if (response.status === 429) {
+          setError("Servicio ocupado temporalmente. Reintentando...");
+          return;
+        }
         throw new Error("Failed to fetch departure advice");
       }
 
-      const payload = await response.json();
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        setError("Respuesta invalida del servicio de recomendaciones.");
+        return;
+      }
+
+      const payload = (await response.json()) as { data?: DepartureAdvice };
       setAdvice(payload.data ?? null);
     } catch {
       setError("No fue posible cargar la recomendacion de salida.");
     } finally {
       setLoading(false);
     }
-  }, [hours, interval]);
+  }, [enabled, hours, interval]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     fetchAdvice();
 
-    const timer = setInterval(fetchAdvice, 2 * 60 * 1000);
+    const timer = setInterval(fetchAdvice, pollMs);
     return () => clearInterval(timer);
-  }, [fetchAdvice]);
+  }, [enabled, fetchAdvice, pollMs]);
 
   return {
     advice,
@@ -70,4 +99,3 @@ export function useDepartureAdvice(hours = 4, interval = 30) {
     refetch: fetchAdvice,
   };
 }
-

@@ -51,12 +51,38 @@ export function usePredictions() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getErrorMessage = useCallback((status: number) => {
+    if (status === 503) {
+      return 'Servicio ML no disponible o modelo no entrenado.';
+    }
+    if (status === 429) {
+      return 'Demasiadas solicitudes. Intenta de nuevo en unos segundos.';
+    }
+    if (status === 401) {
+      return 'No autorizado para consultar predicciones.';
+    }
+    return `HTTP ${status}`;
+  }, []);
+
+  const isMLAvailable = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/predictions/health`);
+      if (!res.ok) return false;
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!contentType.includes('application/json')) return false;
+      const json = (await res.json()) as { data?: { ml_service_available?: boolean } };
+      return Boolean(json.data?.ml_service_available);
+    } catch {
+      return false;
+    }
+  }, []);
+
   const fetchTimeline = useCallback(async (roadId: number) => {
     try {
       setIsLoading(true);
       setError(null);
       const res = await fetch(`${API_BASE}/predictions/road/${roadId}/timeline`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error(getErrorMessage(res.status));
       const json = await res.json();
       setTimeline(json.data?.timeline || []);
     } catch (err) {
@@ -64,41 +90,50 @@ export function usePredictions() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [getErrorMessage]);
 
   const fetchExplanation = useCallback(async (roadId: number) => {
     try {
       setError(null);
       const res = await fetch(`${API_BASE}/predictions/road/${roadId}/explanation`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error(getErrorMessage(res.status));
       const json = await res.json();
       setExplanation(json.data || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error fetching explanation');
     }
-  }, []);
+  }, [getErrorMessage]);
 
   const fetchArroyoRisk = useCallback(async () => {
     try {
       setError(null);
       const res = await fetch(`${API_BASE}/predictions/arroyo-risk`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error(getErrorMessage(res.status));
       const json = await res.json();
       setArroyoRisk(json.data || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error fetching arroyo risk');
     }
-  }, []);
+  }, [getErrorMessage]);
 
   const fetchAll = useCallback(async (roadId: number) => {
     setIsLoading(true);
+    const mlReady = await isMLAvailable();
+    if (!mlReady) {
+      setTimeline([]);
+      setExplanation(null);
+      setArroyoRisk(null);
+      setError('Servicio ML no disponible o modelo no entrenado.');
+      setIsLoading(false);
+      return;
+    }
     await Promise.all([
       fetchTimeline(roadId),
       fetchExplanation(roadId),
       fetchArroyoRisk(),
     ]);
     setIsLoading(false);
-  }, [fetchTimeline, fetchExplanation, fetchArroyoRisk]);
+  }, [fetchTimeline, fetchExplanation, fetchArroyoRisk, isMLAvailable]);
 
   return {
     timeline,
