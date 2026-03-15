@@ -49,10 +49,10 @@ export function MapViewport() {
 
     // When the user moves the slider, simulate historical data for that hour.
     // null = live mode (current real data)
-    const handleTimeChange = (hour: number) => {
+    const handleTimeChange = React.useCallback((hour: number) => {
         const currentHour = new Date().getHours()
         setSimulatedHour(hour === currentHour ? null : hour)
-    }
+    }, [])
 
     const routeGeoJSON = activeRoute ? routeToGeoJSON(activeRoute) : null
 

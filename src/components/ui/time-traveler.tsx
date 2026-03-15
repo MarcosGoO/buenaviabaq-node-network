@@ -13,28 +13,32 @@ interface TimeTravelerProps extends React.HTMLAttributes<HTMLDivElement> {
 export function TimeTraveler({ className, onTimeChange, ...props }: TimeTravelerProps) {
     const [isPlaying, setIsPlaying] = React.useState(false)
     const [hour, setHour] = React.useState(12)
+    const hourRef = React.useRef(12)
 
     React.useEffect(() => {
-        setHour(new Date().getHours())
+        const currentHour = new Date().getHours()
+        hourRef.current = currentHour
+        setHour(currentHour)
     }, [])
 
     // Auto-advance hour when playing
     React.useEffect(() => {
         if (!isPlaying) return
         const timer = setInterval(() => {
-            setHour(prev => {
-                const next = (prev + 1) % 24
-                onTimeChange?.(next)
-                return next
-            })
+            const next = (hourRef.current + 1) % 24
+            hourRef.current = next
+            setHour(next)
+            onTimeChange?.(next)
         }, 1500)
         return () => clearInterval(timer)
     }, [isPlaying, onTimeChange])
 
     const handleSliderChange = (value: number[]) => {
         setIsPlaying(false)
-        setHour(value[0])
-        onTimeChange?.(value[0])
+        const selectedHour = value[0]
+        hourRef.current = selectedHour
+        setHour(selectedHour)
+        onTimeChange?.(selectedHour)
     }
 
     const togglePlay = () => {
