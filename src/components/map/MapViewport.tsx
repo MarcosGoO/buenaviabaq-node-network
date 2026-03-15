@@ -149,7 +149,7 @@ export function MapViewport() {
             <Button
                 size="icon"
                 variant="outline"
-                className="focus-ring absolute bottom-[5.625rem] right-2 h-10 w-10 rounded-full overlay-surface transition-colors z-10 hover:bg-card"
+                className="focus-ring interactive-soft surface-lift absolute bottom-[5.625rem] right-2 z-10 h-10 w-10 rounded-full overlay-surface hover:bg-muted/60"
                 onClick={recenterMap}
                 title="Recentrar mapa"
                 aria-label="Recentrar mapa"
@@ -162,7 +162,7 @@ export function MapViewport() {
                     <div
                         id="time-simulation-panel"
                         className={[
-                            "w-full overflow-hidden origin-bottom transition-all duration-300 ease-out",
+                            "fade-slide-up w-full overflow-hidden origin-bottom",
                             isTimePanelReady && isTimeTravelerOpen
                                 ? "max-h-[420px] translate-y-0 scale-100 opacity-100 pointer-events-auto"
                                 : "max-h-0 translate-y-6 scale-[0.98] opacity-0 pointer-events-none",
@@ -175,8 +175,10 @@ export function MapViewport() {
                         type="button"
                         aria-controls="time-simulation-panel"
                         aria-expanded={isTimeTravelerOpen}
+                        aria-label={isTimeTravelerOpen ? "Ocultar simulacion de tiempo" : "Mostrar simulacion de tiempo"}
+                        title={isTimeTravelerOpen ? "Ocultar simulacion" : "Mostrar simulacion"}
                         onClick={() => setIsTimeTravelerOpen((prev) => !prev)}
-                        className="focus-ring pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full overlay-surface px-2.5 text-[11px] font-medium text-foreground transition-all duration-200 hover:bg-card sm:h-8 sm:px-3"
+                        className="focus-ring interactive-soft surface-lift pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full overlay-surface px-3 text-[11px] font-medium text-foreground hover:bg-muted/60 sm:h-9 sm:px-3"
                     >
                         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted/70 text-muted-foreground">
                             {isTimeTravelerOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
@@ -192,17 +194,25 @@ export function MapViewport() {
 
             {/* Route planner placed below alerts trigger; panel opens to the right on larger screens */}
             <RoutePlannerPanel
-                className="absolute left-4 top-16 z-[52] transition-transform duration-300 ease-out"
+                className="fade-enter absolute left-4 top-16 z-[52]"
                 onRouteSelect={setActiveRoute}
                 style={{ transform: `translateY(${plannerOffsetY}px)` }}
             />
 
             {/* Historical badge in top-left corner */}
-            {simulatedHour !== null && (
-                <div className="absolute left-16 top-4 z-30 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-800 shadow-sm dark:text-amber-300">
-                    Historical - {simulatedHour}:00
-                </div>
-            )}
+            <div
+                className={[
+                    "fade-enter pointer-events-none absolute left-16 top-4 z-30 rounded-full border border-amber-500/35 bg-amber-500/15 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-amber-800 shadow-sm dark:text-amber-300",
+                    simulatedHour !== null ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
+                ].join(" ")}
+                aria-hidden={simulatedHour === null}
+            >
+                {simulatedHour !== null && (
+                    <>
+                    Historico - {simulatedHour}:00
+                    </>
+                )}
+            </div>
 
             {/* Bottom left branding - fixed positioning */}
             <div className="absolute bottom-4 left-4 text-[10px] text-muted-foreground/50 font-medium tracking-wide pointer-events-none select-none" suppressHydrationWarning>

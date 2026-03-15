@@ -84,8 +84,8 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
 
   if (loading) {
     return (
-      <div className={cn("animate-pulse rounded-lg border bg-card p-3", className)} {...props}>
-        <div className="h-14 rounded bg-muted" />
+      <div className={cn("overlay-surface fade-enter rounded-lg p-3", className)} {...props}>
+        <div className="h-14 rounded bg-muted/60" />
       </div>
     )
   }
@@ -103,7 +103,7 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
                 <span className="text-lg font-semibold tracking-tight">{weather.temperature}</span>
                 <span className="text-xs text-muted-foreground">°C</span>
               </div>
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{weather.location}</p>
+              <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{weather.location}</p>
             </div>
           </div>
           <div className="flex flex-col items-end gap-0.5">
@@ -130,7 +130,7 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
             <span className="text-2xl font-semibold tracking-tight">{weather.temperature}</span>
             <span className="text-sm text-muted-foreground">°C</span>
           </div>
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{weather.location}</p>
+          <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{weather.location}</p>
         </div>
       </div>
 
@@ -138,17 +138,17 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
         <div className="rounded-md border bg-muted/30 py-1.5 text-center">
           <Droplets className="mx-auto h-3.5 w-3.5 text-blue-500" />
           <span className="text-xs font-semibold">{weather.humidity}%</span>
-          <p className="text-[10px] uppercase text-muted-foreground">Humidity</p>
+          <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Humedad</p>
         </div>
         <div className="rounded-md border bg-muted/30 py-1.5 text-center">
           <Wind className="mx-auto h-3.5 w-3.5 text-emerald-500" />
           <span className="text-xs font-semibold">{weather.wind_speed}</span>
-          <p className="text-[10px] uppercase text-muted-foreground">km/h</p>
+          <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">km/h</p>
         </div>
         <div className="rounded-md border bg-muted/30 py-1.5 text-center">
           <CloudRain className="mx-auto h-3.5 w-3.5 text-indigo-500" />
           <span className="text-xs font-semibold">{weather.rain_probability}%</span>
-          <p className="text-[10px] uppercase text-muted-foreground">Rain</p>
+          <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Lluvia</p>
         </div>
       </div>
     </div>

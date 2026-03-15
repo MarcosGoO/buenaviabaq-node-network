@@ -65,7 +65,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     size="icon"
                     onClick={() => setCollapsed(!collapsed)}
                     className={cn(
-                        "h-9 w-9 rounded-lg hover:bg-accent transition-colors",
+                        "focus-ring interactive-soft h-9 w-9 rounded-lg hover:bg-muted/60",
                         collapsed && "mx-auto"
                     )}
                 >
@@ -92,7 +92,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
+                                <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/80 font-medium">
                                     Weather
                                 </span>
                             </div>
@@ -110,7 +110,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3 space-y-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
+                                <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/80 font-medium">
                                     Live Metrics
                                 </span>
                             </div>
@@ -138,7 +138,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-sky-500" />
-                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
+                                <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/80 font-medium">
                                     Planned Departure
                                 </span>
                             </div>
@@ -147,26 +147,27 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                                     <div>
                                         <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300">
                                             <Clock3 className="h-4 w-4" />
-                                            <span className="text-xs font-bold uppercase tracking-wider">Salida guardada</span>
+                                            <span className="text-xs font-semibold uppercase tracking-[0.12em]">Salida guardada</span>
                                         </div>
                                         <p className="mt-2 text-2xl font-semibold text-foreground">{formatPlanTime(plan.departureTime)}</p>
                                     </div>
                                     <button
                                         onClick={clearPlan}
-                                        className="rounded-full p-1 text-muted-foreground hover:bg-background/70 hover:text-foreground transition-colors"
+                                        className="focus-ring interactive-soft rounded-full p-1 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                                         title="Quitar plan"
+                                        aria-label="Quitar plan"
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="rounded-xl bg-background/80 px-3 py-2">
-                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Riesgo</p>
-                                        <p className="mt-1 text-sm font-bold">{plan.riskScore}/100</p>
+                                        <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Riesgo</p>
+                                        <p className="mt-1 text-sm font-semibold">{plan.riskScore}/100</p>
                                     </div>
                                     <div className="rounded-xl bg-background/80 px-3 py-2">
-                                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Lluvia</p>
-                                        <p className="mt-1 text-sm font-bold">{plan.rainProbability}%</p>
+                                        <p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Lluvia</p>
+                                        <p className="mt-1 text-sm font-semibold">{plan.rainProbability}%</p>
                                     </div>
                                 </div>
                                 <p className="text-xs leading-relaxed text-muted-foreground">{plan.recommendation}</p>
@@ -183,7 +184,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
-                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
+                                <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/80 font-medium">
                                     Favorite Trip
                                 </span>
                             </div>
@@ -191,20 +192,21 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
                                         <Bookmark className="h-4 w-4" />
-                                        <span className="text-xs font-bold uppercase tracking-wider">Trayecto guardado</span>
+                                        <span className="text-xs font-semibold uppercase tracking-[0.12em]">Trayecto guardado</span>
                                     </div>
                                     <button
                                         onClick={clearFavoriteRoutePlan}
-                                        className="rounded-full p-1 text-muted-foreground hover:bg-background/70 hover:text-foreground transition-colors"
+                                        className="focus-ring interactive-soft rounded-full p-1 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                                         title="Quitar trayecto"
+                                        aria-label="Quitar trayecto"
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </button>
                                 </div>
                                 <div className="rounded-xl bg-background/80 px-3 py-3">
-                                    <p className="text-sm font-bold text-foreground">{favoriteRoutePlan.originLabel}</p>
-                                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1">hacia</p>
-                                    <p className="mt-1 text-sm font-bold text-foreground">{favoriteRoutePlan.destinationLabel}</p>
+                                    <p className="text-sm font-semibold text-foreground">{favoriteRoutePlan.originLabel}</p>
+                                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">hacia</p>
+                                    <p className="mt-1 text-sm font-semibold text-foreground">{favoriteRoutePlan.destinationLabel}</p>
                                 </div>
                             </div>
                         </div>
@@ -219,7 +221,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     collapsed ? "opacity-0 h-0" : "opacity-100"
                 )}>
                     {!collapsed && (
-                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold" suppressHydrationWarning>
+                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.1em] text-muted-foreground/80 font-medium" suppressHydrationWarning>
                             <span className="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full " />
                             <span>System Online</span>
                         </div>
@@ -274,7 +276,7 @@ function NavItem({ icon: Icon, label, collapsed, active, onClick, href }: NavIte
     );
 
     const className = cn(
-        "relative group rounded-xl transition-all duration-200 flex items-center",
+        "interactive-soft relative group rounded-xl duration-200 flex items-center",
         collapsed ? "h-12 w-12 mx-auto justify-center" : "h-12 w-full px-3",
         active
             ? "bg-primary/10"

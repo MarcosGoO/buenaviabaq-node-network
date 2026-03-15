@@ -101,11 +101,13 @@ function CoordInput({
       <button
         onClick={() => setShowPresets(v => !v)}
         className={cn(
-          "w-full flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition-all",
-          "bg-background/80 hover:bg-muted/60 text-xs font-medium",
+          "focus-ring interactive-soft w-full flex items-center gap-2 rounded-xl border px-3 py-2 text-left",
+          "bg-background/80 text-xs font-medium hover:bg-muted/60",
           value ? "border-border/60" : "border-dashed border-border/40 text-muted-foreground",
           showPresets && "ring-1 ring-primary/30 border-primary/30"
         )}
+        aria-expanded={showPresets}
+        aria-label={`Seleccionar ${label.toLowerCase()}`}
       >
         <Icon className={cn("h-3.5 w-3.5 shrink-0", value ? iconColor : "text-muted-foreground/50")} />
         <span className="truncate">{selectedLabel ?? label}</span>
@@ -118,7 +120,7 @@ function CoordInput({
             <button
               key={p.label}
               onClick={() => { onChange(p.coord); setShowPresets(false) }}
-              className="focus-ring w-full px-3 py-2 text-xs text-left hover:bg-muted/60 flex items-center gap-2 transition-colors"
+              className="focus-ring interactive-soft w-full px-3 py-2 text-xs text-left hover:bg-muted/60 flex items-center gap-2"
             >
               <MapPin className="h-3 w-3 text-muted-foreground/50 shrink-0" />
               {p.label}
@@ -156,10 +158,10 @@ function RouteCard({
     >
       {/* Header row */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground">
+        <span className="text-[11px] font-medium tracking-[0.1em] uppercase text-muted-foreground">
           {labels[index] ?? `Ruta ${index + 1}`}
         </span>
-        <div className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-bold", scoreBg(route.overall_score))}>
+        <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold", scoreBg(route.overall_score))}>
           <span className={scoreColor(route.overall_score)}>{route.overall_score}</span>
           <span className="text-muted-foreground/50">/100</span>
         </div>
@@ -229,7 +231,7 @@ function RouteCard({
       {route.warnings.length > 0 && (
         <div className="mt-2 border-t border-border/20 pt-2">
           {route.warnings.slice(0, 2).map((w, i) => (
-            <p key={i} className="text-[11px] text-amber-600/80 leading-relaxed">Warning: {w}</p>
+            <p key={i} className="text-[11px] text-amber-600/80 leading-relaxed">Advertencia: {w}</p>
           ))}
         </div>
       )}
@@ -333,12 +335,12 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
       <Button
         size="icon"
         className={cn(
-          "h-11 w-11 rounded-full border bg-background/90 backdrop-blur-md transition-colors",
-          "hover:bg-background",
-          isOpen ? "border-primary/40 shadow-md" : "border-primary/20 shadow-sm"
+          "focus-ring interactive-soft surface-lift h-11 w-11 rounded-full overlay-surface hover:bg-muted/60",
+          isOpen ? "border-primary/40 shadow-md" : "border-border/70 shadow-sm"
         )}
         onClick={() => setIsOpen((prev) => !prev)}
         title="Planificar ruta"
+        aria-label="Planificar ruta"
         aria-expanded={isOpen}
         aria-controls="route-planner-panel"
       >
@@ -350,13 +352,13 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
         <Card
           id="route-planner-panel"
           className={cn(
-            "overlay-surface absolute left-0 top-14 w-[min(20rem,calc(100vw-2rem))]",
+            "fade-slide-up overlay-surface absolute left-0 top-14 w-[min(20rem,calc(100vw-2rem))]",
             "sm:left-[calc(100%+0.75rem)] sm:top-0",
             panelClassName
           )}
         >
           <CardHeader className="p-4 pb-3">
-            <CardTitle className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               <div className="flex items-center gap-2">
                 <div className="h-1 w-1 bg-primary rounded-full " />
                 Planificador de Ruta
@@ -364,8 +366,10 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
               <Button
                 variant="ghost"
                 size="icon"
-                className="focus-ring h-6 w-6 rounded-full hover:bg-muted/80 -mr-1"
+                className="focus-ring interactive-soft h-6 w-6 rounded-full hover:bg-muted/60 -mr-1"
                 onClick={() => { setIsOpen(false); handleClear() }}
+                title="Cerrar planificador"
+                aria-label="Cerrar planificador"
               >
                 <X className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
@@ -403,6 +407,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     ? "bg-amber-500/10 border-amber-500/40 text-amber-600"
                     : "bg-muted/30 border-border/30 text-muted-foreground/60"
                 )}
+                aria-pressed={avoidArroyos}
               >
                 <Droplets className="h-3 w-3" />
                 Sin arroyos
@@ -414,6 +419,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     ? "bg-red-500/10 border-red-500/40 text-red-600"
                     : "bg-muted/30 border-border/30 text-muted-foreground/60"
                 )}
+                aria-pressed={avoidCongestion}
               >
                 <AlertTriangle className="h-3 w-3" />
                 Sin trafico
@@ -424,7 +430,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
               <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700/80">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-violet-700/80">
                       Trayecto favorito
                     </p>
                     <p className="mt-1 text-xs font-semibold text-foreground">
@@ -438,7 +444,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 flex-1 text-[11px] font-bold uppercase tracking-wider"
+                    className="h-8 flex-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
                     onClick={() => { void handleLoadFavoriteRoute() }}
                   >
                     Usar trayecto
@@ -447,7 +453,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider"
+                    className="h-8 px-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
                     onClick={clearFavoriteRoutePlan}
                   >
                     Quitar
@@ -461,14 +467,14 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
               <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700/80">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-sky-700/80">
                       Mejor ventana de salida
                     </p>
                     <p className="mt-1 text-lg font-semibold text-foreground">
                       {formatClock(advice.best_departure.departure_time)}
                     </p>
                   </div>
-                  <div className={cn("rounded-full border px-2 py-1 text-[11px] font-bold uppercase tracking-wider", departureNudge?.tone)}>
+                  <div className={cn("rounded-full border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]", departureNudge?.tone)}>
                     {departureNudge?.title}
                   </div>
                 </div>
@@ -494,7 +500,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 flex-1 text-[11px] font-bold uppercase tracking-wider"
+                    className="h-8 flex-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
                     onClick={handleSaveDeparturePlan}
                   >
                     Guardar salida
@@ -503,7 +509,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 flex-1 text-[11px] font-bold uppercase tracking-wider"
+                    className="h-8 flex-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
                     onClick={handleSaveFavoriteRoute}
                     disabled={!origin || !destination}
                   >
@@ -514,7 +520,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider"
+                      className="h-8 px-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
                       onClick={clearPlan}
                     >
                       Quitar
@@ -534,7 +540,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
             <Button
               onClick={handleCalculate}
               disabled={!canCalculate}
-              className="w-full h-9 text-xs font-bold tracking-wide"
+              className="w-full h-9 text-xs font-semibold tracking-[0.1em]"
             >
               {isLoading ? (
                 <>
@@ -566,13 +572,15 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                   </span>
                   <button
                     onClick={handleClear}
-                    className="focus-ring flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                    className="focus-ring interactive-soft flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                    title="Limpiar rutas"
+                    aria-label="Limpiar rutas"
                   >
                     <RotateCcw className="h-2.5 w-2.5" />
                     Limpiar
                   </button>
                 </div>
-                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                <div className="minimal-scrollbar space-y-2 max-h-72 overflow-y-auto pr-1">
                   {routes.map((route, i) => (
                     <RouteCard
                       key={route.route_id}

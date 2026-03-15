@@ -53,17 +53,17 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
     }
 
     const getTimeOfDay = (h: number) => {
-        if (h >= 5 && h < 12) return "Morning"
-        if (h >= 12 && h < 17) return "Afternoon"
-        if (h >= 17 && h < 21) return "Evening"
-        return "Night"
+        if (h >= 5 && h < 12) return "Manana"
+        if (h >= 12 && h < 17) return "Tarde"
+        if (h >= 17 && h < 21) return "Noche"
+        return "Madrugada"
     }
 
     return (
         <div
             className={cn(
                 "overlay-surface p-5 rounded-2xl w-full max-w-md",
-                "transition-colors duration-300 hover:border-primary/30",
+                "interactive-soft fade-enter hover:border-primary/30",
                 className
             )}
             {...props}
@@ -75,11 +75,11 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                             <Clock className="w-3.5 h-3.5 text-primary" />
                         </div>
                         <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
-                            Time Simulation
+                            Simulacion de tiempo
                         </span>
                     </div>
                     <p className="text-xs text-muted-foreground font-medium ml-7">
-                        {getTimeOfDay(hour)} Traffic
+                        Trafico en la {getTimeOfDay(hour).toLowerCase()}
                     </p>
                 </div>
                 <div className="text-right">
@@ -88,7 +88,7 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                     </div>
                     <div className="mt-0.5 flex items-center justify-end gap-1 text-[11px] font-medium tracking-wide text-muted-foreground/70">
                         <Calendar className="w-2.5 h-2.5" />
-                        Today
+                        Hoy
                     </div>
                 </div>
             </div>
@@ -98,17 +98,21 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                     variant={isPlaying ? "default" : "outline"}
                     size="icon"
                     onClick={togglePlay}
-                    className="focus-ring h-9 w-9 rounded-full shrink-0 transition-colors"
+                    className="focus-ring interactive-soft surface-lift h-9 w-9 rounded-full shrink-0 hover:bg-muted/60"
+                    title={isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
+                    aria-label={isPlaying ? "Pausar simulacion" : "Iniciar simulacion"}
+                    aria-pressed={isPlaying}
                 >
                     {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
                 </Button>
-                <div className="flex-1 space-y-2">
+                <div className="flex-1 space-y-2 rounded-lg px-1 py-1 hover:bg-muted/20">
                     <Slider
                         max={23}
                         step={1}
                         value={[hour]}
                         onValueChange={handleSliderChange}
                         className="flex-1"
+                        aria-label="Hora simulada"
                     />
                     <div className="flex justify-between px-0.5 text-[10px] font-medium text-muted-foreground/70" suppressHydrationWarning>
                         <span>12 AM</span>

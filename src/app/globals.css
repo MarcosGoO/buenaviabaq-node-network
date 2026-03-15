@@ -135,6 +135,22 @@
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
+
+  .interactive-soft {
+    @apply transition-[background-color,border-color,color,box-shadow,transform,opacity] duration-200 ease-out active:scale-[0.98];
+  }
+
+  .surface-lift {
+    @apply transition-transform duration-200 ease-out hover:-translate-y-px hover:shadow-md;
+  }
+
+  .fade-enter {
+    @apply transition-[opacity,transform] duration-200 ease-out;
+  }
+
+  .fade-slide-up {
+    @apply transition-[opacity,transform,max-height] duration-300 ease-out;
+  }
 }
 
 /* MapLibre Popup Styles */
@@ -169,7 +185,7 @@
 }
 
 .maplibregl-ctrl-group button:hover {
-  @apply bg-accent;
+  @apply bg-muted/60;
 }
 
 .maplibregl-ctrl-group button + button {

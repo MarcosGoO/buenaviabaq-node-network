@@ -92,25 +92,30 @@ export default function RealTimeUpdates() {
   }
 
   return (
-    <div className="fixed right-4 top-4 z-40 w-80 max-w-[calc(100vw-2rem)]" suppressHydrationWarning>
+    <div className="fade-enter fixed right-4 top-4 z-40 w-[min(20rem,calc(100vw-2rem))]" suppressHydrationWarning>
       <div className="overlay-surface rounded-xl p-3">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BellRing className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold">Actualizaciones en vivo</span>
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="text-xs font-semibold tracking-[0.08em] uppercase">Actualizaciones</span>
+            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
               {isConnected ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
               {isConnected ? "Conectado" : "Reconectando"}
             </span>
           </div>
-          <Button variant="ghost" size="sm" className="focus-ring h-7 px-2 text-xs" onClick={() => setUpdates([])}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="focus-ring interactive-soft h-7 px-2 text-xs hover:bg-muted/60"
+            onClick={() => setUpdates([])}
+          >
             Limpiar
           </Button>
         </div>
 
-        <div className="space-y-2">
+        <div className="minimal-scrollbar max-h-72 space-y-2 overflow-y-auto pr-1">
           {updates.map((update) => (
-            <div key={update.id} className="group rounded-lg border bg-background/80 p-2.5">
+            <div key={update.id} className="fade-enter group rounded-lg border border-border/60 bg-background/80 p-2.5">
               <div className="mb-1 flex items-center gap-2">
                 <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide", LEVEL_CLASS[update.level])}>
                   {SOURCE_LABEL[update.source]}
@@ -120,8 +125,9 @@ export default function RealTimeUpdates() {
                 </span>
                 <button
                   onClick={() => setUpdates((prev) => prev.filter((item) => item.id !== update.id))}
-                  className="focus-ring ml-auto rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted"
+                  className="focus-ring interactive-soft ml-auto rounded p-0.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   title="Eliminar actualización"
+                  aria-label="Eliminar actualización"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
