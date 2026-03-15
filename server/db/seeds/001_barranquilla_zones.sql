@@ -150,3 +150,11 @@ UNION ALL
 SELECT 'POIs', COUNT(*) FROM geo.pois
 UNION ALL
 SELECT 'Weather Stations', COUNT(*) FROM weather.stations;
+
+-- Mark seeded geographies as legacy placeholders so OSM imports can be audited
+UPDATE geo.zones
+SET metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object(
+  'source', 'seed-legacy',
+  'dataset_version', 'seed-001'
+)
+WHERE (metadata ->> 'source') IS NULL;

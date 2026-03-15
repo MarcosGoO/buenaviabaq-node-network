@@ -1,0 +1,10 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "osm",
+    "dataset_version": "2026-03-15",
+    "note": "Template file. Replace features with normalized OSM localities before import.",
+    "feature_count": 0
+  },
+  "features": []
+}

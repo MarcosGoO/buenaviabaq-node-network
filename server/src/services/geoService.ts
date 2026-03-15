@@ -1,5 +1,15 @@
 import { query } from '@/db';
 import type { GeoZone, ArroyoZone, Road, POI } from '@/types';
+import { TrafficService, type TrafficData } from './trafficService.js';
+import { RoadZoneMappingService } from './roadZoneMappingService.js';
+
+export interface RoadFlow extends Road {
+  congestion_level: 'low' | 'moderate' | 'high' | 'severe';
+  speed_kmh: number;
+  travel_time_minutes: number;
+  zone_id: number | null;
+  last_updated: string;
+}
 
 export class GeoService {
   // Get all zones
@@ -75,6 +85,39 @@ export class GeoService {
 
     const result = await query(queryText, params);
     return result.rows;
+  }
+
+  static async getRoadsFlow(roadType?: string): Promise<RoadFlow[]> {
+    const roads = await this.getRoads(roadType);
+    if (roads.length === 0) return [];
+
+    const realtime: TrafficData[] = await TrafficService.getRealTimeTraffic().catch(() => []);
+    const realtimeById = new Map<number, TrafficData>(
+      realtime.map((item): [number, TrafficData] => [item.road_id, item])
+    );
+
+    const roadIds = roads.map((road) => road.id);
+    const roadZones = await RoadZoneMappingService.getZonesForRoads(roadIds);
+
+    return roads.map((road) => {
+      const traffic = realtimeById.get(road.id);
+      const zoneIdFromMetadataRaw = road.metadata?.zone_id;
+      const zoneIdFromMetadata =
+        typeof zoneIdFromMetadataRaw === 'number'
+          ? zoneIdFromMetadataRaw
+          : typeof zoneIdFromMetadataRaw === 'string' && /^\d+$/.test(zoneIdFromMetadataRaw)
+            ? Number(zoneIdFromMetadataRaw)
+            : null;
+
+      return {
+        ...road,
+        congestion_level: traffic?.congestion_level ?? 'low',
+        speed_kmh: traffic?.speed_kmh ?? 45,
+        travel_time_minutes: traffic?.travel_time_minutes ?? 12,
+        zone_id: zoneIdFromMetadata ?? roadZones.get(road.id) ?? null,
+        last_updated: traffic?.last_updated ?? new Date().toISOString(),
+      };
+    });
   }
 
   // Get POIs by category

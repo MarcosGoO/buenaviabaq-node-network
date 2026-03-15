@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "smoke": "node scripts/smoke.mjs",
+    "geo:normalize-localidades": "node scripts/geo/normalize-localidades.mjs",
+    "geo:import-localidades": "node scripts/geo/import-localidades.mjs",
     "preflight": "node scripts/preflight.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

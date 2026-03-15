@@ -7,6 +7,8 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { TimeTraveler } from "@/components/ui/time-traveler"
 import { AlertsPanel } from "@/components/panels/AlertsPanel"
 import { TrafficLayer } from "@/components/map/TrafficLayer"
+import { IncidentLayers, RoadsFlowLayer, HotspotsLayer, type LayerVisibilityState } from "@/components/map/TrafficOverlays"
+import { MapLayersControl } from "@/components/map/MapLayersControl"
 import { RoutePlannerPanel } from "@/components/panels/RoutePlannerPanel"
 import { ChevronDown, ChevronUp, LocateFixed } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -46,6 +48,13 @@ export function MapViewport() {
     const [isTimeTravelerOpen, setIsTimeTravelerOpen] = React.useState(true)
     const [isTimePanelReady, setIsTimePanelReady] = React.useState(false)
     const [alertsLayout, setAlertsLayout] = React.useState({ isOpen: false, height: 40 })
+    const [layers, setLayers] = React.useState<LayerVisibilityState>({
+        zones: true,
+        roads: true,
+        hotspots: true,
+        arroyos: true,
+        events: true,
+    })
     const mapRef = React.useRef<MapRef>(null)
 
     const recenterMap = () => {
@@ -96,6 +105,9 @@ export function MapViewport() {
 
     const routeGeoJSON = activeRoute ? routeToGeoJSON(activeRoute) : null
     const plannerOffsetY = alertsLayout.isOpen ? Math.max(0, alertsLayout.height - 44 + 8) : 0
+    const toggleLayer = React.useCallback((layer: keyof LayerVisibilityState) => {
+        setLayers((prev) => ({ ...prev, [layer]: !prev[layer] }))
+    }, [])
 
     return (
         <div className="relative h-full w-full overflow-hidden bg-background">
@@ -112,7 +124,10 @@ export function MapViewport() {
                 attributionControl={false}
                 reuseMaps
             >
-                <TrafficLayer simulatedHour={simulatedHour} />
+                <TrafficLayer simulatedHour={simulatedHour} visible={layers.zones} />
+                <RoadsFlowLayer visible={layers.roads} />
+                <HotspotsLayer visible={layers.hotspots} />
+                <IncidentLayers showArroyos={layers.arroyos} showEvents={layers.events} />
 
             {/* Route overlay drawn on top of traffic layer */}
                 {routeGeoJSON && (
@@ -191,6 +206,7 @@ export function MapViewport() {
 
             {/* Top Left Overlay for Alerts */}
             <AlertsPanel onLayoutChange={setAlertsLayout} />
+            <MapLayersControl layers={layers} onToggle={toggleLayer} />
 
             {/* Route planner placed below alerts trigger; panel opens to the right on larger screens */}
             <RoutePlannerPanel

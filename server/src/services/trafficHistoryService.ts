@@ -3,6 +3,7 @@ import { logger } from '@/utils/logger';
 import { TrafficService } from './trafficService.js';
 import { WeatherService } from './weatherService.js';
 import { EventsService } from './eventsService.js';
+import { RoadZoneMappingService } from './roadZoneMappingService.js';
 
 export interface TrafficSnapshot {
   time: string;
@@ -44,11 +45,15 @@ export class TrafficHistoryService {
       const hasNearbyEvent = events.some(e => e.status === 'ongoing');
 
       // Insert snapshot for each road
+      const zoneByRoad = await RoadZoneMappingService.getZonesForRoads(
+        trafficData.map((road) => road.road_id)
+      );
+
       const values = trafficData.map(road => [
         now.toISOString(),
         road.road_id,
         road.road_name,
-        null, // zone_id - TODO: map roads to zones
+        zoneByRoad.get(road.road_id) ?? null,
         road.congestion_level,
         road.speed_kmh,
         road.travel_time_minutes,

@@ -5,6 +5,12 @@ import { useEffect, useState, useCallback, useRef } from "react";
 export interface Zone {
   id: number;
   name: string;
+  metadata?: {
+    source?: string;
+    source_id?: string | number | null;
+    dataset_version?: string;
+    [key: string]: unknown;
+  };
   geometry: {
     type: string;
     coordinates: number[][][];

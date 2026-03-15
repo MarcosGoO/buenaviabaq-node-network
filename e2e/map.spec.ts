@@ -36,6 +36,18 @@ test.describe('Map View', () => {
     await expect(page.getByText(/error|crash|unhandled/i)).toHaveCount(0);
   });
 
+  test('should render map layers control and allow toggling', async ({ page }) => {
+    const layersPanel = page.getByText(/capas/i).first();
+    await expect(layersPanel).toBeVisible({ timeout: 10_000 });
+
+    const roadsToggle = page.getByLabel('Corredores');
+    await expect(roadsToggle).toBeVisible();
+    await roadsToggle.uncheck();
+    await expect(roadsToggle).not.toBeChecked();
+    await roadsToggle.check();
+    await expect(roadsToggle).toBeChecked();
+  });
+
   test('should not show any JS crash error on load', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (err) => errors.push(err.message));

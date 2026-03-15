@@ -3,6 +3,7 @@ import { GeoService } from '@/services/geoService';
 import { AppError } from '@/middleware/errorHandler';
 import { logger } from '@/utils/logger';
 import type { ApiResponse } from '@/types';
+import { ZoneImportService } from '@/services/zoneImportService.js';
 
 export class GeoController {
   // GET /api/v1/geo/zones
@@ -93,6 +94,25 @@ export class GeoController {
     }
   }
 
+  // GET /api/v1/geo/roads/flow
+  static async getRoadsFlow(req: Request, res: Response, next: NextFunction) {
+    try {
+      const roadType = req.query.type as string | undefined;
+      const roads = await GeoService.getRoadsFlow(roadType);
+
+      const response: ApiResponse<typeof roads> = {
+        status: 'success',
+        data: roads,
+        timestamp: new Date().toISOString(),
+      };
+
+      logger.info(`Retrieved ${roads.length} road flow segments`, { roadType });
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // GET /api/v1/geo/pois
   static async getPOIs(req: Request, res: Response, next: NextFunction) {
     try {
@@ -135,6 +155,36 @@ export class GeoController {
       const response: ApiResponse<typeof zones> = {
         status: 'success',
         data: zones,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /api/v1/geo/import-zones
+  static async importZones(req: Request, res: Response, next: NextFunction) {
+    try {
+      const geojson = req.body?.geojson;
+      const source = typeof req.body?.source === 'string' ? req.body.source : 'osm';
+      const datasetVersion =
+        typeof req.body?.dataset_version === 'string' ? req.body.dataset_version : undefined;
+
+      if (!geojson || geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+        throw new AppError(400, 'Invalid payload. Expected { geojson: FeatureCollection }');
+      }
+
+      const result = await ZoneImportService.importLocalitiesFromGeoJSON(geojson, {
+        source,
+        datasetVersion,
+        zoneType: 'locality',
+      });
+
+      const response: ApiResponse<typeof result> = {
+        status: 'success',
+        data: result,
         timestamp: new Date().toISOString(),
       };
 

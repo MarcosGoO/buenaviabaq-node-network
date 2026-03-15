@@ -18,9 +18,15 @@ export interface GeoZone {
   geometry: PostGISGeometry;
   population: number | null;
   area_km2: number | null;
-  metadata: Record<string, unknown>;
+  metadata: ZoneMetadata;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface ZoneMetadata extends Record<string, unknown> {
+  source?: string;
+  source_id?: string | number | null;
+  dataset_version?: string;
 }
 
 export interface ArroyoZone {

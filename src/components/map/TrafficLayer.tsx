@@ -6,6 +6,7 @@ import { useZonesData } from '@/hooks/useZonesData';
 
 interface TrafficLayerProps {
   simulatedHour?: number | null;
+  visible?: boolean;
 }
 
 // Congestion level → fill color
@@ -42,7 +43,7 @@ function speedToCongestion(avgSpeed: number): string {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
-export function TrafficLayer({ simulatedHour }: TrafficLayerProps) {
+export function TrafficLayer({ simulatedHour, visible = true }: TrafficLayerProps) {
   const { zones, isLoading } = useZonesData();
   const [hourlyPattern, setHourlyPattern] = useState<HourlyPattern | null>(null);
 
@@ -66,7 +67,7 @@ export function TrafficLayer({ simulatedHour }: TrafficLayerProps) {
     return () => controller.abort();
   }, [simulatedHour]);
 
-  if (isLoading || zones.length === 0) return null;
+  if (!visible || isLoading || zones.length === 0) return null;
 
   // In simulation mode, apply the hourly pattern's congestion to all zones
   const getZoneCongestion = (zoneCongestion?: string): string => {
