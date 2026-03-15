@@ -92,7 +92,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
                                     Weather
                                 </span>
                             </div>
@@ -110,7 +110,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3 space-y-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
                                     Live Metrics
                                 </span>
                             </div>
@@ -138,7 +138,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-sky-500" />
-                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
                                     Planned Departure
                                 </span>
                             </div>
@@ -149,7 +149,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                                             <Clock3 className="h-4 w-4" />
                                             <span className="text-xs font-bold uppercase tracking-wider">Salida guardada</span>
                                         </div>
-                                        <p className="mt-2 text-2xl font-black text-foreground">{formatPlanTime(plan.departureTime)}</p>
+                                        <p className="mt-2 text-2xl font-semibold text-foreground">{formatPlanTime(plan.departureTime)}</p>
                                     </div>
                                     <button
                                         onClick={clearPlan}
@@ -183,7 +183,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                         <div className="px-3">
                             <div className="flex items-center gap-2 px-1 mb-2">
                                 <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
-                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-bold">
+                                <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold">
                                     Favorite Trip
                                 </span>
                             </div>
@@ -219,7 +219,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
                     collapsed ? "opacity-0 h-0" : "opacity-100"
                 )}>
                     {!collapsed && (
-                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground/80 font-bold" suppressHydrationWarning>
+                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-muted-foreground/80 font-semibold" suppressHydrationWarning>
                             <span className="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full " />
                             <span>System Online</span>
                         </div>

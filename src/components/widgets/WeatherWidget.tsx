@@ -94,7 +94,7 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
 
   if (compact) {
     return (
-      <div className={cn("rounded-lg border bg-card px-3 py-2.5", className)} {...props}>
+      <div className={cn("overlay-surface rounded-lg px-3 py-2.5", className)} {...props}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div className="rounded-md bg-muted p-1.5">{getWeatherIcon(weather.condition)}</div>
@@ -122,7 +122,7 @@ export function WeatherWidget({ className, compact = false, ...props }: WeatherW
   }
 
   return (
-    <div className={cn("space-y-3 rounded-xl border bg-card p-3", className)} {...props}>
+    <div className={cn("overlay-surface space-y-3 rounded-xl p-3", className)} {...props}>
       <div className="flex items-center gap-2.5">
         <div className="rounded-lg bg-muted p-2">{getWeatherIcon(weather.condition)}</div>
         <div className="flex-1">

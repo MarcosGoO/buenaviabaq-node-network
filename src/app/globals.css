@@ -127,6 +127,14 @@
   .minimal-scrollbar:hover::-webkit-scrollbar-thumb {
     background-color: hsl(var(--muted-foreground) / 0.6);
   }
+
+  .overlay-surface {
+    @apply border border-border/70 bg-card/95 shadow-sm backdrop-blur-md;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
 }
 
 /* MapLibre Popup Styles */

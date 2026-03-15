@@ -62,8 +62,8 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
     return (
         <div
             className={cn(
-                "bg-background/90 backdrop-blur-xl p-5 rounded-2xl border border-border/50 shadow-2xl w-full max-w-md",
-                "transition-all duration-300 hover:shadow-3xl hover:border-primary/20",
+                "overlay-surface p-5 rounded-2xl w-full max-w-md",
+                "transition-colors duration-300 hover:border-primary/30",
                 className
             )}
             {...props}
@@ -74,7 +74,7 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                         <div className="p-1.5 rounded-lg bg-primary/10">
                             <Clock className="w-3.5 h-3.5 text-primary" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
                             Time Simulation
                         </span>
                     </div>
@@ -86,7 +86,7 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                     <div className="text-2xl font-bold font-mono tracking-tight text-foreground">
                         {formatHour(hour)}
                     </div>
-                    <div className="text-[10px] text-muted-foreground/60 font-medium tracking-wider mt-0.5 flex items-center justify-end gap-1">
+                    <div className="mt-0.5 flex items-center justify-end gap-1 text-[11px] font-medium tracking-wide text-muted-foreground/70">
                         <Calendar className="w-2.5 h-2.5" />
                         Today
                     </div>
@@ -98,7 +98,7 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                     variant={isPlaying ? "default" : "outline"}
                     size="icon"
                     onClick={togglePlay}
-                    className="h-9 w-9 rounded-full shrink-0 shadow-md transition-all hover:scale-105 active:scale-95"
+                    className="focus-ring h-9 w-9 rounded-full shrink-0 transition-colors"
                 >
                     {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
                 </Button>
@@ -110,7 +110,7 @@ export function TimeTraveler({ className, onTimeChange, ...props }: TimeTraveler
                         onValueChange={handleSliderChange}
                         className="flex-1"
                     />
-                    <div className="flex justify-between text-[9px] text-muted-foreground/50 font-medium px-0.5" suppressHydrationWarning>
+                    <div className="flex justify-between px-0.5 text-[10px] font-medium text-muted-foreground/70" suppressHydrationWarning>
                         <span>12 AM</span>
                         <span>6 AM</span>
                         <span>12 PM</span>

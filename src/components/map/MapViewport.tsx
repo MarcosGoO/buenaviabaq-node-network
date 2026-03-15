@@ -21,7 +21,7 @@ const BARRANQUILLA_COORDS = {
 }
 
 const ATLANTICO_BOUNDS: [number, number, number, number] = [
-    -75.25, 10.15, // Southwest (Long, Lat) - Near Galapa/UsiacurÃ­
+    -75.25, 10.15, // Southwest (Long, Lat) - Near Galapa/Usiacuri
     -74.55, 11.15  // Northeast (Long, Lat) - Past Puerto Colombia/River
 ]
 
@@ -114,7 +114,7 @@ export function MapViewport() {
             >
                 <TrafficLayer simulatedHour={simulatedHour} />
 
-                {/* Route overlay â€” drawn on top of traffic layer */}
+            {/* Route overlay drawn on top of traffic layer */}
                 {routeGeoJSON && (
                     <Source id="active-route" type="geojson" data={routeGeoJSON}>
                         {/* Casing (white outline for contrast) */}
@@ -145,11 +145,11 @@ export function MapViewport() {
                 <NavigationControl position="bottom-right" showCompass={false} visualizePitch={false} />
             </Map>
 
-            {/* Recenter button - repositioned above zoom controls */}
+            {/* Recenter button positioned above zoom controls */}
             <Button
                 size="icon"
                 variant="outline"
-                className="absolute bottom-[5.625rem] right-2 h-10 w-10 rounded-full border bg-card/95 shadow-sm transition-colors z-10"
+                className="focus-ring absolute bottom-[5.625rem] right-2 h-10 w-10 rounded-full overlay-surface transition-colors z-10 hover:bg-card"
                 onClick={recenterMap}
                 title="Recentrar mapa"
                 aria-label="Recentrar mapa"
@@ -176,7 +176,7 @@ export function MapViewport() {
                         aria-controls="time-simulation-panel"
                         aria-expanded={isTimeTravelerOpen}
                         onClick={() => setIsTimeTravelerOpen((prev) => !prev)}
-                        className="pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-border/70 bg-background/75 px-2.5 text-[11px] font-medium text-foreground shadow-[0_8px_24px_-16px_hsl(var(--foreground)/0.55)] backdrop-blur-md transition-all duration-200 hover:bg-background/90 hover:border-border sm:h-8 sm:px-3"
+                        className="focus-ring pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full overlay-surface px-2.5 text-[11px] font-medium text-foreground transition-all duration-200 hover:bg-card sm:h-8 sm:px-3"
                     >
                         <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted/70 text-muted-foreground">
                             {isTimeTravelerOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
@@ -199,13 +199,13 @@ export function MapViewport() {
 
             {/* Historical badge in top-left corner */}
             {simulatedHour !== null && (
-                <div className="absolute left-16 top-4 z-30 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 shadow-sm dark:text-amber-300">
+                <div className="absolute left-16 top-4 z-30 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-800 shadow-sm dark:text-amber-300">
                     Historical - {simulatedHour}:00
                 </div>
             )}
 
             {/* Bottom left branding - fixed positioning */}
-            <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground/50 font-medium tracking-wider pointer-events-none select-none" suppressHydrationWarning>
+            <div className="absolute bottom-4 left-4 text-[10px] text-muted-foreground/50 font-medium tracking-wide pointer-events-none select-none" suppressHydrationWarning>
                 BUENAVIA-BAQ (C) 2026
             </div>
         </div>

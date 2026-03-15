@@ -93,7 +93,7 @@ export default function RealTimeUpdates() {
 
   return (
     <div className="fixed right-4 top-4 z-40 w-80 max-w-[calc(100vw-2rem)]" suppressHydrationWarning>
-      <div className="rounded-xl border bg-card/95 p-3 shadow-sm backdrop-blur">
+      <div className="overlay-surface rounded-xl p-3">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BellRing className="h-4 w-4 text-primary" />
@@ -103,7 +103,7 @@ export default function RealTimeUpdates() {
               {isConnected ? "Conectado" : "Reconectando"}
             </span>
           </div>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setUpdates([])}>
+          <Button variant="ghost" size="sm" className="focus-ring h-7 px-2 text-xs" onClick={() => setUpdates([])}>
             Limpiar
           </Button>
         </div>
@@ -120,7 +120,7 @@ export default function RealTimeUpdates() {
                 </span>
                 <button
                   onClick={() => setUpdates((prev) => prev.filter((item) => item.id !== update.id))}
-                  className="ml-auto rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted"
+                  className="focus-ring ml-auto rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted"
                   title="Eliminar actualización"
                 >
                   <X className="h-3.5 w-3.5" />

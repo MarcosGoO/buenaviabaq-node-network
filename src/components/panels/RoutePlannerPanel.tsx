@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
@@ -14,17 +14,17 @@ import { useDepartureAdvice } from "@/hooks/useDepartureAdvice"
 import { useDeparturePlan } from "@/hooks/useDeparturePlan"
 import { useFavoriteRoutePlan } from "@/hooks/useFavoriteRoutePlan"
 
-// ─── Barranquilla landmark presets ────────────────────────────────────────────
+// Barranquilla landmark presets
 const PRESETS: { label: string; coord: RouteCoord }[] = [
-  { label: "Centro histórico", coord: { lat: 10.9878, lng: -74.7889 } },
+  { label: "Centro historico", coord: { lat: 10.9878, lng: -74.7889 } },
   { label: "El Prado", coord: { lat: 11.0028, lng: -74.8063 } },
   { label: "Boca Grande", coord: { lat: 11.0189, lng: -74.8196 } },
-  { label: "Vía 40", coord: { lat: 10.9985, lng: -74.7968 } },
+  { label: "Via 40", coord: { lat: 10.9985, lng: -74.7968 } },
   { label: "Aeropuerto", coord: { lat: 10.8896, lng: -74.7808 } },
   { label: "Carulla Buenavista", coord: { lat: 11.0312, lng: -74.8275 } },
 ]
 
-// ─── Score colour helper ───────────────────────────────────────────────────────
+// Score color helper
 function scoreColor(score: number) {
   if (score >= 75) return "text-emerald-600"
   if (score >= 50) return "text-amber-500"
@@ -76,7 +76,7 @@ function getPresetLabel(value: RouteCoord | null, fallback: string) {
   return PRESETS.find((preset) => preset.coord.lat === value.lat && preset.coord.lng === value.lng)?.label ?? fallback
 }
 
-// ─── Coord input with presets ──────────────────────────────────────────────────
+// Coord input with presets
 function CoordInput({
   label,
   icon: Icon,
@@ -113,12 +113,12 @@ function CoordInput({
       </button>
 
       {showPresets && (
-        <div className="absolute z-50 top-full mt-1 w-full rounded-xl border bg-background/98 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="overlay-surface absolute z-50 top-full mt-1 w-full rounded-xl overflow-hidden">
           {PRESETS.map(p => (
             <button
               key={p.label}
               onClick={() => { onChange(p.coord); setShowPresets(false) }}
-              className="w-full px-3 py-2 text-xs text-left hover:bg-muted/60 flex items-center gap-2 transition-colors"
+              className="focus-ring w-full px-3 py-2 text-xs text-left hover:bg-muted/60 flex items-center gap-2 transition-colors"
             >
               <MapPin className="h-3 w-3 text-muted-foreground/50 shrink-0" />
               {p.label}
@@ -130,7 +130,7 @@ function CoordInput({
   )
 }
 
-// ─── Route card ────────────────────────────────────────────────────────────────
+// Route card
 function RouteCard({
   route,
   index,
@@ -156,10 +156,10 @@ function RouteCard({
     >
       {/* Header row */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-black tracking-wider uppercase text-muted-foreground">
+        <span className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground">
           {labels[index] ?? `Ruta ${index + 1}`}
         </span>
-        <div className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold", scoreBg(route.overall_score))}>
+        <div className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-bold", scoreBg(route.overall_score))}>
           <span className={scoreColor(route.overall_score)}>{route.overall_score}</span>
           <span className="text-muted-foreground/50">/100</span>
         </div>
@@ -184,13 +184,13 @@ function RouteCard({
       {/* Score breakdown mini-bars */}
       <div className="grid grid-cols-4 gap-1 mb-2">
         {[
-          { label: "Tráfico", value: route.score_breakdown.traffic_score },
+          { label: "Trafico", value: route.score_breakdown.traffic_score },
           { label: "Clima", value: route.score_breakdown.weather_score },
           { label: "Seguridad", value: route.score_breakdown.safety_score },
           { label: "Distancia", value: route.score_breakdown.distance_score },
         ].map(s => (
           <div key={s.label} className="flex flex-col gap-0.5">
-            <span className="text-[8px] text-muted-foreground/60 text-center">{s.label}</span>
+            <span className="text-[11px] text-muted-foreground/60 text-center">{s.label}</span>
             <div className="h-1 rounded-full bg-muted/50 overflow-hidden">
               <div
                 className={cn("h-full rounded-full transition-all", s.value >= 75 ? "bg-emerald-500" : s.value >= 50 ? "bg-amber-400" : "bg-red-400")}
@@ -204,22 +204,22 @@ function RouteCard({
       {/* Flags */}
       <div className="flex items-center gap-2 flex-wrap">
         {route.metadata.arroyo_risk && (
-          <span className="flex items-center gap-1 text-[9px] font-medium text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-[11px] font-medium text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
             <Droplets className="h-2.5 w-2.5" /> Arroyo
           </span>
         )}
         {route.metadata.weather_affected && (
-          <span className="flex items-center gap-1 text-[9px] font-medium text-blue-600 bg-blue-500/10 px-1.5 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-[11px] font-medium text-blue-600 bg-blue-500/10 px-1.5 py-0.5 rounded-full">
             <Wind className="h-2.5 w-2.5" /> Clima
           </span>
         )}
         {route.metadata.congested_segments > 0 && (
-          <span className="flex items-center gap-1 text-[9px] font-medium text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded-full">
             <AlertTriangle className="h-2.5 w-2.5" /> {route.metadata.congested_segments} seg. congestionado{route.metadata.congested_segments > 1 ? "s" : ""}
           </span>
         )}
         {!route.metadata.arroyo_risk && !route.metadata.weather_affected && route.metadata.congested_segments === 0 && (
-          <span className="flex items-center gap-1 text-[9px] font-medium text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">
             <Shield className="h-2.5 w-2.5" /> Sin incidencias
           </span>
         )}
@@ -229,7 +229,7 @@ function RouteCard({
       {route.warnings.length > 0 && (
         <div className="mt-2 border-t border-border/20 pt-2">
           {route.warnings.slice(0, 2).map((w, i) => (
-            <p key={i} className="text-[9px] text-amber-600/80 leading-relaxed">⚠ {w}</p>
+            <p key={i} className="text-[11px] text-amber-600/80 leading-relaxed">Warning: {w}</p>
           ))}
         </div>
       )}
@@ -237,7 +237,7 @@ function RouteCard({
   )
 }
 
-// ─── Main panel ────────────────────────────────────────────────────────────────
+// Main panel
 interface RoutePlannerPanelProps {
   onRouteSelect?: (route: CalcRoute | null) => void
   className?: string
@@ -350,21 +350,21 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
         <Card
           id="route-planner-panel"
           className={cn(
-            "absolute left-0 top-14 w-[min(20rem,calc(100vw-2rem))] border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl",
+            "overlay-surface absolute left-0 top-14 w-[min(20rem,calc(100vw-2rem))]",
             "sm:left-[calc(100%+0.75rem)] sm:top-0",
             panelClassName
           )}
         >
           <CardHeader className="p-4 pb-3">
-            <CardTitle className="text-[10px] font-black tracking-[0.2em] uppercase text-muted-foreground flex items-center justify-between">
+            <CardTitle className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-1 w-1 bg-primary rounded-full animate-pulse" />
+                <div className="h-1 w-1 bg-primary rounded-full " />
                 Planificador de Ruta
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 rounded-full hover:bg-muted/80 -mr-1"
+                className="focus-ring h-6 w-6 rounded-full hover:bg-muted/80 -mr-1"
                 onClick={() => { setIsOpen(false); handleClear() }}
               >
                 <X className="h-3.5 w-3.5 text-muted-foreground" />
@@ -376,7 +376,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
             {/* Origin / Destination pickers */}
             <div className="space-y-2">
               <CoordInput
-                label="Selecciona origen…"
+                label="Selecciona origen..."
                 icon={MapPin}
                 iconColor="text-emerald-500"
                 value={origin}
@@ -386,7 +386,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                 <ChevronLeft className="h-4 w-4 text-muted-foreground/30 -rotate-90" />
               </div>
               <CoordInput
-                label="Selecciona destino…"
+                label="Selecciona destino..."
                 icon={MapPin}
                 iconColor="text-red-500"
                 value={destination}
@@ -398,8 +398,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
             <div className="flex gap-2">
               <button
                 onClick={() => setAvoidArroyos(v => !v)}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-[10px] font-semibold transition-all",
+                className={cn("focus-ring flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-[11px] font-semibold transition-all",
                   avoidArroyos
                     ? "bg-amber-500/10 border-amber-500/40 text-amber-600"
                     : "bg-muted/30 border-border/30 text-muted-foreground/60"
@@ -410,15 +409,14 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
               </button>
               <button
                 onClick={() => setAvoidCongestion(v => !v)}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-[10px] font-semibold transition-all",
+                className={cn("focus-ring flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-[11px] font-semibold transition-all",
                   avoidCongestion
                     ? "bg-red-500/10 border-red-500/40 text-red-600"
                     : "bg-muted/30 border-border/30 text-muted-foreground/60"
                 )}
               >
                 <AlertTriangle className="h-3 w-3" />
-                Sin tráfico
+                Sin trafico
               </button>
             </div>
 
@@ -426,7 +424,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
               <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-violet-700/80">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700/80">
                       Trayecto favorito
                     </p>
                     <p className="mt-1 text-xs font-semibold text-foreground">
@@ -440,7 +438,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 flex-1 text-[10px] font-bold uppercase tracking-wider"
+                    className="h-8 flex-1 text-[11px] font-bold uppercase tracking-wider"
                     onClick={() => { void handleLoadFavoriteRoute() }}
                   >
                     Usar trayecto
@@ -449,7 +447,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider"
+                    className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider"
                     onClick={clearFavoriteRoutePlan}
                   >
                     Quitar
@@ -463,31 +461,31 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
               <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-sky-700/80">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700/80">
                       Mejor ventana de salida
                     </p>
-                    <p className="mt-1 text-lg font-black text-foreground">
+                    <p className="mt-1 text-lg font-semibold text-foreground">
                       {formatClock(advice.best_departure.departure_time)}
                     </p>
                   </div>
-                  <div className={cn("rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-wider", departureNudge?.tone)}>
+                  <div className={cn("rounded-full border px-2 py-1 text-[11px] font-bold uppercase tracking-wider", departureNudge?.tone)}>
                     {departureNudge?.title}
                   </div>
                 </div>
-                <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
+                <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
                   {departureNudge?.detail}
                 </p>
                 <div className="mt-3 grid grid-cols-3 gap-2">
                   <div className="rounded-lg bg-background/80 px-2 py-2">
-                    <p className="text-[8px] uppercase tracking-wider text-muted-foreground">Riesgo</p>
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Riesgo</p>
                     <p className="mt-1 text-xs font-bold">{advice.best_departure.risk_score}/100</p>
                   </div>
                   <div className="rounded-lg bg-background/80 px-2 py-2">
-                    <p className="text-[8px] uppercase tracking-wider text-muted-foreground">Lluvia</p>
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Lluvia</p>
                     <p className="mt-1 text-xs font-bold">{advice.best_departure.rain_probability}%</p>
                   </div>
                   <div className="rounded-lg bg-background/80 px-2 py-2">
-                    <p className="text-[8px] uppercase tracking-wider text-muted-foreground">Alertas</p>
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Alertas</p>
                     <p className="mt-1 text-xs font-bold">{advice.context.active_alerts}</p>
                   </div>
                 </div>
@@ -496,7 +494,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 flex-1 text-[10px] font-bold uppercase tracking-wider"
+                    className="h-8 flex-1 text-[11px] font-bold uppercase tracking-wider"
                     onClick={handleSaveDeparturePlan}
                   >
                     Guardar salida
@@ -505,7 +503,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 flex-1 text-[10px] font-bold uppercase tracking-wider"
+                    className="h-8 flex-1 text-[11px] font-bold uppercase tracking-wider"
                     onClick={handleSaveFavoriteRoute}
                     disabled={!origin || !destination}
                   >
@@ -516,7 +514,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider"
+                      className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider"
                       onClick={clearPlan}
                     >
                       Quitar
@@ -527,7 +525,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
             )}
 
             {adviceLoading && (
-              <div className="rounded-xl border border-border/30 bg-muted/20 px-3 py-2 text-[10px] text-muted-foreground">
+              <div className="rounded-xl border border-border/30 bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground">
                 Calculando ventana recomendada de salida...
               </div>
             )}
@@ -541,7 +539,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
               {isLoading ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                  Calculando…
+                  Calculando...
                 </>
               ) : (
                 <>
@@ -555,7 +553,7 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
             {error && (
               <div className="flex items-start gap-2 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
                 <AlertTriangle className="h-3.5 w-3.5 text-red-500 mt-0.5 shrink-0" />
-                <p className="text-[10px] text-red-600 leading-relaxed">{error}</p>
+                <p className="text-[11px] text-red-600 leading-relaxed">{error}</p>
               </div>
             )}
 
@@ -563,12 +561,12 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
             {routes.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-black tracking-[0.15em] uppercase text-muted-foreground/70">
+                  <span className="text-[11px] font-semibold tracking-[0.15em] uppercase text-muted-foreground/70">
                     {routes.length} ruta{routes.length > 1 ? "s" : ""} encontrada{routes.length > 1 ? "s" : ""}
                   </span>
                   <button
                     onClick={handleClear}
-                    className="flex items-center gap-1 text-[9px] text-muted-foreground hover:text-foreground transition-colors"
+                    className="focus-ring flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <RotateCcw className="h-2.5 w-2.5" />
                     Limpiar
@@ -593,3 +591,6 @@ export function RoutePlannerPanel({ onRouteSelect, className, panelClassName, st
     </div>
   )
 }
+
+
+

@@ -69,7 +69,7 @@ function AlertCard({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
   const Icon = styleConfig.icon;
 
   return (
-    <Card className={cn("w-80 border bg-card/95 shadow-sm backdrop-blur", levelStyle.border)}>
+    <Card className={cn("w-[min(20rem,calc(100vw-2rem))] overlay-surface", levelStyle.border)}>
       <CardHeader className="p-3 pb-1.5">
         <CardTitle className="flex items-center justify-between gap-2 text-xs font-semibold tracking-wide">
           <div className="flex min-w-0 items-center gap-2">
@@ -79,12 +79,12 @@ function AlertCard({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
             <span className={cn("truncate", levelStyle.text)}>{alert.title}</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className={cn("rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase", levelStyle.badge)}>
+            <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]", levelStyle.badge)}>
               {level}
             </span>
             <button
               onClick={() => onDismiss(alert.id)}
-              className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted"
+              className="focus-ring rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted"
               aria-label="Descartar alerta"
             >
               <X className="h-3 w-3" />
@@ -161,10 +161,10 @@ export function AlertsPanel({ onLayoutChange }: AlertsPanelProps = {}) {
             isOpen ? "pointer-events-none h-0 w-0 scale-95 opacity-0" : "h-11 w-11 scale-100 opacity-100"
           )}
         >
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-11 w-11 rounded-full border border-border/70 bg-background/90 shadow-sm backdrop-blur transition-colors hover:bg-background"
+            <Button
+              variant="outline"
+              size="icon"
+            className="focus-ring h-11 w-11 rounded-full overlay-surface transition-colors hover:bg-card"
             onClick={() => setIsOpen(true)}
           >
             <div className="relative">
@@ -183,18 +183,18 @@ export function AlertsPanel({ onLayoutChange }: AlertsPanelProps = {}) {
         >
           <div className="mb-1 flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Alertas</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Alertas</span>
               {hasAlerts && (
-                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">{alerts.length}</span>
+                <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">{alerts.length}</span>
               )}
             </div>
             <div className="flex items-center gap-1">
               {hasAlerts && (
-                <button onClick={clearAll} className="text-[10px] text-muted-foreground transition-colors hover:text-foreground">
+                <button onClick={clearAll} className="focus-ring text-[11px] text-muted-foreground transition-colors hover:text-foreground">
                   Limpiar
                 </button>
               )}
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" size="icon" className="focus-ring h-6 w-6" onClick={() => setIsOpen(false)}>
                 <ChevronLeft className="h-4 w-4 text-muted-foreground" />
               </Button>
             </div>
