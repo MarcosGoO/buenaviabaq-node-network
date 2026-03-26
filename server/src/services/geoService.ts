@@ -21,6 +21,10 @@ export class GeoService {
         population, area_km2, metadata,
         created_at, updated_at
       FROM geo.zones
+      WHERE (
+        (SELECT COUNT(*) FROM geo.zones WHERE metadata ->> 'source' = 'osm') = 0
+        OR metadata ->> 'source' = 'osm'
+      )
       ORDER BY name
     `);
     return result.rows;
@@ -41,7 +45,7 @@ export class GeoService {
   }
 
   // Get arroyo zones with risk levels
-  static async getArroyoZones(riskLevel?: string): Promise<ArroyoZone[]> {
+  static async getArroyoZones(riskLevel?: string, verifiedOnly: boolean = false): Promise<ArroyoZone[]> {
     let queryText = `
       SELECT
         id, name, zone_id,
@@ -53,9 +57,18 @@ export class GeoService {
     `;
 
     const params: string[] = [];
+    const whereConditions: string[] = [];
     if (riskLevel) {
-      queryText += ' WHERE risk_level = $1';
+      whereConditions.push(`risk_level = $${params.length + 1}`);
       params.push(riskLevel);
+    }
+
+    if (verifiedOnly) {
+      whereConditions.push(`(metadata ->> 'source') IN ('osm', 'official')`);
+    }
+
+    if (whereConditions.length > 0) {
+      queryText += ` WHERE ${whereConditions.join(' AND ')}`;
     }
 
     queryText += ' ORDER BY risk_level DESC, name';
@@ -65,7 +78,7 @@ export class GeoService {
   }
 
   // Get roads
-  static async getRoads(roadType?: string): Promise<Road[]> {
+  static async getRoads(roadType?: string, verifiedOnly: boolean = false): Promise<Road[]> {
     let queryText = `
       SELECT
         id, name, road_type,
@@ -76,9 +89,18 @@ export class GeoService {
     `;
 
     const params: string[] = [];
+    const whereConditions: string[] = [];
     if (roadType) {
-      queryText += ' WHERE road_type = $1';
+      whereConditions.push(`road_type = $${params.length + 1}`);
       params.push(roadType);
+    }
+
+    if (verifiedOnly) {
+      whereConditions.push(`(metadata ->> 'source') IN ('osm', 'official')`);
+    }
+
+    if (whereConditions.length > 0) {
+      queryText += ` WHERE ${whereConditions.join(' AND ')}`;
     }
 
     queryText += ' ORDER BY name';
@@ -87,8 +109,8 @@ export class GeoService {
     return result.rows;
   }
 
-  static async getRoadsFlow(roadType?: string): Promise<RoadFlow[]> {
-    const roads = await this.getRoads(roadType);
+  static async getRoadsFlow(roadType?: string, verifiedOnly: boolean = false): Promise<RoadFlow[]> {
+    const roads = await this.getRoads(roadType, verifiedOnly);
     if (roads.length === 0) return [];
 
     const realtime: TrafficData[] = await TrafficService.getRealTimeTraffic().catch(() => []);
@@ -160,6 +182,10 @@ export class GeoService {
       WHERE ST_Intersects(
         geometry,
         ST_MakeEnvelope($1, $2, $3, $4, 4326)
+      )
+      AND (
+        (SELECT COUNT(*) FROM geo.zones WHERE metadata ->> 'source' = 'osm') = 0
+        OR metadata ->> 'source' = 'osm'
       )
       ORDER BY name
     `, [swLng, swLat, neLng, neLat]);

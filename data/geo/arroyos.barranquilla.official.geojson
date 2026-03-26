@@ -1,0 +1,10 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "official",
+    "dataset_version": "2026-03-15",
+    "note": "Template for arroyo import. Polygon/MultiPolygon features with name and optional risk_level/zone_name.",
+    "feature_count": 0
+  },
+  "features": []
+}

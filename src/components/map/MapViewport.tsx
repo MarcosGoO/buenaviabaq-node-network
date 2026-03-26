@@ -50,10 +50,10 @@ export function MapViewport() {
     const [alertsLayout, setAlertsLayout] = React.useState({ isOpen: false, height: 40 })
     const [layers, setLayers] = React.useState<LayerVisibilityState>({
         zones: true,
-        roads: true,
-        hotspots: true,
-        arroyos: true,
-        events: true,
+        roads: false,
+        hotspots: false,
+        arroyos: false,
+        events: false,
     })
     const mapRef = React.useRef<MapRef>(null)
 

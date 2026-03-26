@@ -1,0 +1,10 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "osm",
+    "dataset_version": "2026-03-15",
+    "note": "Template for roads import. Each feature must be LineString with name/highway properties.",
+    "feature_count": 0
+  },
+  "features": []
+}

@@ -1,0 +1,581 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "soda2",
+    "dataset": "cpp6-je64",
+    "generated_at": "2026-03-15T18:24:57.543Z",
+    "feature_count": 38
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 61 entre carreras 34 y 35",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8004,
+          10.98087
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 76  # 38C - 110",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81432,
+          10.989430000000002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 30 # 4B-350",
+        "tipo": "NO DETENERSE LUZ ROJA - EXC VELOCIDAD - PARADA SOBRE CEBRA",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.78458,
+          10.946670000000001
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 72 # 38-79",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.810864,
+          10.985675
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 56 # 14 - 24",
+        "tipo": "NO DETENERSE LUZ ROJA - EXC VELOCIDAD - PARADA SOBRE CEBRA",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.80349,
+          10.95849
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 45 # 1Sur - 39",
+        "tipo": "NO DETENERSE LUZ ROJA - EXC VELOCIDAD - PARADA SOBRE CEBRA",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.79918,
+          10.92959
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 51B - Calle 102",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83406,
+          11.0131
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 51B # 79-192",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81055,
+          11.0032
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 53 entre calles 86 y 87",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81841,
+          11.00938
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 19 entre carreras 3D(Boulevard)",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.77858,
+          10.9402005
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 19 entre carreras 4C y 5A (Cancha)",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7777,
+          10.94252
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 46 - calle 100 esquina",
+        "tipo": "NO DETENERSE LUZ ROJA - EXC VELOCIDAD - PARADA SOBRE CEBRA",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83351,
+          11.00788
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Via 40 # 73-290",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7925,
+          11.01211
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 84 # 59-34",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81144,
+          11.01113
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 45 # 21-39",
+        "tipo": "NO DETENERSE LUZ ROJA - EXC VELOCIDAD - PARADA SOBRE CEBRA",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.79308,
+          10.96212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 45 # 21 - 18",
+        "tipo": "NO DETENERSE LUZ ROJA - EXC VELOCIDAD - PARADA SOBRE CEBRA",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.79337,
+          10.96134
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 110 # 31 - 15",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83612,
+          10.97787
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 110#29-120 (centro industrial)",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83624,
+          10.97871
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 110# 10 - 427 (Norte-Sur)",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83808,
+          10.962570000000001
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 110# 10 - 427",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83793,
+          10.96272
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 6 - Calle 72 / carrera 56 # 65-44",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81622,
+          10.9475
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Via 11 # 8 - 21",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.89345,
+          10.957490000000002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 6 (Cordialidad) entre calles 99B y 99C",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.830563,
+          10.943326
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 53 - Calle 106",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.83438,
+          11.01742
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 98 # 56-162",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.82514,
+          11.01575
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 21 # 78-44",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.823,
+          10.97109
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Carrera 15 # 18 - 102",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.77608000000001,
+          10.95356
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 94 # 57-57",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.82071,
+          11.01561
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 30 # 5A-121 (Coltanques)",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.78356,
+          10.942760000000002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 82B # 26C1 - 60 (casa esquina)",
+        "tipo": "EXCESO DE VELOCIDAD",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.82306,
+          10.97935
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 45B con carrera 14",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.79734,
+          10.95467
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 82 con carrera 56",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81254,
+          11.0074
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 53 con carrera 45",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.78975,
+          10.98771
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 70 con carrera 46",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8034,
+          10.99322
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 34 con carrera 45",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7775,
+          10.98383
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 45 con carrera 27",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.78989,
+          10.96959
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 72 con carrera 44",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.80666,
+          10.99261
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Calle 82 con carrera 51B",
+        "tipo": "BLOQUEAR CRUCE",
+        "source": "soda2:cpp6-je64"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81435,
+          11.00457
+        ]
+      }
+    }
+  ]
+}

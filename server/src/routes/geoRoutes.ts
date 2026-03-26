@@ -21,5 +21,7 @@ router.get('/pois', GeoController.getPOIs);
 
 // Admin-only geospatial data import
 router.post('/import-zones', requireAdminAuth, GeoController.importZones);
+router.post('/import-roads', requireAdminAuth, GeoController.importRoads);
+router.post('/import-arroyos', requireAdminAuth, GeoController.importArroyos);
 
 export default router;

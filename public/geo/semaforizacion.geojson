@@ -1,0 +1,5141 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "soda2",
+    "dataset": "xknx-agu2",
+    "generated_at": "2026-03-15T18:24:57.543Z",
+    "feature_count": 342
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "AVENIDA DEL RIO PUENTE LEVADIZO BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.773386,
+          10.999367
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "AVENIDA DEL RÍO VENTANA DE CAMPEONES ORIENTE BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.772526,
+          10.998045
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "AVENIDA DEL RÍO VENTANA DE CAMPEONES NORTE BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.772521,
+          10.998583
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 6 CON CARRERA 30 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7760198,
+          10.9852619
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 11 CON CARRERA 9 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.770118,
+          10.949731
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 17 CON CARRERA 15 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7739496,
+          10.9539613
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 17 CON CARRERA 30 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7748803,
+          10.9674284
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 17 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7753842,
+          10.9754118
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 19 CON CARRERA 1E BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.780262,
+          10.936612
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 19 CON CARRERA 5B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7768943,
+          10.9437723
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 19 CON CARRERA 7 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7759048,
+          10.94681
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 26 CON CARRERA 15 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7802189,
+          10.9526771
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 ENTRE CARRERAS 1 Y 2 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.781744,
+          10.93674
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 4 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7826357,
+          10.9397426
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CARRERA 4B-6B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.783772,
+          10.943425
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 8 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7847508,
+          10.9469744
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 14 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7863451,
+          10.9524282
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 15 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7860889,
+          10.9515936
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 20 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.786032,
+          10.9567872
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 21 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7851271,
+          10.9592699
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 21B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7843952,
+          10.9609495
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 23 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7839898,
+          10.9622783
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.783424,
+          10.963379
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 25 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7831608,
+          10.9643142
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 28 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7821481,
+          10.9666814
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 30 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7808624,
+          10.9691942
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7773309,
+          10.9762252
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 40 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.776502,
+          10.9776657
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7753824,
+          10.9811718
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.77556,
+          10.9825115
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 30 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7769683,
+          10.9857315
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7794114,
+          10.9771
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 40 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7787315,
+          10.9790133
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7784432,
+          10.9800066
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7782254,
+          10.9812295
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7778786,
+          10.9828928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.777582,
+          10.9838136
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 46 BARRANQUILLA *norte",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.776969,
+          10.985733
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 34 CON CARRERA 46 BARRANQUILLA *sur",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.776957,
+          10.985721
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 36B CON CARRERA 14 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7912837,
+          10.9524919
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 36B CON CARRERA 8 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7921527,
+          10.946079
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 37 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7799369,
+          10.9833457
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 37 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7793988,
+          10.9860925
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 38 CON CARRERA 30 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7844122,
+          10.9703976
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 38 CON CARRERA 33 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7833655,
+          10.973159
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 38 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.781797,
+          10.9780656
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 38 CON CARRERA 40 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7812785,
+          10.9799677
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 38 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7808262,
+          10.9817507
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 38 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.780499,
+          10.9834463
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 38 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7801725,
+          10.9848984
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 39 CON CARRERA 30 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7850403,
+          10.9703325
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 40 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7805062,
+          10.9887281
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 40 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7810334,
+          10.9863515
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 40 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7815697,
+          10.9837043
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 40 CON CARRERA 40 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7823961,
+          10.9802963
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 40 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7828894,
+          10.9784831
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 42 CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7898688,
+          10.9659884
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 42 CON CARRERA 25 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7890203,
+          10.9667616
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 42 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7824798,
+          10.986711
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 42 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7820207,
+          10.9891238
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 43 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7831735,
+          10.9868798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 44 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.786133,
+          10.9795369
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 1 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7991201,
+          10.930138
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERAS 1G BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7993202,
+          10.9317964
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 2A BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7993457,
+          10.9337912
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 4 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7993309,
+          10.9383337
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 7 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7993874,
+          10.9413601
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 7C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7994937,
+          10.9428048
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 8 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7996238,
+          10.9461818
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 8C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7996782,
+          10.9478098
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 9B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7997875,
+          10.9492599
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 10D BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7984691,
+          10.9517921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERAS 14 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7968304,
+          10.9543704
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 17 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7961987,
+          10.9556793
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 19 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7948608,
+          10.9584588
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 20 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7941408,
+          10.9599332
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 21 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7932791,
+          10.9618252
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7911115,
+          10.9665101
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 26 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7906379,
+          10.9680692
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 27 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7901346,
+          10.9696249
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 30 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7894355,
+          10.9720192
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 33 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7884841,
+          10.9751144
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 34 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.787981,
+          10.976684
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 36 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7874841,
+          10.978146
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7871283,
+          10.9798372
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7867596,
+          10.981457
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7863391,
+          10.9830068
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7857557,
+          10.9845719
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7852241,
+          10.9864681
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7849389,
+          10.9873617
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7840489,
+          10.9896613
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45 CON AV VÍA 40 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7825027,
+          10.9961074
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 45B CON CARRERA 21 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.793891,
+          10.962056
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 47 CON CARRERA 14 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8032998,
+          10.9587401
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 47 CON CARRERA 16 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8016144,
+          10.9598037
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 47 CON CARRERA 18 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7997901,
+          10.9607035
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 47 CON CARRERA 21 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7950824,
+          10.96297
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 47 CON CARRERA 22 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.792362,
+          10.964269
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 47 CON CARRERA 33 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7894946,
+          10.9754357
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 47 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.788194,
+          10.980109
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7952014,
+          10.9684734
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 27 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7939952,
+          10.9712039
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 33 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.791678,
+          10.976169
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7903074,
+          10.98066
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7899097,
+          10.9820734
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7893841,
+          10.983771
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7888018,
+          10.985343
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7882298,
+          10.9873053
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 50 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7879786,
+          10.9881277
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 51 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7912623,
+          10.9808792
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 51B CON CARRERA 8 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.806117,
+          10.94609
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7897734,
+          10.987717
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7895198,
+          10.9885764
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.789138,
+          10.9907409
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7892454,
+          10.9927375
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53D CON CARRERA 21B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8002887,
+          10.9682144
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53D CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.798462,
+          10.970826
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53D CON CARRERA 25 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.797588,
+          10.972475
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 53D CON CARRERA 31 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7973705,
+          10.97656
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 33 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7967611,
+          10.9781534
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7944106,
+          10.9816451
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.793685,
+          10.9828188
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7925588,
+          10.9846061
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7919628,
+          10.9861841
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7913516,
+          10.9881505
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7910884,
+          10.9890391
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.790591,
+          10.9907684
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 54 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7903144,
+          10.9917181
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 55 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7917523,
+          10.989339
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 55 CON CARRERA 47 y 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.791388,
+          10.990703
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 55 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7912042,
+          10.9927706
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 56 CON CARRERA 9D BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8087009,
+          10.9535889
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 56 CON CARRERA 10 BARRANQUILLA",
+        "estado": "Preventiva Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8077437,
+          10.9546099
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 57 CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8012771,
+          10.9713274
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 57 CON CARRERA 25 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.801185,
+          10.972698
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 58 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7914763,
+          10.9928996
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 59 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.79522,
+          10.9892126
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 59 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7949312,
+          10.9902237
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 59 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7945951,
+          10.9914496
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 59 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7940735,
+          10.9919534
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 59 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.793324,
+          10.9929475
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 59 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7926627,
+          10.9939843
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 60 CON CARRERA 14 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8067513,
+          10.9603468
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 60 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7956265,
+          10.9904172
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 61 CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8035041,
+          10.9714016
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 61 CON CARRERA 27 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8032603,
+          10.9755198
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 61 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.798959,
+          10.9836332
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 61 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7980043,
+          10.9848317
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 61 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7975661,
+          10.986423
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 61 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7971482,
+          10.9878254
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 62 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7970541,
+          10.9908089
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 24 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8057368,
+          10.9715268
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 27 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8054204,
+          10.9759955
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.79912,
+          10.988912
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7984688,
+          10.9911749
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.798132,
+          10.992408
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7958224,
+          10.9952341
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7948918,
+          10.9958015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 64 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7946546,
+          10.9959516
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 21B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8097177,
+          10.968804
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 27 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8068543,
+          10.9765186
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 32 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8045322,
+          10.9807784
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8034468,
+          10.9833319
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8021738,
+          10.9889008
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8019449,
+          10.9897171
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8015695,
+          10.990999
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8012952,
+          10.991962
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8009609,
+          10.9931928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7997616,
+          10.9951325
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7980303,
+          10.9962025
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 68 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7975694,
+          10.9971989
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 69 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8038667,
+          10.9868738
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 69 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8030104,
+          10.9893604
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 69 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.802703,
+          10.9901915
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 69 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8019949,
+          10.9923736
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8081656,
+          10.9844714
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8061665,
+          10.9881052
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8048982,
+          10.9903972
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.804406,
+          10.9913249
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 45 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8039222,
+          10.9922433
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.803414,
+          10.9931709
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8030315,
+          10.9938933
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 48 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8026325,
+          10.9946462
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 49 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.802252,
+          10.995353
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.80188,
+          10.99604
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8014623,
+          10.9964707
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8007063,
+          10.9972485
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.799857,
+          10.9981308
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7975243,
+          11.0000715
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70B CON CARRERA 34 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8094388,
+          10.9831307
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 70C CON CARRERA 27 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8097256,
+          10.9768643
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 71 CON CARRERA 27 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8101367,
+          10.9769174
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 71 CON CARRERA 34 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8108464,
+          10.9824468
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8111269,
+          10.9853111
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 41 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8085664,
+          10.9892049
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8071456,
+          10.991598
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.806522,
+          10.9925193
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8055641,
+          10.9943913
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8051319,
+          10.9950587
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERAS 48 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8046761,
+          10.9957798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 49 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8042551,
+          10.9965549
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8037816,
+          10.9973183
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8032762,
+          10.9977678
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8024851,
+          10.9983184
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.801579,
+          10.9989782
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 57 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7992663,
+          11.0006366
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7984009,
+          11.0012906
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON CARRERA 59 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7976397,
+          11.0018507
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 72 CON VIA 40 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7903859,
+          11.007878
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 39 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8118419,
+          10.9887214
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 42F BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8095309,
+          10.9925952
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8093518,
+          10.9929092
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8087984,
+          10.9938169
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8077912,
+          10.9955138
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8070974,
+          10.9963343
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 48 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8065511,
+          10.9969606
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.805036,
+          10.998793
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8043755,
+          10.9992924
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8035836,
+          10.9998159
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8027444,
+          11.0004595
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 74 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7995166,
+          11.0027688
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 75 CON CARRERA 26C7 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8159736,
+          10.9793537
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 75 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.806188,
+          11.000179
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 75 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8054417,
+          11.0007269
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 75 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8046848,
+          11.0012798
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 75 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8038221,
+          11.0018994
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 75 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8005923,
+          11.0042019
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 6 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8216827,
+          10.9456934
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8162356,
+          10.9866404
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 42 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8136587,
+          10.9923109
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 42F BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8135302,
+          10.9936627
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.811597,
+          10.9942397
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8109259,
+          10.9953433
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8100681,
+          10.9968087
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8096969,
+          10.9974724
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 48 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.809253,
+          10.9982136
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 49C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8085037,
+          10.9998393
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.808201,
+          11.0005
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 51 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.807782,
+          11.001162
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8072116,
+          11.0017048
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8065252,
+          11.0021807
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8057707,
+          11.0027291
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 54 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8050667,
+          11.0032494
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 56 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8033079,
+          11.0045029
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 57 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.802571,
+          11.005061
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.801706,
+          11.0057036
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 59 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8009011,
+          11.0062431
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 60 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8001673,
+          11.0067707
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76 CON CARRERA 62 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.799577,
+          11.007248
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 76B CON CARRERA 42F BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8137955,
+          10.9937509
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 77 CON CARRERA 59B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8016404,
+          11.0068867
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 77 CON CARRERA 60 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8011879,
+          11.0081521
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 42F BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.814478,
+          10.99399
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8136578,
+          10.9953249
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8129678,
+          10.9964759
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8120945,
+          10.997987
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8117193,
+          10.9986453
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 49C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8110692,
+          11.0000584
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8104505,
+          11.0009055
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 51 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8097543,
+          11.0018231
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8091471,
+          11.0026222
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8085522,
+          11.003424
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8081282,
+          11.004304
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 59B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8050155,
+          11.008813
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79 CON CARRERA 60 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8046574,
+          11.0092328
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 79A CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.818183,
+          10.9871381
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80 CON CARRERA 42F BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8168731,
+          10.9943343
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8158477,
+          10.9964867
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8142506,
+          10.9992163
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80 CON CARRERA 49C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8133817,
+          11.0010288
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8126246,
+          11.0017022
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80 CON CARRERA 51 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.812456,
+          11.002856
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80B CON CARRERA 42 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8225333,
+          10.989036
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 80B CON CARRERA 38 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.821039,
+          10.986266
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 42H BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8183497,
+          10.996878
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.817993,
+          10.9976459
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81742,
+          10.9990717
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8167568,
+          11.0006369
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8164114,
+          11.0013593
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 49C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8159369,
+          11.0020827
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8154409,
+          11.0029034
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 51 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.814866,
+          11.0037485
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8143788,
+          11.0044963
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.813897,
+          11.005283
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8133269,
+          11.0061612
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 55 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8127537,
+          11.0070276
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 57 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8117652,
+          11.0086374
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 82 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8114825,
+          11.0094152
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.820031,
+          10.9984431
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 44 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81953,
+          11.0000323
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8190021,
+          11.0016435
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8187255,
+          11.0023999
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 49C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8183944,
+          11.0031341
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 89 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8194759,
+          11.0106504
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8179766,
+          11.0040404
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 51 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8175542,
+          11.0049463
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8172124,
+          11.0057315
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.816791,
+          11.0066292
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8160532,
+          11.0073652
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 57 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8132658,
+          11.0093433
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 84 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.812532,
+          11.0099045
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8222857,
+          10.9991116
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8210462,
+          11.0023332
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 49C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8203225,
+          11.004017
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 50 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8198862,
+          11.0049151
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8190697,
+          11.0066005
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8182891,
+          11.0072921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8171564,
+          11.0078847
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 58 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8146798,
+          11.0108647
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON CARRERA 59B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8136675,
+          11.0122192
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 85 CON VIA 40 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8038577,
+          11.0263106
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 86 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.820023,
+          11.0070076
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 86 CON CARRERA 64C BARRANQUILLA",
+        "estado": "Preventiva Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.814009,
+          11.015404
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 87 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8228939,
+          11.00287
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 87 CON CARRERA 47 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8227352,
+          11.0031539
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 87 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8207019,
+          11.0073936
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 88 CON CARRERA 46,47 y 45B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.82365,
+          11.003161
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 90 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8244554,
+          11.0035887
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 90 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8222026,
+          11.0080018
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 90 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8199757,
+          11.0110048
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 93 CON CARRERA 43 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8280803,
+          11.0017702
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 93 CON CARRERA 45B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.827226,
+          11.0038108
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 93 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8269129,
+          11.0047043
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 93 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8250597,
+          11.0094407
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 94 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8246308,
+          11.0106147
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 94 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8233265,
+          11.0126678
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 94 CON CARRERA 57 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.821192,
+          11.01501
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 96 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8293086,
+          11.005801
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 98 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8286042,
+          11.0109886
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 98 CON CARRERA 52 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8278199,
+          11.0120999
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 98 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8263404,
+          11.0138164
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 99 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8273638,
+          11.01447
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 99 CON CARRERA 55 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.826954,
+          11.015444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 99 CON CARRERA 56 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8262897,
+          11.0160656
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 100 CON CARRERA 46 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8338823,
+          11.0080352
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 100 CON CARRERA 49C BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8331849,
+          11.0095466
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 100 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8320259,
+          11.0119752
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 106 CON CARRERA 51B BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8359524,
+          11.0143693
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 106 CON CARRERA 53 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8346608,
+          11.0175066
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 110 CON CARRERA 13 BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.8380514,
+          10.9683261
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 110 (CIRCUNVALAR) CON CARRERA 43 (ALAMEDA DEL RIO) BARRANQUILLA",
+        "estado": "Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.839727,
+          10.996542
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CALLE 110 (CIRCUNVALAR) CON VENTANA AL MUNDO BARRANQUILLA",
+        "estado": "Preventiva Funcionando",
+        "source": "soda2:xknx-agu2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.831136,
+          11.032731
+        ]
+      }
+    }
+  ]
+}

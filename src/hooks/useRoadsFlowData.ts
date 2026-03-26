@@ -38,7 +38,7 @@ export function useRoadsFlowData(): UseRoadsFlowDataReturn {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_URL}/geo/roads/flow`, { signal });
+      const response = await fetch(`${API_URL}/geo/roads/flow?verified=true`, { signal });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -75,4 +75,3 @@ export function useRoadsFlowData(): UseRoadsFlowDataReturn {
     refresh: fetchRoads,
   };
 }
-

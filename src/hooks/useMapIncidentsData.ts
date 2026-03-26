@@ -41,7 +41,7 @@ export function useMapIncidentsData(): UseMapIncidentsDataReturn {
       setError(null);
 
       const [arroyosRes, eventsRes] = await Promise.all([
-        fetch(`${API_URL}/geo/arroyos`),
+        fetch(`${API_URL}/geo/arroyos?verified=true`),
         fetch(`${API_URL}/events/upcoming`),
       ]);
 
@@ -85,4 +85,3 @@ export function useMapIncidentsData(): UseMapIncidentsDataReturn {
     refresh: fetchIncidents,
   };
 }
-

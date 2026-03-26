@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-03-15T18:24:56.815Z",
+  "recommendations": {
+    "soda_version": "SODA2 viable actualmente; migrar a SODA3 mas adelante solo si cambian endpoints/politicas",
+    "map_ready_sources": [
+      "cpp6-je64",
+      "xknx-agu2"
+    ],
+    "non_map_ready_sources": [
+      "yb9r-2dsi",
+      "brb8-xkdk"
+    ]
+  },
+  "datasets": {
+    "accidentalidad": {
+      "dataset": "yb9r-2dsi",
+      "records": 5000,
+      "map_ready": false,
+      "reason": "No trae lat/lon ni geocoded point en la muestra"
+    },
+    "eventos": {
+      "dataset": "brb8-xkdk",
+      "records": 240,
+      "map_ready": false,
+      "reason": "No trae lat/lon/geometria en la muestra y parece fuera del contexto BAQ"
+    },
+    "fotodeteccion": {
+      "dataset": "cpp6-je64",
+      "records": 38,
+      "map_ready": true,
+      "exported_features": 38,
+      "output": "public/geo/hotspots.fotodeteccion.geojson"
+    },
+    "semaforizacion": {
+      "dataset": "xknx-agu2",
+      "records": 342,
+      "map_ready": true,
+      "exported_features": 342,
+      "output": "public/geo/semaforizacion.geojson"
+    }
+  }
+}

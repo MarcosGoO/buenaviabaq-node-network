@@ -42,7 +42,9 @@ export function MapLayersControl({ layers, onToggle }: MapLayersControlProps) {
           );
         })}
       </div>
+      <p className="mt-2 text-[10px] leading-tight text-muted-foreground">
+        Corredores y arroyos muestran solo datos verificados (`source=osm|official`).
+      </p>
     </div>
   );
 }
-

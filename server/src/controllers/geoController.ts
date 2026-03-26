@@ -4,6 +4,7 @@ import { AppError } from '@/middleware/errorHandler';
 import { logger } from '@/utils/logger';
 import type { ApiResponse } from '@/types';
 import { ZoneImportService } from '@/services/zoneImportService.js';
+import { GeoImportService } from '@/services/geoImportService.js';
 
 export class GeoController {
   // GET /api/v1/geo/zones
@@ -55,12 +56,13 @@ export class GeoController {
   static async getArroyoZones(req: Request, res: Response, next: NextFunction) {
     try {
       const riskLevel = req.query.risk_level as string | undefined;
+      const verifiedOnly = String(req.query.verified ?? '').toLowerCase() === 'true';
 
       if (riskLevel && !['low', 'medium', 'high', 'critical'].includes(riskLevel)) {
         throw new AppError(400, 'Invalid risk level. Must be: low, medium, high, or critical');
       }
 
-      const arroyos = await GeoService.getArroyoZones(riskLevel);
+      const arroyos = await GeoService.getArroyoZones(riskLevel, verifiedOnly);
 
       const response: ApiResponse<typeof arroyos> = {
         status: 'success',
@@ -68,7 +70,7 @@ export class GeoController {
         timestamp: new Date().toISOString(),
       };
 
-      logger.info(`Retrieved ${arroyos.length} arroyo zones`, { riskLevel });
+      logger.info(`Retrieved ${arroyos.length} arroyo zones`, { riskLevel, verifiedOnly });
       res.json(response);
     } catch (error) {
       next(error);
@@ -79,7 +81,8 @@ export class GeoController {
   static async getRoads(req: Request, res: Response, next: NextFunction) {
     try {
       const roadType = req.query.type as string | undefined;
-      const roads = await GeoService.getRoads(roadType);
+      const verifiedOnly = String(req.query.verified ?? '').toLowerCase() === 'true';
+      const roads = await GeoService.getRoads(roadType, verifiedOnly);
 
       const response: ApiResponse<typeof roads> = {
         status: 'success',
@@ -87,7 +90,7 @@ export class GeoController {
         timestamp: new Date().toISOString(),
       };
 
-      logger.info(`Retrieved ${roads.length} roads`, { roadType });
+      logger.info(`Retrieved ${roads.length} roads`, { roadType, verifiedOnly });
       res.json(response);
     } catch (error) {
       next(error);
@@ -98,7 +101,8 @@ export class GeoController {
   static async getRoadsFlow(req: Request, res: Response, next: NextFunction) {
     try {
       const roadType = req.query.type as string | undefined;
-      const roads = await GeoService.getRoadsFlow(roadType);
+      const verifiedOnly = String(req.query.verified ?? '').toLowerCase() === 'true';
+      const roads = await GeoService.getRoadsFlow(roadType, verifiedOnly);
 
       const response: ApiResponse<typeof roads> = {
         status: 'success',
@@ -106,7 +110,7 @@ export class GeoController {
         timestamp: new Date().toISOString(),
       };
 
-      logger.info(`Retrieved ${roads.length} road flow segments`, { roadType });
+      logger.info(`Retrieved ${roads.length} road flow segments`, { roadType, verifiedOnly });
       res.json(response);
     } catch (error) {
       next(error);
@@ -182,6 +186,56 @@ export class GeoController {
         zoneType: 'locality',
       });
 
+      const response: ApiResponse<typeof result> = {
+        status: 'success',
+        data: result,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /api/v1/geo/import-roads
+  static async importRoads(req: Request, res: Response, next: NextFunction) {
+    try {
+      const geojson = req.body?.geojson;
+      const source = typeof req.body?.source === 'string' ? req.body.source : 'osm';
+      const datasetVersion =
+        typeof req.body?.dataset_version === 'string' ? req.body.dataset_version : undefined;
+
+      if (!geojson || geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+        throw new AppError(400, 'Invalid payload. Expected { geojson: FeatureCollection }');
+      }
+
+      const result = await GeoImportService.importRoadsFromGeoJSON(geojson, source, datasetVersion);
+      const response: ApiResponse<typeof result> = {
+        status: 'success',
+        data: result,
+        timestamp: new Date().toISOString(),
+      };
+
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /api/v1/geo/import-arroyos
+  static async importArroyos(req: Request, res: Response, next: NextFunction) {
+    try {
+      const geojson = req.body?.geojson;
+      const source = typeof req.body?.source === 'string' ? req.body.source : 'official';
+      const datasetVersion =
+        typeof req.body?.dataset_version === 'string' ? req.body.dataset_version : undefined;
+
+      if (!geojson || geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+        throw new AppError(400, 'Invalid payload. Expected { geojson: FeatureCollection }');
+      }
+
+      const result = await GeoImportService.importArroyosFromGeoJSON(geojson, source, datasetVersion);
       const response: ApiResponse<typeof result> = {
         status: 'success',
         data: result,

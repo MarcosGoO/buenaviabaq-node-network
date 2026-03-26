@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useRoadsFlowData } from "@/hooks/useRoadsFlowData";
 import { useHotspotsData } from "@/hooks/useHotspotsData";
 import { useMapIncidentsData } from "@/hooks/useMapIncidentsData";
+import { useSodaMapLayers } from "@/hooks/useSodaMapLayers";
 
 export interface LayerVisibilityState {
   zones: boolean;
@@ -88,10 +89,11 @@ export function RoadsFlowLayer({ visible }: { visible: boolean }) {
 export function HotspotsLayer({ visible }: { visible: boolean }) {
   const { roads } = useRoadsFlowData();
   const { hotspots } = useHotspotsData();
+  const { photodetection } = useSodaMapLayers();
 
   const roadsById = useMemo(() => new Map(roads.map((road) => [road.id, road])), [roads]);
 
-  const hotspotsGeoJSON = useMemo<GeoJSON.FeatureCollection<GeoJSON.Point>>(
+  const computedHotspotsGeoJSON = useMemo<GeoJSON.FeatureCollection<GeoJSON.Point>>(
     () => {
       const features: GeoJSON.Feature<GeoJSON.Point>[] = [];
 
@@ -121,6 +123,8 @@ export function HotspotsLayer({ visible }: { visible: boolean }) {
     },
     [hotspots, roadsById]
   );
+
+  const hotspotsGeoJSON = photodetection ?? computedHotspotsGeoJSON;
 
   if (!visible) return null;
 
@@ -157,6 +161,7 @@ export function IncidentLayers({
   showEvents: boolean;
 }) {
   const { arroyos, events } = useMapIncidentsData();
+  const { semaforos } = useSodaMapLayers();
 
   const arroyosGeoJSON = useMemo<GeoJSON.FeatureCollection<GeoJSON.MultiPolygon>>(
     () => ({
@@ -223,35 +228,55 @@ export function IncidentLayers({
       )}
 
       {showEvents && (
-        <Source id="events-source" type="geojson" data={eventsGeoJSON}>
-          <Layer
-            id="events-impact-layer"
-            type="circle"
-            paint={{
-              "circle-color": [
-                "match",
-                ["get", "traffic_impact"],
-                "severe", "#7c2d12",
-                "high", "#ea580c",
-                "moderate", "#f59e0b",
-                "low", "#22c55e",
-                "#ea580c",
-              ],
-              "circle-radius": [
-                "match",
-                ["get", "traffic_impact"],
-                "severe", 18,
-                "high", 14,
-                "moderate", 10,
-                "low", 7,
-                10,
-              ],
-              "circle-opacity": 0.32,
-              "circle-stroke-color": "#fff",
-              "circle-stroke-width": 1.5,
-            }}
-          />
-        </Source>
+        <>
+          {eventsGeoJSON.features.length > 0 && (
+            <Source id="events-source" type="geojson" data={eventsGeoJSON}>
+              <Layer
+                id="events-impact-layer"
+                type="circle"
+                paint={{
+                  "circle-color": [
+                    "match",
+                    ["get", "traffic_impact"],
+                    "severe", "#7c2d12",
+                    "high", "#ea580c",
+                    "moderate", "#f59e0b",
+                    "low", "#22c55e",
+                    "#ea580c",
+                  ],
+                  "circle-radius": [
+                    "match",
+                    ["get", "traffic_impact"],
+                    "severe", 18,
+                    "high", 14,
+                    "moderate", 10,
+                    "low", 7,
+                    10,
+                  ],
+                  "circle-opacity": 0.32,
+                  "circle-stroke-color": "#fff",
+                  "circle-stroke-width": 1.5,
+                }}
+              />
+            </Source>
+          )}
+
+          {semaforos && (
+            <Source id="semaforos-source" type="geojson" data={semaforos}>
+              <Layer
+                id="semaforos-layer"
+                type="circle"
+                paint={{
+                  "circle-color": "#0ea5e9",
+                  "circle-radius": 3.5,
+                  "circle-opacity": 0.75,
+                  "circle-stroke-color": "#ffffff",
+                  "circle-stroke-width": 1,
+                }}
+              />
+            </Source>
+          )}
+        </>
       )}
     </>
   );
