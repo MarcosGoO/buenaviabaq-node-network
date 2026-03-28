@@ -5,6 +5,7 @@ import { redis } from './redis.js';
 import { logger } from '@/utils/logger.js';
 import Redis from 'ioredis';
 import { config } from '@/config/index.js';
+import { ObservabilityService } from '@/services/observabilityService.js';
 
 export class SocketService {
   private static io: SocketIOServer | null = null;
@@ -58,6 +59,7 @@ export class SocketService {
         : '';
 
       if (normalizedToken !== expectedToken) {
+        ObservabilityService.recordSocketAuthFailure();
         logger.warn(`Connection rejected: Invalid or missing token for socket ${socket.id}`);
         return next(new Error('Authentication error'));
       }
@@ -98,6 +100,7 @@ export class SocketService {
     if (!this.io) return;
 
     this.io.on('connection', (socket: Socket) => {
+      ObservabilityService.recordSocketConnection(socket.id);
       logger.info(`Client connected: ${socket.id}`);
 
       // Handle client subscribing to specific zones
@@ -107,6 +110,7 @@ export class SocketService {
           return;
         }
         void socket.join(`zone:${zoneId}`);
+        ObservabilityService.recordSocketSubscription(socket.id, 'zone');
         logger.debug(`Client ${socket.id} subscribed to zone:${zoneId}`);
       });
 
@@ -117,70 +121,85 @@ export class SocketService {
           return;
         }
         void socket.leave(`zone:${zoneId}`);
+        ObservabilityService.recordSocketUnsubscription(socket.id, 'zone');
         logger.debug(`Client ${socket.id} unsubscribed from zone:${zoneId}`);
       });
 
       // Handle client subscribing to traffic updates
       socket.on('subscribe:traffic', () => {
         void socket.join('traffic');
+        ObservabilityService.recordSocketSubscription(socket.id, 'traffic');
         logger.debug(`Client ${socket.id} subscribed to traffic updates`);
       });
       socket.on('unsubscribe:traffic', () => {
         void socket.leave('traffic');
+        ObservabilityService.recordSocketUnsubscription(socket.id, 'traffic');
       });
 
       // Handle client subscribing to weather updates
       socket.on('subscribe:weather', () => {
         void socket.join('weather');
+        ObservabilityService.recordSocketSubscription(socket.id, 'weather');
         logger.debug(`Client ${socket.id} subscribed to weather updates`);
       });
       socket.on('unsubscribe:weather', () => {
         void socket.leave('weather');
+        ObservabilityService.recordSocketUnsubscription(socket.id, 'weather');
       });
 
       // Handle client subscribing to event updates
       socket.on('subscribe:events', () => {
         void socket.join('events');
+        ObservabilityService.recordSocketSubscription(socket.id, 'events');
         logger.debug(`Client ${socket.id} subscribed to event updates`);
       });
       socket.on('unsubscribe:events', () => {
         void socket.leave('events');
+        ObservabilityService.recordSocketUnsubscription(socket.id, 'events');
       });
 
       // Handle client subscribing to alert updates
       socket.on('subscribe:alerts', () => {
         void socket.join('alerts');
+        ObservabilityService.recordSocketSubscription(socket.id, 'alerts');
         logger.debug(`Client ${socket.id} subscribed to alert updates`);
       });
       socket.on('unsubscribe:alerts', () => {
         void socket.leave('alerts');
+        ObservabilityService.recordSocketUnsubscription(socket.id, 'alerts');
       });
 
       // Handle client subscribing to prediction updates
       socket.on('subscribe:predictions', () => {
         void socket.join('predictions');
+        ObservabilityService.recordSocketSubscription(socket.id, 'predictions');
         logger.debug(`Client ${socket.id} subscribed to prediction updates`);
       });
       socket.on('unsubscribe:predictions', () => {
         void socket.leave('predictions');
+        ObservabilityService.recordSocketUnsubscription(socket.id, 'predictions');
       });
 
       // Handle client subscribing to ML reliability updates
       socket.on('subscribe:ml-reliability', () => {
         void socket.join('ml-reliability');
+        ObservabilityService.recordSocketSubscription(socket.id, 'ml-reliability');
         logger.debug(`Client ${socket.id} subscribed to ML reliability updates`);
       });
       socket.on('unsubscribe:ml-reliability', () => {
         void socket.leave('ml-reliability');
+        ObservabilityService.recordSocketUnsubscription(socket.id, 'ml-reliability');
       });
 
       // Handle disconnection
       socket.on('disconnect', (reason) => {
+        ObservabilityService.recordSocketDisconnection(socket.id);
         logger.info(`Client disconnected: ${socket.id}, reason: ${reason}`);
       });
 
       // Handle errors
       socket.on('error', (error) => {
+        ObservabilityService.recordSocketError();
         logger.error(`Socket error for client ${socket.id}:`, error);
       });
     });
@@ -199,6 +218,7 @@ export class SocketService {
       timestamp: new Date().toISOString(),
       data,
     });
+    ObservabilityService.recordSocketEmission('traffic:update');
 
     logger.debug('Emitted traffic update to subscribers');
   }
@@ -216,6 +236,7 @@ export class SocketService {
       timestamp: new Date().toISOString(),
       data,
     });
+    ObservabilityService.recordSocketEmission('weather:update');
 
     logger.debug('Emitted weather update to subscribers');
   }
@@ -233,6 +254,7 @@ export class SocketService {
       timestamp: new Date().toISOString(),
       event,
     });
+    ObservabilityService.recordSocketEmission('event:notification');
 
     logger.debug('Emitted event notification to subscribers');
   }
@@ -251,6 +273,7 @@ export class SocketService {
       zoneId,
       alert,
     });
+    ObservabilityService.recordSocketEmission('zone:alert');
 
     logger.debug(`Emitted alert to zone:${zoneId}`);
   }
@@ -268,6 +291,7 @@ export class SocketService {
       timestamp: new Date().toISOString(),
       alert,
     });
+    ObservabilityService.recordSocketEmission('alert:notification');
 
     logger.debug('Emitted alert notification to subscribers');
   }
@@ -285,6 +309,7 @@ export class SocketService {
       timestamp: new Date().toISOString(),
       predictions,
     });
+    ObservabilityService.recordSocketEmission('prediction:update');
 
     logger.debug('Emitted prediction update to subscribers');
   }
@@ -299,6 +324,7 @@ export class SocketService {
     }
 
     this.io.to('ml-reliability').emit('ml:reliability:update', payload);
+    ObservabilityService.recordSocketEmission('ml:reliability:update');
     logger.debug('Emitted ml:reliability:update');
   }
 
@@ -312,6 +338,7 @@ export class SocketService {
     }
 
     this.io.to('ml-reliability').emit('ml:incident:opened', payload);
+    ObservabilityService.recordSocketEmission('ml:incident:opened');
     logger.debug('Emitted ml:incident:opened');
   }
 
@@ -325,6 +352,7 @@ export class SocketService {
     }
 
     this.io.to('ml-reliability').emit('ml:incident:resolved', payload);
+    ObservabilityService.recordSocketEmission('ml:incident:resolved');
     logger.debug('Emitted ml:incident:resolved');
   }
 
@@ -338,6 +366,7 @@ export class SocketService {
     }
 
     this.io.to('ml-reliability').emit('ml:decision:recommended', payload);
+    ObservabilityService.recordSocketEmission('ml:decision:recommended');
     logger.debug('Emitted ml:decision:recommended');
   }
 
@@ -351,6 +380,7 @@ export class SocketService {
     }
 
     this.io.emit(event, data);
+    ObservabilityService.recordSocketEmission(event);
     logger.debug(`Broadcasted event: ${event}`);
   }
 

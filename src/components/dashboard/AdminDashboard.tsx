@@ -119,6 +119,7 @@ export default function AdminDashboard() {
   const {
     modelHistory,
     health,
+    metrics,
     isAuthenticated,
     retrainStatus,
     isLoading,
@@ -148,12 +149,10 @@ export default function AdminDashboard() {
     void bootstrap();
   }, [checkSession, fetchAll]);
 
-  // Check all services health
   useEffect(() => {
     async function checkServices() {
       const checks: ServiceStatus[] = [];
 
-      // ML Service
       try {
         const res = await fetch(`${API_BASE}/predictions/health`);
         const json = await res.json();
@@ -167,42 +166,38 @@ export default function AdminDashboard() {
         checks.push({ name: 'ML Service (FastAPI)', status: 'offline', icon: Cpu });
       }
 
-      // DB — check via traffic endpoint
-      try {
-        const res = await fetch(`${API_BASE}/traffic/summary`);
-        checks.push({
-          name: 'Base de Datos (PostgreSQL)',
-          status: res.ok ? 'online' : 'offline',
-          icon: Database,
-        });
-      } catch {
-        checks.push({ name: 'Base de Datos (PostgreSQL)', status: 'offline', icon: Database });
-      }
+      const metricsRes = await fetch(`${API_BASE}/metrics`)
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .catch(() => null);
 
-      // Redis — check via insights (cached)
-      try {
-        const res = await fetch(`${API_BASE}/insights/summary`);
-        checks.push({
-          name: 'Cache (Redis)',
-          status: res.ok ? 'online' : 'offline',
-          icon: Server,
-        });
-      } catch {
-        checks.push({ name: 'Cache (Redis)', status: 'offline', icon: Server });
-      }
+      checks.push({
+        name: 'Base de Datos (PostgreSQL)',
+        status: metricsRes?.db ? 'online' : 'offline',
+        icon: Database,
+        detail: metricsRes?.db ? `${metricsRes.db.active_connections}/${metricsRes.db.pool_size} conexiones activas` : undefined,
+      });
 
-      // Socket.IO — basic check
+      checks.push({
+        name: 'Cache (Redis)',
+        status: metricsRes?.redis?.connected ? 'online' : 'offline',
+        icon: Server,
+        detail: metricsRes?.cache ? `${metricsRes.cache.hit_rate}% hit rate` : undefined,
+      });
+
       checks.push({
         name: 'WebSocket (Socket.IO)',
-        status: 'online',
+        status: metricsRes ? 'online' : 'offline',
         icon: Wifi,
-        detail: 'Verificado via cliente',
+        detail: metricsRes ? `${metricsRes.sockets.connected_clients} cliente(s) conectados` : undefined,
       });
 
       setServices(checks);
     }
 
-    checkServices();
+    void checkServices();
   }, []);
 
   const [confirmRollback, setConfirmRollback] = useState<string | null>(null);
@@ -320,7 +315,6 @@ export default function AdminDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Model History */}
         <TabsContent value="models" className="space-y-4">
           {modelHistory ? (
             <>
@@ -336,7 +330,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {modelHistory.versions.map(model => (
+                {modelHistory.versions.map((model) => (
                   <ModelCard
                     key={model.version}
                     model={model}
@@ -364,7 +358,6 @@ export default function AdminDashboard() {
           )}
         </TabsContent>
 
-        {/* Retraining */}
         <TabsContent value="retrain" className="space-y-4">
           <Card>
             <CardHeader>
@@ -410,7 +403,6 @@ export default function AdminDashboard() {
                 )}
               </div>
 
-              {/* Training info */}
               <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border/50">
                 <p className="text-sm font-semibold mb-2">Informacion del Proceso</p>
                 <div className="space-y-1 text-sm text-muted-foreground">
@@ -423,7 +415,6 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Latest model info */}
           {modelHistory && modelHistory.versions.length > 0 && (
             <Card>
               <CardHeader>
@@ -440,10 +431,9 @@ export default function AdminDashboard() {
           )}
         </TabsContent>
 
-        {/* System Health */}
         <TabsContent value="health" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {services.map(service => {
+            {services.map((service) => {
               const Icon = service.icon;
               return (
                 <Card key={service.name} className="overflow-hidden">
@@ -482,7 +472,6 @@ export default function AdminDashboard() {
             })}
           </div>
 
-          {/* ML Service Details */}
           {health && (
             <Card>
               <CardHeader>
@@ -505,6 +494,82 @@ export default function AdminDashboard() {
                     <p className="text-sm font-semibold">
                       {new Date(health.checked_at).toLocaleString('es-CO')}
                     </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {metrics && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Observabilidad del Backend</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Requests/min</p>
+                    <p className="text-lg font-bold">{metrics.requests.per_minute}</p>
+                    <p className="text-xs text-muted-foreground">Total: {metrics.requests.total}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Latencia P95</p>
+                    <p className="text-lg font-bold">{metrics.requests.latency_ms.p95} ms</p>
+                    <p className="text-xs text-muted-foreground">Avg: {metrics.requests.latency_ms.avg} ms</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Sockets</p>
+                    <p className="text-lg font-bold">{metrics.sockets.connected_clients}</p>
+                    <p className="text-xs text-muted-foreground">Pico: {metrics.sockets.peak_connections}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Scheduler</p>
+                    <p className="text-lg font-bold capitalize">{metrics.jobs.scheduler.status}</p>
+                    <p className="text-xs text-muted-foreground">Starts: {metrics.jobs.scheduler.starts}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <p className="text-xs font-semibold mb-2">Cache y base de datos</p>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <p>Cache hit rate: <span className="font-semibold text-foreground">{metrics.cache.hit_rate}%</span></p>
+                      <p>Redis: <span className="font-semibold text-foreground">{metrics.redis.connected ? 'Conectado' : 'Desconectado'}</span></p>
+                      <p>Pool DB: <span className="font-semibold text-foreground">{metrics.db.active_connections}/{metrics.db.pool_size}</span></p>
+                      <p>Memoria RSS: <span className="font-semibold text-foreground">{metrics.process.memory_mb.rss} MB</span></p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <p className="text-xs font-semibold mb-2">Cola y ejecucion</p>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <p>Queue waiting: <span className="font-semibold text-foreground">{metrics.jobs.queue?.waiting ?? 0}</span></p>
+                      <p>Queue active: <span className="font-semibold text-foreground">{metrics.jobs.queue?.active ?? 0}</span></p>
+                      <p>Queue failed: <span className="font-semibold text-foreground">{metrics.jobs.queue?.failed ?? 0}</span></p>
+                      <p>Socket auth failures: <span className="font-semibold text-foreground">{metrics.sockets.auth_failures}</span></p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                  <p className="text-xs font-semibold mb-2">Rutas mas activas</p>
+                  <div className="space-y-2">
+                    {metrics.requests.busiest_routes.slice(0, 5).map((routeMetric) => (
+                      <div key={routeMetric.route} className="flex items-center justify-between gap-3 text-sm">
+                        <div className="min-w-0">
+                          <p className="font-mono truncate">{routeMetric.route}</p>
+                          <p className="text-xs text-muted-foreground">
+                            P95 {routeMetric.latency_ms.p95} ms · error {routeMetric.error_rate}%
+                          </p>
+                        </div>
+                        <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+                          {routeMetric.count} req
+                        </span>
+                      </div>
+                    ))}
+                    {metrics.requests.busiest_routes.length === 0 && (
+                      <p className="text-sm text-muted-foreground">Aun no hay suficiente trafico para mostrar rutas.</p>
+                    )}
                   </div>
                 </div>
               </CardContent>

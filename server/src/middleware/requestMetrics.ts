@@ -1,30 +1,33 @@
 import type { NextFunction, Request, Response } from 'express';
+import { ObservabilityService } from '@/services/observabilityService.js';
 
-const ONE_MINUTE_MS = 60_000;
-let totalRequests = 0;
-const requestTimestamps: number[] = [];
-
-function trimWindow(now: number) {
-  const cutoff = now - ONE_MINUTE_MS;
-  while (requestTimestamps.length > 0 && requestTimestamps[0] < cutoff) {
-    requestTimestamps.shift();
+function resolveRouteLabel(req: Request) {
+  if (req.route?.path) {
+    const routePath = typeof req.route.path === 'string' ? req.route.path : req.path;
+    const base = req.baseUrl || '';
+    return `${base}${routePath}` || req.originalUrl;
   }
+
+  return req.path || req.originalUrl;
 }
 
-export function requestMetricsMiddleware(_req: Request, _res: Response, next: NextFunction) {
-  const now = Date.now();
-  totalRequests += 1;
-  requestTimestamps.push(now);
-  trimWindow(now);
+export function requestMetricsMiddleware(req: Request, res: Response, next: NextFunction) {
+  const startedAt = process.hrtime.bigint();
+  ObservabilityService.recordRequestStart();
+
+  res.on('finish', () => {
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+    ObservabilityService.recordRequestComplete({
+      method: req.method,
+      route: resolveRouteLabel(req),
+      statusCode: res.statusCode,
+      durationMs,
+    });
+  });
+
   next();
 }
 
 export function getRequestMetrics() {
-  const now = Date.now();
-  trimWindow(now);
-  return {
-    total: totalRequests,
-    perMinute: requestTimestamps.length,
-  };
+  return ObservabilityService.getRequestMetrics();
 }
-

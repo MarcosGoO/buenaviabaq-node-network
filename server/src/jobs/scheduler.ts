@@ -3,6 +3,7 @@ import { dataCollectionQueue, JobTypes } from './queues.js';
 import { ModelReliabilityService } from '@/services/modelReliabilityService.js';
 import { ModelGovernanceService } from '@/services/modelGovernanceService.js';
 import { SocketService } from '@/lib/socket.js';
+import { ObservabilityService } from '@/services/observabilityService.js';
 
 /**
  * Schedule recurring jobs
@@ -16,6 +17,7 @@ export class JobScheduler {
    */
   static async start(): Promise<void> {
     logger.info('Starting job scheduler...');
+    ObservabilityService.recordSchedulerStarting();
 
     // Schedule full data collection every 5 minutes
     const collectionInterval = setInterval(async () => {
@@ -60,6 +62,7 @@ export class JobScheduler {
     await this.monitorPredictionDrift();
     await this.materializeDailyQuality();
 
+    ObservabilityService.recordSchedulerStarted();
     logger.info('Job scheduler started - data collection every 5 minutes, alerts every 2 minutes, drift monitor every 15 minutes, reliability daily quality at 00:10, model retraining weekly on Sunday 3:00 AM');
   }
 
@@ -68,6 +71,7 @@ export class JobScheduler {
    */
   static async scheduleDataCollection(): Promise<void> {
     try {
+      ObservabilityService.recordJobScheduled(JobTypes.COLLECT_ALL);
       const job = await dataCollectionQueue.add(
         JobTypes.COLLECT_ALL,
         {
@@ -82,6 +86,7 @@ export class JobScheduler {
 
       logger.info(`Scheduled data collection job: ${job.id}`);
     } catch (error) {
+      ObservabilityService.recordJobFailed(JobTypes.COLLECT_ALL, error);
       logger.error('Failed to schedule data collection:', error);
       throw error;
     }
@@ -92,6 +97,7 @@ export class JobScheduler {
    */
   static async scheduleTrafficCollection(): Promise<void> {
     try {
+      ObservabilityService.recordJobScheduled(JobTypes.COLLECT_TRAFFIC);
       const job = await dataCollectionQueue.add(
         JobTypes.COLLECT_TRAFFIC,
         {
@@ -106,6 +112,7 @@ export class JobScheduler {
 
       logger.info(`Scheduled traffic collection job: ${job.id}`);
     } catch (error) {
+      ObservabilityService.recordJobFailed(JobTypes.COLLECT_TRAFFIC, error);
       logger.error('Failed to schedule traffic collection:', error);
       throw error;
     }
@@ -116,6 +123,7 @@ export class JobScheduler {
    */
   static async scheduleWeatherCollection(): Promise<void> {
     try {
+      ObservabilityService.recordJobScheduled(JobTypes.COLLECT_WEATHER);
       const job = await dataCollectionQueue.add(
         JobTypes.COLLECT_WEATHER,
         {
@@ -130,6 +138,7 @@ export class JobScheduler {
 
       logger.info(`Scheduled weather collection job: ${job.id}`);
     } catch (error) {
+      ObservabilityService.recordJobFailed(JobTypes.COLLECT_WEATHER, error);
       logger.error('Failed to schedule weather collection:', error);
       throw error;
     }
@@ -140,6 +149,7 @@ export class JobScheduler {
    */
   static async scheduleAlertDetection(): Promise<void> {
     try {
+      ObservabilityService.recordJobScheduled(JobTypes.DETECT_ALERTS);
       const job = await dataCollectionQueue.add(
         JobTypes.DETECT_ALERTS,
         {
@@ -154,6 +164,7 @@ export class JobScheduler {
 
       logger.info(`Scheduled alert detection job: ${job.id}`);
     } catch (error) {
+      ObservabilityService.recordJobFailed(JobTypes.DETECT_ALERTS, error);
       logger.error('Failed to schedule alert detection:', error);
       throw error;
     }
@@ -230,6 +241,7 @@ export class JobScheduler {
    */
   static async scheduleModelRetraining(): Promise<string> {
     try {
+      ObservabilityService.recordJobScheduled(JobTypes.RETRAIN_MODEL);
       const job = await dataCollectionQueue.add(
         JobTypes.RETRAIN_MODEL,
         {
@@ -246,6 +258,7 @@ export class JobScheduler {
       logger.info(`Scheduled model retraining job: ${job.id}`);
       return job.id ?? '';
     } catch (error) {
+      ObservabilityService.recordJobFailed(JobTypes.RETRAIN_MODEL, error);
       logger.error('Failed to schedule model retraining:', error);
       throw error;
     }
@@ -358,6 +371,7 @@ export class JobScheduler {
     });
 
     this.intervals = [];
+    ObservabilityService.recordSchedulerStopped();
 
     logger.info('Job scheduler stopped');
   }

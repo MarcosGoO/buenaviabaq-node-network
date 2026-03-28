@@ -34,6 +34,8 @@ import routingRoutes from '@/routes/routingRoutes.js';
 import metricsRoutes from '@/routes/metricsRoutes.js';
 import authRoutes from '@/routes/authRoutes.js';
 import { CacheWarmupService } from '@/services/cacheWarmupService.js';
+import { requestIdMiddleware } from '@/api/middleware/requestId.js';
+import { ObservabilityService } from '@/services/observabilityService.js';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -74,15 +76,25 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression({
   threshold: 1024, // 1kb explicit threshold
 }));
+app.use(requestIdMiddleware);
 app.use(requestMetricsMiddleware);
 app.use(cacheHeaders);
 
 // Request logging
 app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.path}`, {
-    ip: req.ip,
-    userAgent: req.get('user-agent'),
+  const startedAt = process.hrtime.bigint();
+
+  res.on('finish', () => {
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+    logger.info(`${req.method} ${req.path}`, {
+      requestId: res.getHeader('X-Request-ID'),
+      statusCode: res.statusCode,
+      durationMs: Number(durationMs.toFixed(2)),
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
   });
+
   next();
 });
 
@@ -90,7 +102,9 @@ app.use((req, res, next) => {
 app.get('/health', async (req, res) => {
   const dbConnected = await testConnection();
   const redisConnected = await RedisClient.healthCheck();
-  const socketConnections = await SocketService.getConnectedClientsCount();
+  const requestMetrics = ObservabilityService.getRequestMetrics();
+  const socketMetrics = ObservabilityService.getSocketMetrics();
+  const jobMetrics = ObservabilityService.getJobMetrics();
 
   res.json({
     status: (dbConnected && redisConnected) ? 'ok' : 'degraded',
@@ -102,8 +116,14 @@ app.get('/health', async (req, res) => {
       redis: redisConnected ? 'connected' : 'disconnected',
       socket: {
         status: 'active',
-        connections: socketConnections,
+        connections: socketMetrics.connectedClients,
       },
+    },
+    observability: {
+      requests_per_minute: requestMetrics.perMinute,
+      request_latency_p95_ms: requestMetrics.latencyMs.p95,
+      socket_clients: socketMetrics.connectedClients,
+      scheduler_status: jobMetrics.scheduler.status,
     },
   });
 });
@@ -161,6 +181,7 @@ async function startBackgroundJobs() {
 
     logger.info('✅ Background jobs and scheduler started successfully');
   } catch (error) {
+    ObservabilityService.recordSchedulerError(error);
     logger.error('Failed to start background jobs:', error);
   }
 }
@@ -183,6 +204,7 @@ httpServer.listen(PORT, async () => {
 // Graceful shutdown
 async function gracefulShutdown(signal: string) {
   logger.info(`${signal} signal received: closing server gracefully...`);
+  ObservabilityService.recordSchedulerStopped();
 
   try {
     // Stop accepting new connections

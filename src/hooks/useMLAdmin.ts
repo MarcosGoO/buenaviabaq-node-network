@@ -24,9 +24,103 @@ export interface SystemHealth {
   checked_at: string;
 }
 
+export interface ObservabilityMetrics {
+  uptime_seconds: number;
+  process: {
+    pid: number;
+    memory_mb: {
+      rss: number;
+      used: number;
+      total: number;
+      external: number;
+    };
+  };
+  requests: {
+    total: number;
+    in_flight: number;
+    per_minute: number;
+    server_errors: number;
+    latency_ms: {
+      avg: number;
+      p95: number;
+      max: number;
+    };
+    busiest_routes: Array<{
+      route: string;
+      count: number;
+      errors: number;
+      error_rate: number;
+      latency_ms: {
+        avg: number;
+        p95: number;
+        max: number;
+      };
+      last_seen_at: string | null;
+      last_status_code: number | null;
+    }>;
+  };
+  cache: {
+    hits: number;
+    misses: number;
+    hit_rate: number;
+  };
+  db: {
+    pool_size: number;
+    idle_connections: number;
+    active_connections: number;
+  };
+  redis: {
+    connected: boolean;
+  };
+  sockets: {
+    connected_clients: number;
+    peak_connections: number;
+    total_connections: number;
+    total_disconnections: number;
+    auth_failures: number;
+    errors: number;
+    emitted_events: Record<string, number>;
+    channels: Record<string, {
+      active: number;
+      subscribes: number;
+      unsubscribes: number;
+    }>;
+  };
+  jobs: {
+    scheduler: {
+      status: 'idle' | 'starting' | 'running' | 'stopped' | 'error';
+      starts: number;
+      stops: number;
+      last_started_at: string | null;
+      last_stopped_at: string | null;
+      last_error_at: string | null;
+      last_error: string | null;
+    };
+    queue: {
+      waiting: number;
+      active: number;
+      completed: number;
+      failed: number;
+      delayed: number;
+      total: number;
+    } | null;
+    execution: Record<string, {
+      scheduled: number;
+      completed: number;
+      failed: number;
+      lastScheduledAt: string | null;
+      lastCompletedAt: string | null;
+      lastFailedAt: string | null;
+      lastError: string | null;
+    }>;
+  };
+  timestamp: string;
+}
+
 export function useMLAdmin() {
   const [modelHistory, setModelHistory] = useState<ModelHistory | null>(null);
   const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [metrics, setMetrics] = useState<ObservabilityMetrics | null>(null);
   const [retrainStatus, setRetrainStatus] = useState<'idle' | 'queued' | 'error'>('idle');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,6 +195,17 @@ export function useMLAdmin() {
     }
   }, []);
 
+  const fetchMetrics = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/metrics`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setMetrics(json as ObservabilityMetrics);
+    } catch {
+      setMetrics(null);
+    }
+  }, []);
+
   const triggerRetrain = useCallback(async () => {
     try {
       setRetrainStatus('queued');
@@ -134,13 +239,14 @@ export function useMLAdmin() {
 
   const fetchAll = useCallback(async () => {
     setIsLoading(true);
-    await Promise.all([fetchModelHistory(), fetchHealth()]);
+    await Promise.all([fetchModelHistory(), fetchHealth(), fetchMetrics()]);
     setIsLoading(false);
-  }, [fetchModelHistory, fetchHealth]);
+  }, [fetchHealth, fetchMetrics, fetchModelHistory]);
 
   return {
     modelHistory,
     health,
+    metrics,
     isAuthenticated,
     retrainStatus,
     isLoading,
@@ -150,6 +256,7 @@ export function useMLAdmin() {
     logout,
     fetchModelHistory,
     fetchHealth,
+    fetchMetrics,
     triggerRetrain,
     rollbackModel,
     fetchAll,

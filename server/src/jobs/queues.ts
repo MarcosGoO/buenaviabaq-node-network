@@ -1,6 +1,7 @@
 import { Queue, QueueEvents } from 'bullmq';
 import { logger } from '@/utils/logger.js';
 import { config } from '@/config/index.js';
+import { ObservabilityService } from '@/services/observabilityService.js';
 
 const connection = {
   host: config.REDIS_HOST,
@@ -33,10 +34,18 @@ export const dataCollectionEvents = new QueueEvents('data-collection', {
 
 // Event listeners for queue monitoring
 dataCollectionEvents.on('completed', ({ jobId }) => {
+  const jobType = inferJobType(jobId);
+  if (jobType) {
+    ObservabilityService.recordJobCompleted(jobType);
+  }
   logger.info(`Job ${jobId} completed successfully`);
 });
 
 dataCollectionEvents.on('failed', ({ jobId, failedReason }) => {
+  const jobType = inferJobType(jobId);
+  if (jobType) {
+    ObservabilityService.recordJobFailed(jobType, failedReason);
+  }
   logger.error(`Job ${jobId} failed:`, failedReason);
 });
 
@@ -66,3 +75,17 @@ export const JobTypes = {
 } as const;
 
 export type JobType = (typeof JobTypes)[keyof typeof JobTypes];
+
+function inferJobType(jobId?: string | null): JobType | null {
+  if (!jobId) {
+    return null;
+  }
+
+  if (jobId.startsWith('collect-all-')) return JobTypes.COLLECT_ALL;
+  if (jobId.startsWith('collect-traffic-')) return JobTypes.COLLECT_TRAFFIC;
+  if (jobId.startsWith('collect-weather-')) return JobTypes.COLLECT_WEATHER;
+  if (jobId.startsWith('detect-alerts-')) return JobTypes.DETECT_ALERTS;
+  if (jobId.startsWith('retrain-model-')) return JobTypes.RETRAIN_MODEL;
+
+  return null;
+}
