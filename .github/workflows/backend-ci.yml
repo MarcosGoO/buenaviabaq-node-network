@@ -49,8 +49,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
 
       - name: Install dependencies
         working-directory: ./server
@@ -131,8 +129,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
 
       - name: Install dependencies for audit
         working-directory: ./server
