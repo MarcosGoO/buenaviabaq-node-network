@@ -1,285 +1,149 @@
-# BUENAVIABAQ - Barranquilla Mobility Intelligence Platform
+# VíaBaq
 
-> **Advanced traffic prediction and urban mobility analytics for Barranquilla, Colombia**
+Plataforma de inteligencia vial para Barranquilla con visualización geoespacial, analítica histórica, alertas en tiempo real y un servicio de predicción apoyado por machine learning.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-22.16-green)](https://nodejs.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-7.2-red)](https://redis.io/)
+## Qué incluye
 
----
+- Frontend en Next.js 16 con mapa interactivo, paneles de analítica y vistas de administración.
+- Backend en Node.js + Express con API REST, WebSockets, Redis y jobs en segundo plano.
+- Servicio ML en Python para predicciones, explicabilidad y monitoreo de confiabilidad.
+- Base de datos PostgreSQL/PostGIS para datos geoespaciales y series históricas.
+- Pruebas unitarias, de integración y E2E.
 
-## Overview
+## Stack
 
-VíaBaq is a **production-ready** urban mobility platform that combines real-time geospatial data, historical analytics, and machine learning to optimize traffic flow in Barranquilla. The system provides:
+- Frontend: Next.js, React 19, TypeScript, Tailwind CSS, MapLibre GL, Recharts
+- Backend: Node.js 22, Express, TypeScript, Socket.IO, BullMQ, Redis
+- Datos: PostgreSQL 15, PostGIS, TimescaleDB
+- ML: FastAPI, Python, pipelines de entrenamiento y evaluación
+- Testing: Vitest, Playwright
 
-- **Real-time traffic monitoring** with WebSocket updates
-- **Weather-aware predictions** considering Barranquilla's flood-prone zones (arroyos)
-- **Advanced analytics** with 4,000+ historical data points
-- **ML-ready architecture** for predictive modeling
-- **High-performance API** with Redis caching and background jobs
+## Estructura del proyecto
 
----
-
-## Key Features
-
-### For End Users
-- Interactive map with real-time traffic visualization
-- Weather-based traffic predictions
-- **Smart Alert System** with 4 alert types (arroyo floods, congestion, weather impact, events)
-- flood warnings integration
-- Event-based congestion alerts
-- **Real-time WebSocket notifications** 
-
-### For Developers
-- **46+ RESTful API endpoints** (including 5 alert endpoints) 
-- TypeScript strict mode (100% type-safe)
-- Repository pattern architecture
-- Comprehensive error handling
-- Production-grade logging (Winston)
-- **Real-time updates (Socket.IO with Redis adapter)** 
-- **Background job processing (BullMQ) - alerts every 2 min** 
-
-### For Data Scientists
-- 4,038 historical traffic records
-- Feature-rich dataset (weather, events, rush hour)
-- PostGIS geospatial queries
-- Ready for ML model integration
-
----
-
-## Architecture
-
-```
-
- Next.js ← Frontend (MapLibre GL + Recharts)
- Frontend 
-
- HTTP/WebSocket
- ↓
-
- Express API ← Backend (TypeScript + Express)
- + Socket.IO 
-
- 
- 
- ↓ ↓
- 
- Postgres Redis ← Cache + Jobs
- PostGIS BullMQ 
- 
-```
-
-**Tech Stack:**
-- **Frontend:** Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, MapLibre GL
-- **Backend:** Node.js 22, Express, TypeScript (strict), Zod validation
-- **Database:** PostgreSQL 15 + PostGIS 3.4
-- **Cache/Jobs:** Redis 7.2, ioredis, BullMQ
-- **Real-time:** Socket.IO with Redis adapter
-- **Logging:** Winston
-- **Security:** Helmet, CORS, Rate Limiting
-
----
-
-## Quick Start
-
-### Prerequisites
-- Node.js 22+ (LTS recommended)
-- Docker & Docker Compose
-- PostgreSQL 15+ (or use Docker)
-- Redis 7+ (or use Docker)
-
-### Installation
-
-```bash
-# Clone repository
-git clone https://github.com/yourusername/viabaq-node-network.git
-cd viabaq-node-network
-
-# Install dependencies
-npm install
-
-# Start infrastructure (PostgreSQL + Redis)
-docker-compose up -d
-
-# Setup backend
-cd server
-npm install
-npm run db:migrate # Run migrations
-npm run db:seed # Seed database
-npm run dev # Start backend (port 4000)
-
-# In another terminal - Setup frontend
-cd ..
-npm run dev # Start frontend (port 3000)
-```
-
-### Verify Installation
-
-**Backend Health Check:**
-```bash
-curl http://localhost:4000/health
-```
-
-**Frontend:**
-Open browser → `http://localhost:3000`
-
-### Preflight Before Push
-
-```bash
-npm run preflight
-```
-
-See [docs/ADMIN_AUTH_AND_PREFLIGHT.md](docs/ADMIN_AUTH_AND_PREFLIGHT.md) for admin session auth and smoke checks.
-
----
-
-## Project Structure
-
-```
+```text
 viabaq-node-network/
-├── .github/              # CI/CD workflows
-├── docs/                 # All documentation
-│   ├── architecture/     # System design
-│   ├── guides/          # Setup & testing guides
-│   ├── planning/        # Roadmap & plans
-│   └── changelogs/      # Change history
-├── data/                # External data files
-│   └── raw/            # Raw data (not in git)
-├── scripts/            # Utility scripts
-│   ├── test-api.sh
-│   └── setup.sh
-├── server/             # Backend API
-│   ├── src/
-│   │   ├── api/           # Controllers, routes, middleware
-│   │   ├── core/          # Services, repositories
-│   │   ├── infrastructure/ # DB, cache, jobs
-│   │   └── shared/        # Config, types, utils
-│   ├── tests/          # Unit, integration, e2e tests
-│   └── db/            # Migrations & seeds
-├── src/               # Frontend (Next.js)
-│   ├── app/          # Pages & layouts
-│   ├── components/   # React components
-│   └── hooks/        # Custom hooks
-├── docker-compose.yml
-└── README.md          # This file
+|- src/                 Frontend App Router, componentes y hooks
+|- public/              Assets estáticos y capas geoespaciales públicas
+|- e2e/                 Pruebas end-to-end con Playwright
+|- server/              API backend, servicios, jobs, rutas y tests
+|- ml-service/          Servicio de machine learning en Python
+|- scripts/             Utilidades de smoke, preflight y carga de datos
+|- data/                Datos geoespaciales y archivos de soporte
+|- docs/                Guías y documentación técnica
+`- .github/workflows/   Pipelines de CI
 ```
 
----
+## Puesta en marcha
 
-## API Endpoints
+### Requisitos
 
-### Geospatial
-- `GET /api/v1/geo/zones` - City zones
-- `GET /api/v1/geo/arroyos` - Flood-prone areas
-- `GET /api/v1/geo/roads` - Road network
-- `GET /api/v1/geo/pois` - Points of interest
+- Node.js 22+
+- npm 10+
+- Docker y Docker Compose
 
-### Traffic
-- `GET /api/v1/traffic/realtime` - Real-time traffic
-- `GET /api/v1/traffic/summary` - Traffic summary
-- `GET /api/v1/traffic/road/:id` - Road-specific traffic
-
-### Weather
-- `GET /api/v1/weather/current` - Current weather
-- `GET /api/v1/weather/forecast` - Weather forecast
-
-### Analytics
-- `GET /api/v1/analytics/traffic-patterns` - Traffic patterns
-- `GET /api/v1/analytics/hotspots` - Congestion hotspots
-- `GET /api/v1/analytics/weather-impact` - Weather impact
-
-### Events
-- `GET /api/v1/events` - Urban events
-- `GET /api/v1/events/upcoming` - Upcoming events
-- `POST /api/v1/events` - Create event (admin)
-
-### Alerts NEW
-- `GET /api/v1/alerts/active` - All active alerts
-- `GET /api/v1/alerts/critical` - Critical alerts only
-- `GET /api/v1/alerts/summary` - Alert statistics
-- `GET /api/v1/alerts/by-severity/:severity` - Filter by severity
-- `GET /api/v1/alerts/by-type/:type` - Filter by type
-
-**[See full API docs →](./server/API_DOCUMENTATION.md)**
-**[WebSocket API →](./docs/WEBSOCKETS_API.md)**
-**[Alerts System →](./docs/ALERTS_SYSTEM.md)** 
-
----
-
-## Testing
+### 1. Instalar dependencias
 
 ```bash
-# Backend tests
-cd server
-npm test # Run all tests
-npm run test:watch # Watch mode
-npm run test:coverage # Coverage report
-
-# Frontend tests
-npm test
-
-# E2E tests
-npm run test:e2e
-
-# API integration test
-bash scripts/test-api.sh
+npm install
+cd server && npm install
+cd ../ml-service && pip install -r requirements.txt
+cd ..
 ```
 
----
+### 2. Configurar variables de entorno
 
-## Contributing
+Frontend en `.env.local`:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+```
 
-**Commit Convention:** We use [Conventional Commits](https://www.conventionalcommits.org/)
-- `feat:` New features
-- `fix:` Bug fixes
-- `docs:` Documentation
-- `chore:` Maintenance
-- `test:` Tests
+Backend en `server/.env`:
 
----
-
-## Environment Variables
-
-### Backend (`server/.env`)
 ```bash
 NODE_ENV=development
 PORT=4000
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/viabaq_db
 REDIS_URL=redis://localhost:6379
-OPENWEATHER_API_KEY=your_api_key_here # Optional
+FRONTEND_URL=http://localhost:3000
+OPENWEATHER_API_KEY=your_key_here
+ADMIN_API_KEY=change_me
 ```
 
-### Frontend (`.env.local`)
+### 3. Levantar infraestructura
+
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+docker-compose up -d
 ```
----
 
-## License
+### 4. Inicializar backend
 
-MIT License - see [LICENSE](./LICENSE) file for details
+```bash
+cd server
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
 
----
+### 5. Iniciar frontend
 
-## ‍ Author
+```bash
+npm run dev
+```
 
-**Marcos GoO** - [GitHub](https://github.com/MarcosGoO)
+### 6. Iniciar servicio ML
 
----
+Revisa [ml-service/README.md](./ml-service/README.md) para el flujo completo del servicio.
 
-<div align="center">
+## Scripts útiles
 
-**Built for Barranquilla's urban mobility**
+Frontend:
 
-[Documentation](./docs/README.md) • [API Reference](./server/API_DOCUMENTATION.md) • [Contributing](#-contributing) • [License](#-license)
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run preflight
+npm run smoke
+npm run test:e2e
+```
 
-</div>
+Backend:
+
+```bash
+cd server
+npm run dev
+npm run lint
+npm run typecheck
+npm run test
+npm run test:coverage
+npm run preflight
+```
+
+## Áreas principales
+
+- `/`: mapa operativo con capas, simulación horaria, planeación de ruta y alertas.
+- `/analytics`: tendencias, hotspots, clima y comparativas históricas.
+- `/predictions`: timeline predictivo, factores SHAP y riesgo de arroyos.
+- `/admin`: salud del sistema ML, reentrenamiento y rollback de modelos.
+- `/settings`: preferencias de experiencia, alertas, mapa y conexión.
+
+## Documentación adicional
+
+- [Guía de testing](./docs/guides/TESTING_GUIDE.md)
+- [Seguridad](./docs/guides/SECURITY.md)
+- [WebSockets API](./docs/architecture/WEBSOCKETS_API.md)
+- [Feature store ML](./docs/architecture/ML_FEATURE_STORE.md)
+- [Admin auth y preflight](./docs/ADMIN_AUTH_AND_PREFLIGHT.md)
+- [API backend](./server/API_DOCUMENTATION.md)
+
+## Estado del proyecto
+
+Proyecto enfocado en mostrar una arquitectura full-stack aplicada a movilidad urbana:
+
+- ingestión y normalización de datos
+- visualización geoespacial en tiempo real
+- analítica operacional
+- predicción y monitoreo ML
+- experiencia de dashboard lista para demo

@@ -92,7 +92,10 @@ export default function RealTimeUpdates() {
   }
 
   return (
-    <div className="fade-enter fixed right-4 top-4 z-40 w-[min(20rem,calc(100vw-2rem))]" suppressHydrationWarning>
+    <div
+      className="fade-enter fixed left-4 right-4 top-16 z-40 w-auto md:left-auto md:right-4 md:top-4 md:w-[min(20rem,calc(100vw-2rem))]"
+      suppressHydrationWarning
+    >
       <div className="overlay-surface rounded-xl p-3">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">

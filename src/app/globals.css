@@ -79,6 +79,7 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     line-height: 1.45;
+    overscroll-behavior: none;
   }
 
   h1,
@@ -190,6 +191,13 @@
 
 .maplibregl-ctrl-group button + button {
   @apply border-t border-border;
+}
+
+@media (max-width: 767px) {
+  .maplibregl-ctrl-bottom-right {
+    bottom: 5.75rem !important;
+    right: 0.5rem !important;
+  }
 }
 
 .maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon,

@@ -164,7 +164,7 @@ export function MapViewport() {
             <Button
                 size="icon"
                 variant="outline"
-                className="focus-ring interactive-soft surface-lift absolute bottom-[5.625rem] right-2 z-10 h-10 w-10 rounded-full overlay-surface hover:bg-muted/60"
+                className="focus-ring interactive-soft surface-lift absolute bottom-28 right-2 z-10 h-10 w-10 rounded-full overlay-surface hover:bg-muted/60 md:bottom-[5.625rem]"
                 onClick={recenterMap}
                 title="Recentrar mapa"
                 aria-label="Recentrar mapa"
@@ -172,7 +172,7 @@ export function MapViewport() {
                 <LocateFixed className="h-4 w-4" />
             </Button>
 
-            <div className="pointer-events-none absolute bottom-0 left-1/2 z-20 w-full max-w-lg -translate-x-1/2 px-4 pb-3">
+            <div className="pointer-events-none absolute bottom-0 left-1/2 z-20 w-full max-w-lg -translate-x-1/2 px-4 pb-24 md:pb-3">
                 <div className="flex flex-col items-center gap-2">
                     <div
                         id="time-simulation-panel"
@@ -231,7 +231,7 @@ export function MapViewport() {
             </div>
 
             {/* Bottom left branding - fixed positioning */}
-            <div className="absolute bottom-4 left-4 text-[10px] text-muted-foreground/50 font-medium tracking-wide pointer-events-none select-none" suppressHydrationWarning>
+            <div className="pointer-events-none absolute bottom-24 left-4 hidden select-none text-[10px] font-medium tracking-wide text-muted-foreground/50 md:block" suppressHydrationWarning>
                 BUENAVIA-BAQ (C) 2026
             </div>
         </div>
