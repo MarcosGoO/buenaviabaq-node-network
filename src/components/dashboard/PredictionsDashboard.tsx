@@ -86,29 +86,41 @@ export default function PredictionsDashboard() {
   const [selectedRoad, setSelectedRoad] = useState<number | null>(null);
   const [roadsLoading, setRoadsLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [roadsError, setRoadsError] = useState<string | null>(null);
 
   // Fetch roads list
   useEffect(() => {
     async function loadRoads() {
       try {
+        setRoadsError(null);
         const res = await fetch(`${API_BASE}/traffic/realtime`);
-        if (res.ok) {
-          const json = await res.json();
-          const roadList = (json.data || []) as TrafficRoad[];
-          const dedupedRoads = Array.from(
-            new Map(
-              roadList
-                .filter((road) => Number.isFinite(road.id) && typeof road.name === 'string' && road.name.length > 0)
-                .map((road) => [road.id, road])
-            ).values()
-          );
-          setRoads(dedupedRoads);
-          if (dedupedRoads.length > 0) {
-            setSelectedRoad(dedupedRoads[0].id);
-          }
+        if (!res.ok) {
+          throw new Error(`No fue posible cargar vías (${res.status}).`);
         }
-      } catch {
-        console.error('Failed to load roads');
+
+        const contentType = res.headers.get('content-type') ?? '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('La respuesta de vías no llegó en formato JSON.');
+        }
+
+        const json = await res.json();
+        const roadList = (json.data || []) as TrafficRoad[];
+        const dedupedRoads = Array.from(
+          new Map(
+            roadList
+              .filter((road) => Number.isFinite(road.id) && typeof road.name === 'string' && road.name.length > 0)
+              .map((road) => [road.id, road])
+          ).values()
+        );
+        setRoads(dedupedRoads);
+        setSelectedRoad((prev) => prev ?? dedupedRoads[0]?.id ?? null);
+        if (dedupedRoads.length === 0) {
+          setRoadsError('No hay vías disponibles para generar predicciones.');
+        }
+      } catch (error) {
+        setRoads([]);
+        setSelectedRoad(null);
+        setRoadsError(error instanceof Error ? error.message : 'No fue posible cargar vías.');
       } finally {
         setRoadsLoading(false);
       }
@@ -162,6 +174,25 @@ export default function PredictionsDashboard() {
     );
   }
 
+  if (!selectedRoad) {
+    return (
+      <div className="space-y-6 p-6 pt-20">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Predicciones ML</h2>
+          <p className="mt-1 text-muted-foreground">Predicciones de trafico con Machine Learning</p>
+        </div>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Brain className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
+            <p className="text-muted-foreground">
+              {roadsError ?? 'No hay vías cargadas para mostrar predicciones.'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6 pt-20">
       <div className="flex items-center justify-between">
@@ -207,6 +238,12 @@ export default function PredictionsDashboard() {
       {error && (
         <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
           {error}
+        </div>
+      )}
+
+      {roadsError && !error && (
+        <div className="rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+          {roadsError}
         </div>
       )}
 

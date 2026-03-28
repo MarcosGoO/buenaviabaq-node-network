@@ -10,6 +10,13 @@ Plataforma de inteligencia vial para Barranquilla con visualización geoespacial
 - Base de datos PostgreSQL/PostGIS para datos geoespaciales y series históricas.
 - Pruebas unitarias, de integración y E2E.
 
+## Estado de las fuentes de datos
+
+- Clima: integración real disponible vía backend cuando se configura `OPENWEATHER_API_KEY`.
+- Eventos y capas geográficas: salen de base de datos y archivos del proyecto.
+- Tráfico en tiempo real: actualmente se simula en backend con contexto horario, clima y eventos.
+- Predicciones ML: dependen del servicio Python y de que exista un modelo entrenado.
+
 ## Stack
 
 - Frontend: Next.js, React 19, TypeScript, Tailwind CSS, MapLibre GL, Recharts

@@ -93,6 +93,7 @@ export default function AnalyticsDashboard() {
   const [weatherImpact, setWeatherImpact] = useState<WeatherImpact[]>([]);
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Comparative state
   const [roads, setRoads] = useState<TrafficRoadBasic[]>([]);
@@ -103,16 +104,18 @@ export default function AnalyticsDashboard() {
   const [compareLoading, setCompareLoading] = useState(false);
   const [dropdownA, setDropdownA] = useState(false);
   const [dropdownB, setDropdownB] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
 
-  const fetchAnalytics = useCallback(async () => {
+  const fetchAnalytics = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
+      setError(null);
 
       const [hourlyRes, hotspotsRes, weatherRes, summaryRes] = await Promise.all([
-        fetch(`${API_BASE}/analytics/hourly-pattern`),
-        fetch(`${API_BASE}/analytics/hotspots?limit=5`),
-        fetch(`${API_BASE}/analytics/weather-impact?days=7`),
-        fetch(`${API_BASE}/insights/summary`).catch(() => null),
+        fetch(`${API_BASE}/analytics/hourly-pattern`, { signal }),
+        fetch(`${API_BASE}/analytics/hotspots?limit=5`, { signal }),
+        fetch(`${API_BASE}/analytics/weather-impact?days=7`, { signal }),
+        fetch(`${API_BASE}/insights/summary`, { signal }).catch(() => null),
       ]);
 
       const [hourlyData, hotspotsData, weatherData] = await Promise.all([
@@ -130,7 +133,10 @@ export default function AnalyticsDashboard() {
         setSummary((summaryData?.data as ExecutiveSummary | undefined) ?? null);
       }
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+      setError('No fue posible cargar la analítica en este momento.');
     } finally {
       setLoading(false);
     }
@@ -147,32 +153,46 @@ export default function AnalyticsDashboard() {
           const list = rows.map((r) => ({ id: r.id, name: r.name }));
           setRoads(list);
         }
-      } catch { /* ignore */ }
+      } catch {
+        setRoads([]);
+      }
     }
     loadRoads();
   }, []);
 
-  const fetchComparison = useCallback(async () => {
+  const fetchComparison = useCallback(async (signal?: AbortSignal) => {
     if (!compareRoadA && !compareRoadB) return;
     setCompareLoading(true);
+    setComparisonError(null);
     const [resA, resB] = await Promise.all([
-      compareRoadA ? fetch(`${API_BASE}/analytics/compare/${compareRoadA}`).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
-      compareRoadB ? fetch(`${API_BASE}/analytics/compare/${compareRoadB}`).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
+      compareRoadA ? fetch(`${API_BASE}/analytics/compare/${compareRoadA}`, { signal }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
+      compareRoadB ? fetch(`${API_BASE}/analytics/compare/${compareRoadB}`, { signal }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
     ]);
     setComparisonA(resA?.data ?? null);
     setComparisonB(resB?.data ?? null);
+    if (!resA && !resB) {
+      setComparisonError('No fue posible obtener la comparativa seleccionada.');
+    }
     setCompareLoading(false);
   }, [compareRoadA, compareRoadB]);
 
   useEffect(() => {
-    fetchComparison();
+    const controller = new AbortController();
+    fetchComparison(controller.signal);
+    return () => controller.abort();
   }, [fetchComparison]);
 
   useEffect(() => {
-    fetchAnalytics();
+    const controller = new AbortController();
+    fetchAnalytics(controller.signal);
     // Auto-refresh every 5 minutes
-    const interval = setInterval(fetchAnalytics, 5 * 60 * 1000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      void fetchAnalytics();
+    }, 5 * 60 * 1000);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [fetchAnalytics]);
 
   if (loading) {
@@ -188,12 +208,20 @@ export default function AnalyticsDashboard() {
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h2>
         <button
-          onClick={fetchAnalytics}
+          onClick={() => {
+            void fetchAnalytics();
+          }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Actualizar
         </button>
       </div>
+
+      {error && (
+        <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
 
       <Tabs defaultValue="summary" className="w-full">
         <TabsList className="grid w-full grid-cols-5">
@@ -375,6 +403,15 @@ export default function AnalyticsDashboard() {
 
         {/* Hourly Patterns */}
         <TabsContent value="patterns" className="space-y-4">
+          {hourlyPattern.length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                No hay patrones horarios disponibles todavía.
+              </CardContent>
+            </Card>
+          )}
+          {hourlyPattern.length > 0 && (
+            <>
           <Card>
             <CardHeader>
               <CardTitle>Patrón de Tráfico por Hora (Hoy)</CardTitle>
@@ -421,10 +458,21 @@ export default function AnalyticsDashboard() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+            </>
+          )}
         </TabsContent>
 
         {/* Hotspots */}
         <TabsContent value="hotspots" className="space-y-4">
+          {hotspots.length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                No hay hotspots disponibles para el rango consultado.
+              </CardContent>
+            </Card>
+          )}
+          {hotspots.length > 0 && (
+            <>
           <Card>
             <CardHeader>
               <CardTitle>Top 5 Zonas Críticas de Tráfico</CardTitle>
@@ -476,10 +524,21 @@ export default function AnalyticsDashboard() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+            </>
+          )}
         </TabsContent>
 
         {/* Weather Impact */}
         <TabsContent value="weather" className="space-y-4">
+          {weatherImpact.length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                No hay suficientes datos climáticos para este análisis.
+              </CardContent>
+            </Card>
+          )}
+          {weatherImpact.length > 0 && (
+            <>
           <Card>
             <CardHeader>
               <CardTitle>Impacto del Clima en el Tráfico</CardTitle>
@@ -541,6 +600,8 @@ export default function AnalyticsDashboard() {
               </div>
             </CardContent>
           </Card>
+            </>
+          )}
         </TabsContent>
 
         {/* Comparative Side-by-Side */}
@@ -556,6 +617,12 @@ export default function AnalyticsDashboard() {
               <p className="text-sm text-muted-foreground mb-4">
                 Selecciona dos vias para comparar su trafico actual contra el promedio historico (misma hora y dia de la semana).
               </p>
+
+              {comparisonError && (
+                <div className="mb-4 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                  {comparisonError}
+                </div>
+              )}
 
               {/* Road Selectors */}
               <div className="grid grid-cols-2 gap-4 mb-6">

@@ -46,11 +46,18 @@ export class SocketService {
 
     // Add authentication middleware
     this.io.use((socket, next) => {
-      const token = socket.handshake.auth.token || socket.handshake.headers['authorization'];
+      const expectedToken = config.SOCKET_AUTH_TOKEN?.trim();
+      if (!expectedToken) {
+        next();
+        return;
+      }
 
-      // In a production app, verify real JWT here.
-      // For this project, a simple API token check is sufficient.
-      if (!token || (token !== 'viabaq-auth-token' && !String(token).includes('viabaq-auth-token'))) {
+      const rawToken = socket.handshake.auth.token || socket.handshake.headers['authorization'];
+      const normalizedToken = typeof rawToken === 'string'
+        ? rawToken.replace(/^Bearer\s+/i, '').trim()
+        : '';
+
+      if (normalizedToken !== expectedToken) {
         logger.warn(`Connection rejected: Invalid or missing token for socket ${socket.id}`);
         return next(new Error('Authentication error'));
       }
@@ -118,11 +125,17 @@ export class SocketService {
         void socket.join('traffic');
         logger.debug(`Client ${socket.id} subscribed to traffic updates`);
       });
+      socket.on('unsubscribe:traffic', () => {
+        void socket.leave('traffic');
+      });
 
       // Handle client subscribing to weather updates
       socket.on('subscribe:weather', () => {
         void socket.join('weather');
         logger.debug(`Client ${socket.id} subscribed to weather updates`);
+      });
+      socket.on('unsubscribe:weather', () => {
+        void socket.leave('weather');
       });
 
       // Handle client subscribing to event updates
@@ -130,11 +143,17 @@ export class SocketService {
         void socket.join('events');
         logger.debug(`Client ${socket.id} subscribed to event updates`);
       });
+      socket.on('unsubscribe:events', () => {
+        void socket.leave('events');
+      });
 
       // Handle client subscribing to alert updates
       socket.on('subscribe:alerts', () => {
         void socket.join('alerts');
         logger.debug(`Client ${socket.id} subscribed to alert updates`);
+      });
+      socket.on('unsubscribe:alerts', () => {
+        void socket.leave('alerts');
       });
 
       // Handle client subscribing to prediction updates
@@ -142,11 +161,17 @@ export class SocketService {
         void socket.join('predictions');
         logger.debug(`Client ${socket.id} subscribed to prediction updates`);
       });
+      socket.on('unsubscribe:predictions', () => {
+        void socket.leave('predictions');
+      });
 
       // Handle client subscribing to ML reliability updates
       socket.on('subscribe:ml-reliability', () => {
         void socket.join('ml-reliability');
         logger.debug(`Client ${socket.id} subscribed to ML reliability updates`);
+      });
+      socket.on('unsubscribe:ml-reliability', () => {
+        void socket.leave('ml-reliability');
       });
 
       // Handle disconnection

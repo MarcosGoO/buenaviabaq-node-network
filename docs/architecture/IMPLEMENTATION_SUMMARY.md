@@ -41,7 +41,7 @@ Sistema completo de backend para dashboard de movilidad urbana de Barranquilla c
 
 **APIs Externas:**
 - OpenWeather API (clima)
-- Mock data para tráfico (preparado para APIs reales)
+- Tráfico simulado en backend (preparado para APIs reales como TomTom/HERE)
 
 ---
 
@@ -85,6 +85,7 @@ Sistema completo de backend para dashboard de movilidad urbana de Barranquilla c
 - Mock data inteligente (rush hour detection)
 - 4 niveles de congestión
 - Preparado para APIs reales (Google/TomTom/HERE)
+- Estado actual: la app usa simulación enriquecida para tráfico; no hay proveedor externo conectado todavía.
 
 **Sistema de Eventos:**
 - CRUD completo con PostgreSQL + PostGIS

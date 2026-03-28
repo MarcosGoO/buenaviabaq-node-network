@@ -22,9 +22,11 @@ export interface TrafficSummary {
 export class TrafficService {
   private static readonly BARRANQUILLA_LAT = 10.9639;
   private static readonly BARRANQUILLA_LON = -74.7964;
+  private static hasLoggedMockMode = false;
 
-  // TODO: Replace with real API integration (Google Traffic, TomTom, HERE, or Waze)
-  // For now, we generate mock data based on time of day and weather conditions
+  // Current status:
+  // - Weather and events can be backed by live or persisted data.
+  // - Traffic flow remains simulated until a provider such as TomTom/HERE is connected.
   static async getRealTimeTraffic(): Promise<TrafficData[]> {
     try {
       // Try to get from cache first (5 minute TTL)
@@ -37,7 +39,10 @@ export class TrafficService {
           //   return await this.fetchFromTrafficAPI(apiKey);
           // }
 
-          logger.info('Generating advanced mock traffic data');
+          if (!this.hasLoggedMockMode) {
+            logger.warn('TrafficService is using simulated traffic data. Connect a traffic provider for live road speeds.');
+            this.hasLoggedMockMode = true;
+          }
           return await this.generateMockTrafficData();
         },
         {
@@ -149,7 +154,7 @@ export class TrafficService {
     });
   }
 
-  // TODO: Implement real API integration
+  // Planned integration point for a real traffic provider.
   // private static async fetchFromTrafficAPI(apiKey: string): Promise<TrafficData[]> {
   //   // Example with Google Traffic API or TomTom
   //   const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${this.BARRANQUILLA_LAT},${this.BARRANQUILLA_LON}&key=${apiKey}`;

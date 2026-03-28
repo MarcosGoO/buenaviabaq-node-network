@@ -49,19 +49,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
 
       - name: Install dependencies
         working-directory: ./server
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --legacy-peer-deps
-          else
-            npm install --legacy-peer-deps
-          fi
+        run: npm ci --legacy-peer-deps
 
       - name: Lint
         working-directory: ./server
         run: npm run lint
+
+      - name: Type check
+        working-directory: ./server
+        run: npm run typecheck
 
       - name: Setup database
         run: |
@@ -130,19 +131,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
 
       - name: Install dependencies for audit
         working-directory: ./server
-        run: npm install --legacy-peer-deps
-
-      - name: Fix vulnerabilities
-        working-directory: ./server
-        run: npm audit fix --force || true
+        run: npm ci --legacy-peer-deps
 
       - name: Run npm audit
         working-directory: ./server
-        run: npm audit --audit-level=high || echo "Vulnerabilities found, please review"
-
-      - name: Check for known vulnerabilities
-        working-directory: ./server
-        run: npx auditjs ossi --whitelist allow-list.json || true
+        run: npm audit --audit-level=high

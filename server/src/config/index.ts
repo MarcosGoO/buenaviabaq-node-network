@@ -54,6 +54,10 @@ const envSchema = z.object({
     if (typeof value === 'string' && value.trim() === '') return undefined;
     return value;
   }, z.string().min(12).optional()),
+  SOCKET_AUTH_TOKEN: z.preprocess((value) => {
+    if (typeof value === 'string' && value.trim() === '') return undefined;
+    return value;
+  }, z.string().min(12).optional()),
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1000).max(86_400_000).default(900000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().min(1).max(10000).default(100),
@@ -94,6 +98,10 @@ export function validateSecurityConfig(current: RuntimeConfig): void {
 
   if (current.ADMIN_API_KEY === current.JWT_SECRET) {
     throw new Error('In production, ADMIN_API_KEY and JWT_SECRET must be different values.');
+  }
+
+  if (current.SOCKET_AUTH_TOKEN && current.SOCKET_AUTH_TOKEN.length < 24) {
+    throw new Error('In production, SOCKET_AUTH_TOKEN must have at least 24 chars when configured.');
   }
 
   if (!current.FRONTEND_URL.startsWith('https://')) {

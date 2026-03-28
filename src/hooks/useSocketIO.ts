@@ -1,170 +1,210 @@
-﻿"use client";
+"use client"
 
-import { useEffect, useCallback, useSyncExternalStore } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useCallback, useEffect, useSyncExternalStore } from "react"
+import { io, Socket } from "socket.io-client"
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000"
+const SOCKET_AUTH_TOKEN = process.env.NEXT_PUBLIC_SOCKET_AUTH_TOKEN?.trim() || ""
+const IS_DEV = process.env.NODE_ENV !== "production"
 
-interface UseSocketIOReturn {
-  socket: Socket | null;
-  isConnected: boolean;
-  subscribe: (channel: string, data?: unknown) => void;
-  unsubscribe: (channel: string, data?: unknown) => void;
+type SubscriptionChannel =
+  | "traffic"
+  | "weather"
+  | "events"
+  | "alerts"
+  | "predictions"
+  | "ml-reliability"
+  | "zone"
+
+const CHANNEL_EVENT_MAP: Record<
+  Exclude<SubscriptionChannel, "zone">,
+  { subscribe: string; unsubscribe: string }
+> = {
+  traffic: { subscribe: "subscribe:traffic", unsubscribe: "unsubscribe:traffic" },
+  weather: { subscribe: "subscribe:weather", unsubscribe: "unsubscribe:weather" },
+  events: { subscribe: "subscribe:events", unsubscribe: "unsubscribe:events" },
+  alerts: { subscribe: "subscribe:alerts", unsubscribe: "unsubscribe:alerts" },
+  predictions: { subscribe: "subscribe:predictions", unsubscribe: "unsubscribe:predictions" },
+  "ml-reliability": {
+    subscribe: "subscribe:ml-reliability",
+    unsubscribe: "unsubscribe:ml-reliability",
+  },
 }
 
-// Store socket instance and connection state outside component
-let socketInstance: Socket | null = null;
-let subscribers = 0;
-let isConnectedState = false;
+interface UseSocketIOReturn {
+  socket: Socket | null
+  isConnected: boolean
+  subscribe: (channel: SubscriptionChannel, data?: unknown) => void
+  unsubscribe: (channel: SubscriptionChannel, data?: unknown) => void
+}
 
-// Listeners for connection state changes
-const connectionListeners = new Set<() => void>();
+let socketInstance: Socket | null = null
+let subscribers = 0
+let isConnectedState = false
 
-const getSocket = () => socketInstance;
-const getConnectionState = () => isConnectedState;
+const connectionListeners = new Set<() => void>()
+const activeSubscriptions = new Map<string, number>()
+
+const getSocket = () => socketInstance
+const getConnectionState = () => isConnectedState
 
 const setConnectionState = (connected: boolean) => {
   if (isConnectedState !== connected) {
-    isConnectedState = connected;
-    connectionListeners.forEach(listener => listener());
+    isConnectedState = connected
+    connectionListeners.forEach((listener) => listener())
   }
-};
+}
+
+const debugLog = (...args: unknown[]) => {
+  if (IS_DEV) {
+    console.log(...args)
+  }
+}
+
+const warnLog = (...args: unknown[]) => {
+  if (IS_DEV) {
+    console.warn(...args)
+  }
+}
+
+const errorLog = (...args: unknown[]) => {
+  if (IS_DEV) {
+    console.error(...args)
+  }
+}
+
+const emitManagedSubscription = (
+  channel: SubscriptionChannel,
+  action: "subscribe" | "unsubscribe",
+  data?: unknown
+) => {
+  if (!socketInstance) return
+
+  if (channel === "zone") {
+    if (typeof data !== "number") {
+      warnLog(`Zone subscription ignored because no numeric zone id was provided for ${action}.`)
+      return
+    }
+
+    const key = `zone:${data}`
+    const current = activeSubscriptions.get(key) ?? 0
+
+    if (action === "subscribe") {
+      activeSubscriptions.set(key, current + 1)
+      if (current === 0) {
+        socketInstance.emit("subscribe:zone", data)
+      }
+      return
+    }
+
+    if (current <= 1) {
+      activeSubscriptions.delete(key)
+      socketInstance.emit("unsubscribe:zone", data)
+      return
+    }
+
+    activeSubscriptions.set(key, current - 1)
+    return
+  }
+
+  const eventPair = CHANNEL_EVENT_MAP[channel]
+  const current = activeSubscriptions.get(channel) ?? 0
+
+  if (action === "subscribe") {
+    activeSubscriptions.set(channel, current + 1)
+    if (current === 0) {
+      socketInstance.emit(eventPair.subscribe)
+    }
+    return
+  }
+
+  if (current <= 1) {
+    activeSubscriptions.delete(channel)
+    socketInstance.emit(eventPair.unsubscribe)
+    return
+  }
+
+  activeSubscriptions.set(channel, current - 1)
+}
 
 export function useSocketIO(): UseSocketIOReturn {
-  // Use useSyncExternalStore to safely access socket
   const socket = useSyncExternalStore(
     () => {
-      // Subscribe to socket changes
-      subscribers++;
+      subscribers++
       return () => {
-        subscribers--;
-      };
+        subscribers--
+      }
     },
     getSocket,
     getSocket
-  );
+  )
 
-  // Use useSyncExternalStore for connection state
   const isConnected = useSyncExternalStore(
     (callback) => {
-      connectionListeners.add(callback);
+      connectionListeners.add(callback)
       return () => {
-        connectionListeners.delete(callback);
-      };
+        connectionListeners.delete(callback)
+      }
     },
     getConnectionState,
     getConnectionState
-  );
+  )
 
   useEffect(() => {
-    // Create socket connection only once
     if (socketInstance) {
-      setConnectionState(socketInstance.connected);
-      return;
+      setConnectionState(socketInstance.connected)
+      return
     }
 
     const newSocket = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'],
-      auth: { token: 'viabaq-auth-token' },
+      transports: ["websocket", "polling"],
+      auth: SOCKET_AUTH_TOKEN ? { token: SOCKET_AUTH_TOKEN } : undefined,
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 10,
       timeout: 10000,
-    });
+    })
 
-    // Connection events
-    newSocket.on('connect', () => {
-      console.log('Socket.IO connected to', SOCKET_URL);
-      setConnectionState(true);
-    });
+    newSocket.on("connect", () => {
+      debugLog("Socket.IO connected to", SOCKET_URL)
+      setConnectionState(true)
+    })
 
-    newSocket.on('disconnect', (reason) => {
-      console.log('Socket.IO disconnected:', reason);
-      setConnectionState(false);
-    });
+    newSocket.on("disconnect", (reason) => {
+      debugLog("Socket.IO disconnected:", reason)
+      setConnectionState(false)
+    })
 
-    newSocket.on('connect_error', (error) => {
-      console.error('Socket.IO connection error:', error.message);
-      setConnectionState(false);
-    });
+    newSocket.on("connect_error", (error) => {
+      errorLog("Socket.IO connection error:", error.message)
+      setConnectionState(false)
+    })
 
-    socketInstance = newSocket;
+    socketInstance = newSocket
 
-    // Cleanup only when no more subscribers
     return () => {
       if (subscribers === 0 && socketInstance) {
-        console.log('Closing socket connection');
-        socketInstance.disconnect();
-        socketInstance = null;
-        setConnectionState(false);
+        debugLog("Closing socket connection")
+        activeSubscriptions.clear()
+        socketInstance.disconnect()
+        socketInstance = null
+        setConnectionState(false)
       }
-    };
-  }, []);
-
-  const subscribe = useCallback((channel: string, data?: unknown) => {
-    if (!socketInstance) return;
-
-    switch (channel) {
-      case 'traffic':
-        socketInstance.emit('subscribe:traffic');
-        break;
-      case 'weather':
-        socketInstance.emit('subscribe:weather');
-        break;
-      case 'events':
-        socketInstance.emit('subscribe:events');
-        break;
-      case 'alerts':
-        socketInstance.emit('subscribe:alerts');
-        break;
-      case 'predictions':
-        socketInstance.emit('subscribe:predictions');
-        break;
-      case 'zone':
-        if (typeof data === 'number') {
-          socketInstance.emit('subscribe:zone', data);
-        }
-        break;
-      default:
-        console.warn(`Unknown channel: ${channel}`);
     }
-  }, []);
+  }, [])
 
-  const unsubscribe = useCallback((channel: string, data?: unknown) => {
-    if (!socketInstance) return;
+  const subscribe = useCallback((channel: SubscriptionChannel, data?: unknown) => {
+    emitManagedSubscription(channel, "subscribe", data)
+  }, [])
 
-    switch (channel) {
-      case 'traffic':
-        socketInstance.emit('unsubscribe:traffic');
-        break;
-      case 'weather':
-        socketInstance.emit('unsubscribe:weather');
-        break;
-      case 'events':
-        socketInstance.emit('unsubscribe:events');
-        break;
-      case 'alerts':
-        socketInstance.emit('unsubscribe:alerts');
-        break;
-      case 'predictions':
-        socketInstance.emit('unsubscribe:predictions');
-        break;
-      case 'zone':
-        if (typeof data === 'number') {
-          socketInstance.emit('unsubscribe:zone', data);
-        }
-        break;
-      default:
-        console.warn(`Unknown channel: ${channel}`);
-    }
-  }, []);
+  const unsubscribe = useCallback((channel: SubscriptionChannel, data?: unknown) => {
+    emitManagedSubscription(channel, "unsubscribe", data)
+  }, [])
 
   return {
     socket,
     isConnected,
     subscribe,
     unsubscribe,
-  };
+  }
 }
-
-

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -50,6 +50,17 @@ export function usePredictions() {
   const [arroyoRisk, setArroyoRisk] = useState<ArroyoRiskData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const activeRequestId = useRef(0);
+
+  const isActiveRequest = useCallback((requestId: number) => activeRequestId.current === requestId, []);
+
+  const readJson = useCallback(async (res: Response) => {
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      throw new Error('Respuesta no válida del servicio de predicciones.');
+    }
+    return res.json();
+  }, []);
 
   const getErrorMessage = useCallback((status: number) => {
     if (status === 503) {
@@ -77,48 +88,63 @@ export function usePredictions() {
     }
   }, []);
 
-  const fetchTimeline = useCallback(async (roadId: number) => {
+  const fetchTimeline = useCallback(async (roadId: number, requestId?: number) => {
     try {
-      setIsLoading(true);
-      setError(null);
       const res = await fetch(`${API_BASE}/predictions/road/${roadId}/timeline`);
       if (!res.ok) throw new Error(getErrorMessage(res.status));
-      const json = await res.json();
-      setTimeline(json.data?.timeline || []);
+      const json = await readJson(res);
+      if (!requestId || isActiveRequest(requestId)) {
+        setTimeline(json.data?.timeline || []);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error fetching timeline');
-    } finally {
-      setIsLoading(false);
+      if (!requestId || isActiveRequest(requestId)) {
+        setTimeline([]);
+        setError(err instanceof Error ? err.message : 'Error fetching timeline');
+      }
     }
-  }, [getErrorMessage]);
+  }, [getErrorMessage, isActiveRequest, readJson]);
 
-  const fetchExplanation = useCallback(async (roadId: number) => {
+  const fetchExplanation = useCallback(async (roadId: number, requestId?: number) => {
     try {
-      setError(null);
       const res = await fetch(`${API_BASE}/predictions/road/${roadId}/explanation`);
       if (!res.ok) throw new Error(getErrorMessage(res.status));
-      const json = await res.json();
-      setExplanation(json.data || null);
+      const json = await readJson(res);
+      if (!requestId || isActiveRequest(requestId)) {
+        setExplanation(json.data || null);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error fetching explanation');
+      if (!requestId || isActiveRequest(requestId)) {
+        setExplanation(null);
+        setError(err instanceof Error ? err.message : 'Error fetching explanation');
+      }
     }
-  }, [getErrorMessage]);
+  }, [getErrorMessage, isActiveRequest, readJson]);
 
-  const fetchArroyoRisk = useCallback(async () => {
+  const fetchArroyoRisk = useCallback(async (requestId?: number) => {
     try {
-      setError(null);
       const res = await fetch(`${API_BASE}/predictions/arroyo-risk`);
       if (!res.ok) throw new Error(getErrorMessage(res.status));
-      const json = await res.json();
-      setArroyoRisk(json.data || null);
+      const json = await readJson(res);
+      if (!requestId || isActiveRequest(requestId)) {
+        setArroyoRisk(json.data || null);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error fetching arroyo risk');
+      if (!requestId || isActiveRequest(requestId)) {
+        setArroyoRisk(null);
+        setError(err instanceof Error ? err.message : 'Error fetching arroyo risk');
+      }
     }
-  }, [getErrorMessage]);
+  }, [getErrorMessage, isActiveRequest, readJson]);
 
   const fetchAll = useCallback(async (roadId: number) => {
+    const requestId = Date.now();
+    activeRequestId.current = requestId;
     setIsLoading(true);
+    setError(null);
     const mlReady = await isMLAvailable();
+    if (!isActiveRequest(requestId)) {
+      return;
+    }
     if (!mlReady) {
       setTimeline([]);
       setExplanation(null);
@@ -128,12 +154,14 @@ export function usePredictions() {
       return;
     }
     await Promise.all([
-      fetchTimeline(roadId),
-      fetchExplanation(roadId),
-      fetchArroyoRisk(),
+      fetchTimeline(roadId, requestId),
+      fetchExplanation(roadId, requestId),
+      fetchArroyoRisk(requestId),
     ]);
-    setIsLoading(false);
-  }, [fetchTimeline, fetchExplanation, fetchArroyoRisk, isMLAvailable]);
+    if (isActiveRequest(requestId)) {
+      setIsLoading(false);
+    }
+  }, [fetchTimeline, fetchExplanation, fetchArroyoRisk, isMLAvailable, isActiveRequest]);
 
   return {
     timeline,
