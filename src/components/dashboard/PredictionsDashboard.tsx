@@ -24,6 +24,7 @@ import {
   TrendingUp,
   AlertTriangle,
   ChevronDown,
+  RefreshCw,
 } from 'lucide-react';
 import { usePredictions } from '@/hooks/usePredictions';
 import type { TrafficRoad } from '@/hooks/useTrafficData';
@@ -71,6 +72,29 @@ function formatFeatureName(name: string): string {
   return map[name] || name.replace(/_/g, ' ');
 }
 
+function SectionStateCard({
+  icon: Icon,
+  title,
+  message,
+  action,
+}: {
+  icon: React.ElementType;
+  title: string;
+  message: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-8 text-center">
+        <Icon className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+        <p className="font-medium text-foreground">{title}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{message}</p>
+        {action && <div className="mt-4">{action}</div>}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function PredictionsDashboard() {
   const {
     timeline,
@@ -78,6 +102,13 @@ export default function PredictionsDashboard() {
     arroyoRisk,
     isLoading,
     error,
+    mlAvailable,
+    timelineLoading,
+    timelineError,
+    explanationLoading,
+    explanationError,
+    arroyoRiskLoading,
+    arroyoRiskError,
     fetchAll,
     fetchArroyoRisk,
   } = usePredictions();
@@ -88,19 +119,22 @@ export default function PredictionsDashboard() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [roadsError, setRoadsError] = useState<string | null>(null);
 
-  // Fetch roads list
   useEffect(() => {
+    const controller = new AbortController();
+
     async function loadRoads() {
       try {
+        setRoadsLoading(true);
         setRoadsError(null);
-        const res = await fetch(`${API_BASE}/traffic/realtime`);
+
+        const res = await fetch(`${API_BASE}/traffic/realtime`, { signal: controller.signal });
         if (!res.ok) {
-          throw new Error(`No fue posible cargar vías (${res.status}).`);
+          throw new Error(`No fue posible cargar vias (${res.status}).`);
         }
 
         const contentType = res.headers.get('content-type') ?? '';
         if (!contentType.includes('application/json')) {
-          throw new Error('La respuesta de vías no llegó en formato JSON.');
+          throw new Error('La respuesta de vias no llego en formato JSON.');
         }
 
         const json = await res.json();
@@ -112,38 +146,43 @@ export default function PredictionsDashboard() {
               .map((road) => [road.id, road])
           ).values()
         );
+
         setRoads(dedupedRoads);
         setSelectedRoad((prev) => prev ?? dedupedRoads[0]?.id ?? null);
+
         if (dedupedRoads.length === 0) {
-          setRoadsError('No hay vías disponibles para generar predicciones.');
+          setRoadsError('No hay vias disponibles para generar predicciones.');
         }
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
         setRoads([]);
         setSelectedRoad(null);
-        setRoadsError(error instanceof Error ? error.message : 'No fue posible cargar vías.');
+        setRoadsError(error instanceof Error ? error.message : 'No fue posible cargar vias.');
       } finally {
         setRoadsLoading(false);
       }
     }
-    loadRoads();
+
+    void loadRoads();
+    return () => controller.abort();
   }, []);
 
-  // Fetch predictions when road changes
   useEffect(() => {
     if (selectedRoad) {
-      fetchAll(selectedRoad);
+      void fetchAll(selectedRoad);
     }
   }, [selectedRoad, fetchAll]);
 
-  // Fetch arroyo risk on mount
   useEffect(() => {
-    fetchArroyoRisk();
+    const controller = new AbortController();
+    void fetchArroyoRisk(undefined, controller.signal);
+    return () => controller.abort();
   }, [fetchArroyoRisk]);
 
-  const selectedRoadName = roads.find(r => r.id === selectedRoad)?.name || '';
-
-  // Prepare timeline chart data
-  const timelineData = timeline.map(t => ({
+  const selectedRoadName = roads.find((r) => r.id === selectedRoad)?.name || '';
+  const timelineData = timeline.map((t) => ({
     horizon: HORIZON_LABELS[t.horizon_minutes] || `${t.horizon_minutes}m`,
     speed: t.prediction.predicted_speed_kmh,
     lower: t.prediction.predicted_speed_lower,
@@ -152,9 +191,8 @@ export default function PredictionsDashboard() {
     confidence: t.prediction.confidence_score,
   }));
 
-  // Prepare SHAP chart data (sorted by absolute value)
   const shapData = (explanation?.top_features || [])
-    .map(f => ({
+    .map((f) => ({
       name: formatFeatureName(f.feature_name),
       value: Math.round(f.shap_value * 100) / 100,
       contribution: f.contribution,
@@ -162,9 +200,14 @@ export default function PredictionsDashboard() {
     }))
     .sort((a, b) => b.absValue - a.absValue);
 
-  // Prepare arroyo risk data
   const arroyoData = (arroyoRisk?.arroyos || [])
     .sort((a, b) => b.activation_probability - a.activation_probability);
+
+  const reloadSelectedRoad = () => {
+    if (selectedRoad) {
+      void fetchAll(selectedRoad);
+    }
+  };
 
   if (roadsLoading) {
     return (
@@ -181,21 +224,18 @@ export default function PredictionsDashboard() {
           <h2 className="text-3xl font-bold tracking-tight">Predicciones ML</h2>
           <p className="mt-1 text-muted-foreground">Predicciones de trafico con Machine Learning</p>
         </div>
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Brain className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">
-              {roadsError ?? 'No hay vías cargadas para mostrar predicciones.'}
-            </p>
-          </CardContent>
-        </Card>
+        <SectionStateCard
+          icon={Brain}
+          title="No hay vias listas para prediccion"
+          message={roadsError ?? 'No hay vias cargadas para mostrar predicciones.'}
+        />
       </div>
     );
   }
 
   return (
     <div className="space-y-6 p-6 pt-20">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Predicciones ML</h2>
           <p className="text-muted-foreground mt-1">
@@ -203,40 +243,50 @@ export default function PredictionsDashboard() {
           </p>
         </div>
 
-        {/* Road Selector */}
-        <div className="relative">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-2 px-4 py-2 bg-background border rounded-lg hover:bg-accent transition-colors min-w-[200px] justify-between"
+            onClick={reloadSelectedRoad}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
+            disabled={isLoading}
           >
-            <span className="text-sm font-medium truncate">
-              {selectedRoadName || 'Seleccionar via'}
-            </span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Actualizar
           </button>
-          {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-64 max-h-64 overflow-y-auto bg-background border rounded-lg shadow-xl z-50">
-              {roads.map((road) => (
-                <button
-                  key={road.id}
-                  onClick={() => {
-                    setSelectedRoad(road.id);
-                    setDropdownOpen(false);
-                  }}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-accent transition-colors ${
-                    road.id === selectedRoad ? 'bg-primary/10 text-primary font-medium' : ''
-                  }`}
-                >
-                  {road.name}
-                </button>
-              ))}
-            </div>
-          )}
+
+          <div className="relative">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-background border rounded-lg hover:bg-accent transition-colors min-w-[220px] justify-between"
+            >
+              <span className="text-sm font-medium truncate">
+                {selectedRoadName || 'Seleccionar via'}
+              </span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </button>
+            {dropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 w-64 max-h-64 overflow-y-auto bg-background border rounded-lg shadow-xl z-50">
+                {roads.map((road) => (
+                  <button
+                    key={road.id}
+                    onClick={() => {
+                      setSelectedRoad(road.id);
+                      setDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-accent transition-colors ${
+                      road.id === selectedRoad ? 'bg-primary/10 text-primary font-medium' : ''
+                    }`}
+                  >
+                    {road.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+        <div className="p-3 bg-amber-500/10 text-sm text-amber-700 dark:text-amber-300 rounded-lg">
           {error}
         </div>
       )}
@@ -244,6 +294,12 @@ export default function PredictionsDashboard() {
       {roadsError && !error && (
         <div className="rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
           {roadsError}
+        </div>
+      )}
+
+      {mlAvailable === false && (
+        <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+          El servicio ML no esta disponible. Puedes seguir viendo otras partes del proyecto, pero esta vista no podra generar nuevas predicciones hasta que el backend ML se recupere.
         </div>
       )}
 
@@ -263,19 +319,31 @@ export default function PredictionsDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Timeline Tab */}
         <TabsContent value="timeline" className="space-y-4">
-          {isLoading ? (
+          {timelineLoading ? (
             <Card>
               <CardContent className="p-8 flex justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               </CardContent>
             </Card>
+          ) : timelineError ? (
+            <SectionStateCard
+              icon={Clock}
+              title="No pudimos cargar el timeline"
+              message={timelineError}
+              action={
+                <button
+                  onClick={reloadSelectedRoad}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Reintentar
+                </button>
+              }
+            />
           ) : timelineData.length > 0 ? (
             <>
-              {/* KPI Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {timeline.map(t => (
+                {timeline.map((t) => (
                   <Card key={t.horizon_minutes} className="overflow-hidden">
                     <div
                       className="h-1"
@@ -309,12 +377,11 @@ export default function PredictionsDashboard() {
                 ))}
               </div>
 
-              {/* Timeline Chart with confidence bands */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-primary" />
-                    Prediccion de Velocidad — {selectedRoadName}
+                    Prediccion de Velocidad - {selectedRoadName}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -347,20 +414,8 @@ export default function PredictionsDashboard() {
                           value === 'lower' ? 'Limite inferior' : value
                         }
                       />
-                      <Area
-                        type="monotone"
-                        dataKey="upper"
-                        stroke="none"
-                        fill="hsl(var(--primary))"
-                        fillOpacity={0.1}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="lower"
-                        stroke="none"
-                        fill="hsl(var(--background))"
-                        fillOpacity={1}
-                      />
+                      <Area type="monotone" dataKey="upper" stroke="none" fill="hsl(var(--primary))" fillOpacity={0.1} />
+                      <Area type="monotone" dataKey="lower" stroke="none" fill="hsl(var(--background))" fillOpacity={1} />
                       <Line
                         type="monotone"
                         dataKey="speed"
@@ -375,26 +430,42 @@ export default function PredictionsDashboard() {
               </Card>
             </>
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">
-                  No hay datos de timeline disponibles. Verifica que el servicio ML este corriendo.
-                </p>
-              </CardContent>
-            </Card>
+            <SectionStateCard
+              icon={Clock}
+              title="No hay timeline disponible"
+              message="La via seleccionada no devolvio predicciones de horizonte en este momento."
+            />
           )}
         </TabsContent>
 
-        {/* SHAP Explanation Tab */}
         <TabsContent value="shap" className="space-y-4">
-          {explanation ? (
+          {explanationLoading ? (
+            <Card>
+              <CardContent className="p-8 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </CardContent>
+            </Card>
+          ) : explanationError ? (
+            <SectionStateCard
+              icon={Brain}
+              title="No pudimos explicar la prediccion"
+              message={explanationError}
+              action={
+                <button
+                  onClick={reloadSelectedRoad}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Reintentar
+                </button>
+              }
+            />
+          ) : explanation ? (
             <>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Brain className="h-5 w-5 text-purple-500" />
-                    Factores que Afectan la Congestion — {selectedRoadName}
+                    Factores que Afectan la Congestion - {selectedRoadName}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -405,16 +476,8 @@ export default function PredictionsDashboard() {
                   <ResponsiveContainer width="100%" height={Math.max(shapData.length * 45, 200)}>
                     <BarChart data={shapData} layout="vertical" margin={{ left: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis
-                        type="number"
-                        label={{ value: 'Impacto SHAP', position: 'insideBottom', offset: -5 }}
-                      />
-                      <YAxis
-                        dataKey="name"
-                        type="category"
-                        width={140}
-                        tick={{ fontSize: 12 }}
-                      />
+                      <XAxis type="number" label={{ value: 'Impacto SHAP', position: 'insideBottom', offset: -5 }} />
+                      <YAxis dataKey="name" type="category" width={140} tick={{ fontSize: 12 }} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'hsl(var(--background))',
@@ -442,7 +505,6 @@ export default function PredictionsDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Feature Impact Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {shapData.slice(0, 6).map((feature) => (
                   <Card key={feature.name} className="overflow-hidden">
@@ -476,20 +538,36 @@ export default function PredictionsDashboard() {
               </div>
             </>
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">
-                  {isLoading ? 'Cargando explicacion SHAP...' : 'Selecciona una via para ver los factores SHAP.'}
-                </p>
-              </CardContent>
-            </Card>
+            <SectionStateCard
+              icon={Brain}
+              title="No hay explicacion SHAP disponible"
+              message="La via seleccionada no devolvio explicaciones interpretables en este momento."
+            />
           )}
         </TabsContent>
 
-        {/* Arroyo Risk Tab */}
         <TabsContent value="arroyo" className="space-y-4">
-          {arroyoData.length > 0 ? (
+          {arroyoRiskLoading ? (
+            <Card>
+              <CardContent className="p-8 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </CardContent>
+            </Card>
+          ) : arroyoRiskError ? (
+            <SectionStateCard
+              icon={Droplets}
+              title="No pudimos calcular el riesgo de arroyos"
+              message={arroyoRiskError}
+              action={
+                <button
+                  onClick={() => void fetchArroyoRisk()}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Reintentar
+                </button>
+              }
+            />
+          ) : arroyoData.length > 0 ? (
             <>
               <Card>
                 <CardHeader>
@@ -503,9 +581,8 @@ export default function PredictionsDashboard() {
                     Probabilidad de activacion de arroyos basada en pronostico meteorologico actual.
                   </p>
 
-                  {/* Risk Heatmap Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
-                    {arroyoData.map(arroyo => {
+                    {arroyoData.map((arroyo) => {
                       const pct = Math.round(arroyo.activation_probability * 100);
                       const color = RISK_COLORS[arroyo.risk_level] || '#6b7280';
                       return (
@@ -541,10 +618,9 @@ export default function PredictionsDashboard() {
                     })}
                   </div>
 
-                  {/* Risk Bar Chart */}
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart
-                      data={arroyoData.map(a => ({
+                      data={arroyoData.map((a) => ({
                         name: a.zone_name.length > 15 ? a.zone_name.slice(0, 15) + '...' : a.zone_name,
                         probability: Math.round(a.activation_probability * 100),
                         risk_level: a.risk_level,
@@ -552,10 +628,7 @@ export default function PredictionsDashboard() {
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
-                      <YAxis
-                        label={{ value: 'Probabilidad %', angle: -90, position: 'insideLeft' }}
-                        domain={[0, 100]}
-                      />
+                      <YAxis label={{ value: 'Probabilidad %', angle: -90, position: 'insideLeft' }} domain={[0, 100]} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'hsl(var(--background))',
@@ -573,7 +646,6 @@ export default function PredictionsDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Weather Summary */}
               {arroyoRisk?.weather_summary && (
                 <Card>
                   <CardHeader>
@@ -598,14 +670,11 @@ export default function PredictionsDashboard() {
               )}
             </>
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Droplets className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">
-                  {isLoading ? 'Cargando riesgo de arroyos...' : 'No hay datos de riesgo de arroyos disponibles.'}
-                </p>
-              </CardContent>
-            </Card>
+            <SectionStateCard
+              icon={Droplets}
+              title="No hay datos de riesgo disponibles"
+              message="El backend no devolvio zonas con riesgo calculado para este corte."
+            />
           )}
         </TabsContent>
       </Tabs>

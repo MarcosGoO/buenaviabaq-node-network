@@ -44,22 +44,41 @@ export interface ArroyoRiskData {
   arroyos: ArroyoRiskEntry[];
 }
 
+type ResourceState = {
+  loading: boolean;
+  error: string | null;
+};
+
+type ReadJsonResponse<T> = {
+  data?: T;
+};
+
+function defaultResourceState(): ResourceState {
+  return { loading: false, error: null };
+}
+
 export function usePredictions() {
   const [timeline, setTimeline] = useState<TimelinePrediction[]>([]);
   const [explanation, setExplanation] = useState<ExplanationData | null>(null);
   const [arroyoRisk, setArroyoRisk] = useState<ArroyoRiskData | null>(null);
+
+  const [timelineState, setTimelineState] = useState<ResourceState>(defaultResourceState);
+  const [explanationState, setExplanationState] = useState<ResourceState>(defaultResourceState);
+  const [arroyoRiskState, setArroyoRiskState] = useState<ResourceState>(defaultResourceState);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mlAvailable, setMlAvailable] = useState<boolean | null>(null);
+
   const activeRequestId = useRef(0);
 
   const isActiveRequest = useCallback((requestId: number) => activeRequestId.current === requestId, []);
 
-  const readJson = useCallback(async (res: Response) => {
+  const readJson = useCallback(async <T,>(res: Response): Promise<ReadJsonResponse<T>> => {
     const contentType = res.headers.get('content-type') ?? '';
     if (!contentType.includes('application/json')) {
-      throw new Error('Respuesta no válida del servicio de predicciones.');
+      throw new Error('Respuesta no valida del servicio de predicciones.');
     }
-    return res.json();
+    return (await res.json()) as ReadJsonResponse<T>;
   }, []);
 
   const getErrorMessage = useCallback((status: number) => {
@@ -75,9 +94,9 @@ export function usePredictions() {
     return `HTTP ${status}`;
   }, []);
 
-  const isMLAvailable = useCallback(async () => {
+  const isMLReady = useCallback(async (signal?: AbortSignal) => {
     try {
-      const res = await fetch(`${API_BASE}/predictions/health`);
+      const res = await fetch(`${API_BASE}/predictions/health`, { signal });
       if (!res.ok) return false;
       const contentType = res.headers.get('content-type') ?? '';
       if (!contentType.includes('application/json')) return false;
@@ -88,51 +107,86 @@ export function usePredictions() {
     }
   }, []);
 
-  const fetchTimeline = useCallback(async (roadId: number, requestId?: number) => {
+  const fetchTimeline = useCallback(async (roadId: number, requestId: number, signal?: AbortSignal) => {
+    setTimelineState({ loading: true, error: null });
+
     try {
-      const res = await fetch(`${API_BASE}/predictions/road/${roadId}/timeline`);
+      const res = await fetch(`${API_BASE}/predictions/road/${roadId}/timeline`, { signal });
       if (!res.ok) throw new Error(getErrorMessage(res.status));
-      const json = await readJson(res);
-      if (!requestId || isActiveRequest(requestId)) {
-        setTimeline(json.data?.timeline || []);
-      }
+      const json = await readJson<{ timeline?: TimelinePrediction[] }>(res);
+
+      if (!isActiveRequest(requestId)) return;
+
+      setTimeline(Array.isArray(json.data?.timeline) ? json.data.timeline : []);
+      setTimelineState({ loading: false, error: null });
+      return null;
     } catch (err) {
-      if (!requestId || isActiveRequest(requestId)) {
-        setTimeline([]);
-        setError(err instanceof Error ? err.message : 'Error fetching timeline');
+      if (err instanceof Error && err.name === 'AbortError') {
+        return null;
       }
+      if (!isActiveRequest(requestId)) return;
+
+      const message = err instanceof Error ? err.message : 'Error fetching timeline';
+      setTimeline([]);
+      setTimelineState({ loading: false, error: message });
+      return message;
     }
   }, [getErrorMessage, isActiveRequest, readJson]);
 
-  const fetchExplanation = useCallback(async (roadId: number, requestId?: number) => {
+  const fetchExplanation = useCallback(async (roadId: number, requestId: number, signal?: AbortSignal) => {
+    setExplanationState({ loading: true, error: null });
+
     try {
-      const res = await fetch(`${API_BASE}/predictions/road/${roadId}/explanation`);
+      const res = await fetch(`${API_BASE}/predictions/road/${roadId}/explanation`, { signal });
       if (!res.ok) throw new Error(getErrorMessage(res.status));
-      const json = await readJson(res);
-      if (!requestId || isActiveRequest(requestId)) {
-        setExplanation(json.data || null);
-      }
+      const json = await readJson<ExplanationData>(res);
+
+      if (!isActiveRequest(requestId)) return;
+
+      setExplanation(json.data ?? null);
+      setExplanationState({ loading: false, error: null });
+      return null;
     } catch (err) {
-      if (!requestId || isActiveRequest(requestId)) {
-        setExplanation(null);
-        setError(err instanceof Error ? err.message : 'Error fetching explanation');
+      if (err instanceof Error && err.name === 'AbortError') {
+        return null;
       }
+      if (!isActiveRequest(requestId)) return;
+
+      const message = err instanceof Error ? err.message : 'Error fetching explanation';
+      setExplanation(null);
+      setExplanationState({ loading: false, error: message });
+      return message;
     }
   }, [getErrorMessage, isActiveRequest, readJson]);
 
-  const fetchArroyoRisk = useCallback(async (requestId?: number) => {
+  const fetchArroyoRisk = useCallback(async (requestId?: number, signal?: AbortSignal) => {
+    const effectiveRequestId = requestId ?? Date.now();
+    if (!requestId) {
+      activeRequestId.current = effectiveRequestId;
+    }
+
+    setArroyoRiskState({ loading: true, error: null });
+
     try {
-      const res = await fetch(`${API_BASE}/predictions/arroyo-risk`);
+      const res = await fetch(`${API_BASE}/predictions/arroyo-risk`, { signal });
       if (!res.ok) throw new Error(getErrorMessage(res.status));
-      const json = await readJson(res);
-      if (!requestId || isActiveRequest(requestId)) {
-        setArroyoRisk(json.data || null);
-      }
+      const json = await readJson<ArroyoRiskData>(res);
+
+      if (!isActiveRequest(effectiveRequestId)) return;
+
+      setArroyoRisk(json.data ?? null);
+      setArroyoRiskState({ loading: false, error: null });
+      return null;
     } catch (err) {
-      if (!requestId || isActiveRequest(requestId)) {
-        setArroyoRisk(null);
-        setError(err instanceof Error ? err.message : 'Error fetching arroyo risk');
+      if (err instanceof Error && err.name === 'AbortError') {
+        return null;
       }
+      if (!isActiveRequest(effectiveRequestId)) return;
+
+      const message = err instanceof Error ? err.message : 'Error fetching arroyo risk';
+      setArroyoRisk(null);
+      setArroyoRiskState({ loading: false, error: message });
+      return message;
     }
   }, [getErrorMessage, isActiveRequest, readJson]);
 
@@ -141,27 +195,43 @@ export function usePredictions() {
     activeRequestId.current = requestId;
     setIsLoading(true);
     setError(null);
-    const mlReady = await isMLAvailable();
+
+    const controller = new AbortController();
+    const mlReady = await isMLReady(controller.signal);
+
     if (!isActiveRequest(requestId)) {
+      controller.abort();
       return;
     }
+
+    setMlAvailable(mlReady);
+
     if (!mlReady) {
       setTimeline([]);
       setExplanation(null);
-      setArroyoRisk(null);
+      setTimelineState({ loading: false, error: 'Servicio ML no disponible o modelo no entrenado.' });
+      setExplanationState({ loading: false, error: 'Servicio ML no disponible o modelo no entrenado.' });
       setError('Servicio ML no disponible o modelo no entrenado.');
       setIsLoading(false);
       return;
     }
-    await Promise.all([
-      fetchTimeline(roadId, requestId),
-      fetchExplanation(roadId, requestId),
-      fetchArroyoRisk(requestId),
+
+    const [timelineResult, explanationResult, arroyoResult] = await Promise.all([
+      fetchTimeline(roadId, requestId, controller.signal),
+      fetchExplanation(roadId, requestId, controller.signal),
+      fetchArroyoRisk(requestId, controller.signal),
     ]);
-    if (isActiveRequest(requestId)) {
-      setIsLoading(false);
+
+    if (!isActiveRequest(requestId)) {
+      controller.abort();
+      return;
     }
-  }, [fetchTimeline, fetchExplanation, fetchArroyoRisk, isMLAvailable, isActiveRequest]);
+
+    const sectionErrors = [timelineResult, explanationResult, arroyoResult].filter(Boolean);
+
+    setError(sectionErrors.length > 0 ? 'Algunas secciones no pudieron cargarse por completo.' : null);
+    setIsLoading(false);
+  }, [fetchArroyoRisk, fetchExplanation, fetchTimeline, isActiveRequest, isMLReady]);
 
   return {
     timeline,
@@ -169,6 +239,13 @@ export function usePredictions() {
     arroyoRisk,
     isLoading,
     error,
+    mlAvailable,
+    timelineLoading: timelineState.loading,
+    timelineError: timelineState.error,
+    explanationLoading: explanationState.loading,
+    explanationError: explanationState.error,
+    arroyoRiskLoading: arroyoRiskState.loading,
+    arroyoRiskError: arroyoRiskState.error,
     fetchTimeline,
     fetchExplanation,
     fetchArroyoRisk,

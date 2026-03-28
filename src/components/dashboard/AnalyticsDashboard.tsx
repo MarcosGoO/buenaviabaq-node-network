@@ -15,7 +15,18 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Activity, Cloud, AlertTriangle, LayoutDashboard, TrendingUp, TrendingDown, Minus, GitCompareArrows, ChevronDown } from 'lucide-react';
+import {
+  Activity,
+  Cloud,
+  AlertTriangle,
+  LayoutDashboard,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  GitCompareArrows,
+  ChevronDown,
+  RefreshCw,
+} from 'lucide-react';
 import DepartureAdviceCard from '@/components/dashboard/DepartureAdviceCard';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
@@ -66,15 +77,24 @@ interface DailyComparison {
   historical_congestion_level: string;
 }
 
-const TREND_ICON = { improving: TrendingUp, stable: Minus, worsening: TrendingDown }
-const TREND_COLOR = { improving: 'text-green-600', stable: 'text-muted-foreground', worsening: 'text-red-600' }
-const CONGESTION_COLOR: Record<string, string> = { low: '#22c55e', moderate: '#eab308', high: '#f97316', severe: '#ef4444' }
+type ResourceState = {
+  loading: boolean;
+  error: string | null;
+};
 
-async function parseJsonIfAvailable(response: Response): Promise<{ data?: unknown } | null> {
-  if (!response.ok) return null;
+const TREND_ICON = { improving: TrendingUp, stable: Minus, worsening: TrendingDown };
+const TREND_COLOR = { improving: 'text-green-600', stable: 'text-muted-foreground', worsening: 'text-red-600' };
+const CONGESTION_COLOR: Record<string, string> = { low: '#22c55e', moderate: '#eab308', high: '#f97316', severe: '#ef4444' };
+
+function emptyState(): ResourceState {
+  return { loading: false, error: null };
+}
+
+async function parseJsonIfAvailable<T>(response: Response | null): Promise<{ data?: T } | null> {
+  if (!response?.ok) return null;
   const contentType = response.headers.get('content-type') ?? '';
   if (!contentType.includes('application/json')) return null;
-  return (await response.json()) as { data?: unknown };
+  return (await response.json()) as { data?: T };
 }
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
@@ -84,7 +104,30 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
       <p className="text-2xl font-bold text-foreground">{value}</p>
       {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
     </div>
-  )
+  );
+}
+
+function SectionStateCard({
+  icon: Icon,
+  title,
+  message,
+  action,
+}: {
+  icon: React.ElementType;
+  title: string;
+  message: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-8 text-center">
+        <Icon className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+        <p className="font-medium text-foreground">{title}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{message}</p>
+        {action && <div className="mt-4">{action}</div>}
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function AnalyticsDashboard() {
@@ -92,103 +135,176 @@ export default function AnalyticsDashboard() {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [weatherImpact, setWeatherImpact] = useState<WeatherImpact[]>([]);
   const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Comparative state
   const [roads, setRoads] = useState<TrafficRoadBasic[]>([]);
+
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [summaryState, setSummaryState] = useState<ResourceState>(emptyState);
+  const [patternsState, setPatternsState] = useState<ResourceState>(emptyState);
+  const [hotspotsState, setHotspotsState] = useState<ResourceState>(emptyState);
+  const [weatherState, setWeatherState] = useState<ResourceState>(emptyState);
+  const [roadsState, setRoadsState] = useState<ResourceState>(emptyState);
+
   const [compareRoadA, setCompareRoadA] = useState<number | null>(null);
   const [compareRoadB, setCompareRoadB] = useState<number | null>(null);
   const [comparisonA, setComparisonA] = useState<DailyComparison | null>(null);
   const [comparisonB, setComparisonB] = useState<DailyComparison | null>(null);
-  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareState, setCompareState] = useState<ResourceState>(emptyState);
   const [dropdownA, setDropdownA] = useState(false);
   const [dropdownB, setDropdownB] = useState(false);
-  const [comparisonError, setComparisonError] = useState<string | null>(null);
 
-  const fetchAnalytics = useCallback(async (signal?: AbortSignal) => {
-    try {
+  const fetchAnalytics = useCallback(async (signal?: AbortSignal, mode: 'initial' | 'refresh' = 'initial') => {
+    if (mode === 'initial') {
       setLoading(true);
-      setError(null);
+    } else {
+      setRefreshing(true);
+    }
 
+    setError(null);
+    setSummaryState({ loading: true, error: null });
+    setPatternsState({ loading: true, error: null });
+    setHotspotsState({ loading: true, error: null });
+    setWeatherState({ loading: true, error: null });
+
+    try {
       const [hourlyRes, hotspotsRes, weatherRes, summaryRes] = await Promise.all([
-        fetch(`${API_BASE}/analytics/hourly-pattern`, { signal }),
-        fetch(`${API_BASE}/analytics/hotspots?limit=5`, { signal }),
-        fetch(`${API_BASE}/analytics/weather-impact?days=7`, { signal }),
+        fetch(`${API_BASE}/analytics/hourly-pattern`, { signal }).catch(() => null),
+        fetch(`${API_BASE}/analytics/hotspots?limit=5`, { signal }).catch(() => null),
+        fetch(`${API_BASE}/analytics/weather-impact?days=7`, { signal }).catch(() => null),
         fetch(`${API_BASE}/insights/summary`, { signal }).catch(() => null),
       ]);
 
-      const [hourlyData, hotspotsData, weatherData] = await Promise.all([
-        parseJsonIfAvailable(hourlyRes),
-        parseJsonIfAvailable(hotspotsRes),
-        parseJsonIfAvailable(weatherRes),
+      const [hourlyData, hotspotsData, weatherData, summaryData] = await Promise.all([
+        parseJsonIfAvailable<HourlyPattern[]>(hourlyRes),
+        parseJsonIfAvailable<Hotspot[]>(hotspotsRes),
+        parseJsonIfAvailable<WeatherImpact[]>(weatherRes),
+        parseJsonIfAvailable<ExecutiveSummary>(summaryRes),
       ]);
 
-      setHourlyPattern((hourlyData?.data as HourlyPattern[]) || []);
-      setHotspots((hotspotsData?.data as Hotspot[]) || []);
-      setWeatherImpact((weatherData?.data as WeatherImpact[]) || []);
+      setHourlyPattern(Array.isArray(hourlyData?.data) ? hourlyData.data : []);
+      setHotspots(Array.isArray(hotspotsData?.data) ? hotspotsData.data : []);
+      setWeatherImpact(Array.isArray(weatherData?.data) ? weatherData.data : []);
+      setSummary(summaryData?.data ?? null);
 
-      if (summaryRes?.ok) {
-        const summaryData = await parseJsonIfAvailable(summaryRes);
-        setSummary((summaryData?.data as ExecutiveSummary | undefined) ?? null);
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
+      setPatternsState({ loading: false, error: hourlyRes?.ok ? null : 'No fue posible cargar patrones horarios.' });
+      setHotspotsState({ loading: false, error: hotspotsRes?.ok ? null : 'No fue posible cargar hotspots.' });
+      setWeatherState({ loading: false, error: weatherRes?.ok ? null : 'No fue posible cargar impacto del clima.' });
+      setSummaryState({ loading: false, error: summaryRes?.ok ? null : 'No fue posible cargar el resumen ejecutivo.' });
+
+      const sectionFailures = [hourlyRes, hotspotsRes, weatherRes, summaryRes].filter((response) => !response?.ok).length;
+      setError(sectionFailures > 0 ? 'Algunas secciones de analytics no pudieron actualizarse por completo.' : null);
+    } catch (fetchError) {
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         return;
       }
-      setError('No fue posible cargar la analítica en este momento.');
+
+      setError('No fue posible cargar la analitica en este momento.');
+      setSummaryState({ loading: false, error: 'No fue posible cargar el resumen ejecutivo.' });
+      setPatternsState({ loading: false, error: 'No fue posible cargar patrones horarios.' });
+      setHotspotsState({ loading: false, error: 'No fue posible cargar hotspots.' });
+      setWeatherState({ loading: false, error: 'No fue posible cargar impacto del clima.' });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
-  // Fetch roads list for comparative
-  useEffect(() => {
-    async function loadRoads() {
-      try {
-        const res = await fetch(`${API_BASE}/traffic/realtime`);
-        if (res.ok) {
-          const json = await parseJsonIfAvailable(res);
-          const rows = Array.isArray(json?.data) ? (json.data as Array<{ id: number; name: string }>) : [];
-          const list = rows.map((r) => ({ id: r.id, name: r.name }));
-          setRoads(list);
-        }
-      } catch {
-        setRoads([]);
+  const loadRoads = useCallback(async (signal?: AbortSignal) => {
+    setRoadsState({ loading: true, error: null });
+
+    try {
+      const res = await fetch(`${API_BASE}/traffic/realtime`, { signal });
+      if (!res.ok) {
+        throw new Error(`No fue posible cargar vias (${res.status}).`);
       }
+
+      const json = await parseJsonIfAvailable<Array<{ id: number; name: string }>>(res);
+      const rows = Array.isArray(json?.data) ? json.data : [];
+      const list = rows.map((r) => ({ id: r.id, name: r.name }));
+
+      setRoads(list);
+      setRoadsState({
+        loading: false,
+        error: list.length === 0 ? 'No hay vias disponibles para comparar.' : null,
+      });
+    } catch (roadsError) {
+      if (roadsError instanceof Error && roadsError.name === 'AbortError') {
+        return;
+      }
+      setRoads([]);
+      setRoadsState({
+        loading: false,
+        error: roadsError instanceof Error ? roadsError.message : 'No fue posible cargar vias.',
+      });
     }
-    loadRoads();
   }, []);
 
   const fetchComparison = useCallback(async (signal?: AbortSignal) => {
-    if (!compareRoadA && !compareRoadB) return;
-    setCompareLoading(true);
-    setComparisonError(null);
-    const [resA, resB] = await Promise.all([
-      compareRoadA ? fetch(`${API_BASE}/analytics/compare/${compareRoadA}`, { signal }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
-      compareRoadB ? fetch(`${API_BASE}/analytics/compare/${compareRoadB}`, { signal }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null),
-    ]);
-    setComparisonA(resA?.data ?? null);
-    setComparisonB(resB?.data ?? null);
-    if (!resA && !resB) {
-      setComparisonError('No fue posible obtener la comparativa seleccionada.');
+    if (!compareRoadA && !compareRoadB) {
+      setComparisonA(null);
+      setComparisonB(null);
+      setCompareState(emptyState());
+      return;
     }
-    setCompareLoading(false);
+
+    setCompareState({ loading: true, error: null });
+
+    try {
+      const [resA, resB] = await Promise.all([
+        compareRoadA ? fetch(`${API_BASE}/analytics/compare/${compareRoadA}`, { signal }).catch(() => null) : Promise.resolve(null),
+        compareRoadB ? fetch(`${API_BASE}/analytics/compare/${compareRoadB}`, { signal }).catch(() => null) : Promise.resolve(null),
+      ]);
+
+      const [jsonA, jsonB] = await Promise.all([
+        parseJsonIfAvailable<DailyComparison>(resA),
+        parseJsonIfAvailable<DailyComparison>(resB),
+      ]);
+
+      setComparisonA(jsonA?.data ?? null);
+      setComparisonB(jsonB?.data ?? null);
+
+      if (!resA?.ok && !resB?.ok) {
+        setCompareState({ loading: false, error: 'No fue posible obtener la comparativa seleccionada.' });
+        return;
+      }
+
+      setCompareState({
+        loading: false,
+        error: (!resA?.ok || !resB?.ok) ? 'Una de las vias no devolvio comparativa completa.' : null,
+      });
+    } catch (comparisonError) {
+      if (comparisonError instanceof Error && comparisonError.name === 'AbortError') {
+        return;
+      }
+      setComparisonA(null);
+      setComparisonB(null);
+      setCompareState({
+        loading: false,
+        error: comparisonError instanceof Error ? comparisonError.message : 'No fue posible obtener la comparativa seleccionada.',
+      });
+    }
   }, [compareRoadA, compareRoadB]);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchComparison(controller.signal);
+    void loadRoads(controller.signal);
+    return () => controller.abort();
+  }, [loadRoads]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchComparison(controller.signal);
     return () => controller.abort();
   }, [fetchComparison]);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchAnalytics(controller.signal);
-    // Auto-refresh every 5 minutes
+    void fetchAnalytics(controller.signal, 'initial');
     const interval = setInterval(() => {
-      void fetchAnalytics();
+      void fetchAnalytics(undefined, 'refresh');
     }, 5 * 60 * 1000);
+
     return () => {
       controller.abort();
       clearInterval(interval);
@@ -205,20 +321,22 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6 p-6 pt-20">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h2 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h2>
         <button
           onClick={() => {
-            void fetchAnalytics();
+            void fetchAnalytics(undefined, 'refresh');
           }}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          disabled={refreshing}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           Actualizar
         </button>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
           {error}
         </div>
       )}
@@ -247,13 +365,31 @@ export default function AnalyticsDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Executive Summary */}
         <TabsContent value="summary" className="space-y-4">
-          {summary ? (
+          {summaryState.loading ? (
+            <Card>
+              <CardContent className="p-8 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </CardContent>
+            </Card>
+          ) : summaryState.error ? (
+            <SectionStateCard
+              icon={LayoutDashboard}
+              title="No pudimos cargar el resumen"
+              message={summaryState.error}
+              action={
+                <button
+                  onClick={() => void fetchAnalytics(undefined, 'refresh')}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Reintentar
+                </button>
+              }
+            />
+          ) : summary ? (
             <>
               <DepartureAdviceCard />
 
-              {/* System KPIs */}
               <Card>
                 <CardHeader>
                   <CardTitle>Estado General del Sistema</CardTitle>
@@ -261,29 +397,28 @@ export default function AnalyticsDashboard() {
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <StatCard label="Velocidad promedio" value={`${summary.system.avg_speed_kmh} km/h`} />
-                    <StatCard label="Congestión general" value={summary.system.overall_congestion_level} sub="nivel actual" />
-                    <StatCard label="Vías activas" value={summary.system.total_active_roads} />
+                    <StatCard label="Congestion general" value={summary.system.overall_congestion_level} sub="nivel actual" />
+                    <StatCard label="Vias activas" value={summary.system.total_active_roads} />
                     <StatCard label="Zonas monitoreadas" value={summary.system.monitored_zones} />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Traffic vs Historical */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Tráfico Actual vs Histórico</CardTitle>
+                  <CardTitle>Trafico Actual vs Historico</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <StatCard label="Velocidad actual" value={`${summary.traffic.current_avg_speed} km/h`} />
-                    <StatCard label="Velocidad histórica" value={`${summary.traffic.historical_avg_speed} km/h`} />
+                    <StatCard label="Velocidad historica" value={`${summary.traffic.historical_avg_speed} km/h`} />
                     <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
                       <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Cambio</p>
                       <div className="flex items-center gap-1">
                         {(() => {
-                          const pct = summary.traffic.speed_change_percentage
-                          const trend = pct > 2 ? 'improving' : pct < -2 ? 'worsening' : 'stable'
-                          const Icon = TREND_ICON[trend]
+                          const pct = summary.traffic.speed_change_percentage;
+                          const trend = pct > 2 ? 'improving' : pct < -2 ? 'worsening' : 'stable';
+                          const Icon = TREND_ICON[trend];
                           return (
                             <>
                               <Icon className={`h-5 w-5 ${TREND_COLOR[trend]}`} />
@@ -291,33 +426,32 @@ export default function AnalyticsDashboard() {
                                 {pct > 0 ? '+' : ''}{pct}%
                               </span>
                             </>
-                          )
+                          );
                         })()}
                       </div>
                     </div>
                     <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
-                      <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Próxima hora</p>
+                      <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">Proxima hora</p>
                       <div className="flex items-center gap-1">
                         {(() => {
-                          const trend = summary.predictions.next_hour_trend as 'improving' | 'stable' | 'worsening'
-                          const Icon = TREND_ICON[trend] ?? Minus
-                          return <Icon className={`h-5 w-5 ${TREND_COLOR[trend] ?? ''}`} />
+                          const trend = summary.predictions.next_hour_trend as 'improving' | 'stable' | 'worsening';
+                          const Icon = TREND_ICON[trend] ?? Minus;
+                          return <Icon className={`h-5 w-5 ${TREND_COLOR[trend] ?? ''}`} />;
                         })()}
                         <span className="text-sm font-semibold capitalize">{summary.predictions.next_hour_trend}</span>
                       </div>
                       {summary.predictions.rush_hour_active && (
-                        <p className="text-[10px] text-amber-600 font-bold mt-1">⚡ Rush hour</p>
+                        <p className="text-[10px] text-amber-600 font-bold mt-1">Rush hour</p>
                       )}
                     </div>
                   </div>
 
-                  {/* Congestion breakdown bar */}
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Distribución de Congestión</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Distribucion de Congestion</p>
                     <div className="flex h-6 rounded-full overflow-hidden gap-0.5">
                       {Object.entries(summary.traffic.congestion_breakdown).map(([level, count]) => {
-                        const total = Object.values(summary.traffic.congestion_breakdown).reduce((a, b) => a + b, 0)
-                        const pct = total > 0 ? (count / total) * 100 : 0
+                        const total = Object.values(summary.traffic.congestion_breakdown).reduce((a, b) => a + b, 0);
+                        const pct = total > 0 ? (count / total) * 100 : 0;
                         return pct > 0 ? (
                           <div
                             key={level}
@@ -325,7 +459,7 @@ export default function AnalyticsDashboard() {
                             title={`${level}: ${count} roads (${Math.round(pct)}%)`}
                             className="transition-all"
                           />
-                        ) : null
+                        ) : null;
                       })}
                     </div>
                     <div className="flex gap-4 mt-2">
@@ -340,18 +474,17 @@ export default function AnalyticsDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Weather + Alerts */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card>
-                  <CardHeader><CardTitle>Condiciones Climáticas</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>Condiciones Climaticas</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Condición</span><span className="font-semibold">{summary.weather.current_condition}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Temperatura</span><span className="font-semibold">{summary.weather.temperature_celsius}°C</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Condicion</span><span className="font-semibold">{summary.weather.current_condition}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Temperatura</span><span className="font-semibold">{summary.weather.temperature_celsius} C</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground text-sm">Prob. lluvia</span><span className="font-semibold">{summary.weather.rain_probability}%</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Impacto en tráfico</span>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Impacto en trafico</span>
                         <span className={`font-semibold ${summary.weather.is_affecting_traffic ? 'text-amber-600' : 'text-green-600'}`}>
-                          {summary.weather.is_affecting_traffic ? 'Sí' : 'No'}
+                          {summary.weather.is_affecting_traffic ? 'Si' : 'No'}
                         </span>
                       </div>
                       <div>
@@ -365,18 +498,18 @@ export default function AnalyticsDashboard() {
                 </Card>
 
                 <Card>
-                  <CardHeader><CardTitle>Alertas & Predicciones</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>Alertas y Predicciones</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex justify-between"><span className="text-muted-foreground text-sm">Alertas activas</span><span className="font-semibold">{summary.alerts.total_active}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Alertas críticas</span>
+                      <div className="flex justify-between"><span className="text-muted-foreground text-sm">Alertas criticas</span>
                         <span className={`font-semibold ${summary.alerts.critical_count > 0 ? 'text-red-600' : 'text-green-600'}`}>
                           {summary.alerts.critical_count}
                         </span>
                       </div>
                       <div className="flex justify-between"><span className="text-muted-foreground text-sm">Rush hour activo</span>
                         <span className={`font-semibold ${summary.predictions.rush_hour_active ? 'text-amber-600' : 'text-green-600'}`}>
-                          {summary.predictions.rush_hour_active ? 'Sí' : 'No'}
+                          {summary.predictions.rush_hour_active ? 'Si' : 'No'}
                         </span>
                       </div>
                       <div className="flex justify-between"><span className="text-muted-foreground text-sm">Tiempo viaje estimado</span><span className="font-semibold">{summary.predictions.estimated_avg_travel_time_minutes} min</span></div>
@@ -392,241 +525,249 @@ export default function AnalyticsDashboard() {
               </div>
             </>
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <LayoutDashboard className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">Resumen ejecutivo no disponible. Verifica que el servicio esté corriendo.</p>
-              </CardContent>
-            </Card>
+            <SectionStateCard
+              icon={LayoutDashboard}
+              title="No hay resumen ejecutivo"
+              message="El backend respondio sin resumen agregado para este momento."
+            />
           )}
         </TabsContent>
 
-        {/* Hourly Patterns */}
         <TabsContent value="patterns" className="space-y-4">
-          {hourlyPattern.length === 0 && (
+          {patternsState.loading ? (
             <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
-                No hay patrones horarios disponibles todavía.
+              <CardContent className="p-8 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               </CardContent>
             </Card>
-          )}
-          {hourlyPattern.length > 0 && (
+          ) : patternsState.error ? (
+            <SectionStateCard
+              icon={Activity}
+              title="No pudimos cargar patrones horarios"
+              message={patternsState.error}
+            />
+          ) : hourlyPattern.length === 0 ? (
+            <SectionStateCard
+              icon={Activity}
+              title="Aun no hay patrones horarios"
+              message="Todavia no hay suficientes agregados para construir los patrones del dia."
+            />
+          ) : (
             <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Patrón de Tráfico por Hora (Hoy)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={hourlyPattern}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="hour"
-                    label={{ value: 'Hora del día', position: 'insideBottom', offset: -5 }}
-                  />
-                  <YAxis
-                    label={{ value: 'Velocidad (km/h)', angle: -90, position: 'insideLeft' }}
-                  />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="avg_speed"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                    name="Velocidad Promedio"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Patron de Trafico por Hora (Hoy)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={hourlyPattern}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="hour" label={{ value: 'Hora del dia', position: 'insideBottom', offset: -5 }} />
+                      <YAxis label={{ value: 'Velocidad (km/h)', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="avg_speed" stroke="#8884d8" strokeWidth={2} name="Velocidad Promedio" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Volumen de Tráfico por Hora</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={hourlyPattern}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="traffic_volume" fill="#82ca9d" name="Volumen" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Volumen de Trafico por Hora</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={hourlyPattern}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="hour" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="traffic_volume" fill="#82ca9d" name="Volumen" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
             </>
           )}
         </TabsContent>
 
-        {/* Hotspots */}
         <TabsContent value="hotspots" className="space-y-4">
-          {hotspots.length === 0 && (
+          {hotspotsState.loading ? (
             <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
-                No hay hotspots disponibles para el rango consultado.
+              <CardContent className="p-8 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               </CardContent>
             </Card>
-          )}
-          {hotspots.length > 0 && (
+          ) : hotspotsState.error ? (
+            <SectionStateCard
+              icon={AlertTriangle}
+              title="No pudimos cargar hotspots"
+              message={hotspotsState.error}
+            />
+          ) : hotspots.length === 0 ? (
+            <SectionStateCard
+              icon={AlertTriangle}
+              title="No hay hotspots disponibles"
+              message="No hubo vias suficientemente congestionadas para construir el ranking actual."
+            />
+          ) : (
             <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Top 5 Zonas Críticas de Tráfico</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {hotspots.map((hotspot, index) => (
-                  <div
-                    key={hotspot.road_id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-muted"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive font-bold">
-                        {index + 1}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top 5 Zonas Criticas de Trafico</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {hotspots.map((hotspot, index) => (
+                      <div key={hotspot.road_id} className="flex items-center justify-between p-4 rounded-lg bg-muted">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive font-bold">
+                            {index + 1}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{hotspot.road_name}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {hotspot.congestion_frequency}% congestion
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">{hotspot.avg_speed} km/h</p>
+                          <p className="text-sm text-muted-foreground">
+                            {hotspot.total_incidents} incidentes
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold">{hotspot.road_name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {hotspot.congestion_frequency}% congestión
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{hotspot.avg_speed} km/h</p>
-                      <p className="text-sm text-muted-foreground">
-                        {hotspot.total_incidents} incidentes
-                      </p>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Frecuencia de Congestión</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={hotspots} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="road_name" type="category" width={100} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="congestion_frequency" fill="#ef4444" name="% Congestión" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Frecuencia de Congestion</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={hotspots} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="road_name" type="category" width={100} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="congestion_frequency" fill="#ef4444" name="% Congestion" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
             </>
           )}
         </TabsContent>
 
-        {/* Weather Impact */}
         <TabsContent value="weather" className="space-y-4">
-          {weatherImpact.length === 0 && (
+          {weatherState.loading ? (
             <Card>
-              <CardContent className="p-8 text-center text-muted-foreground">
-                No hay suficientes datos climáticos para este análisis.
+              <CardContent className="p-8 flex justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              </CardContent>
+            </Card>
+          ) : weatherState.error ? (
+            <SectionStateCard
+              icon={Cloud}
+              title="No pudimos cargar el impacto del clima"
+              message={weatherState.error}
+            />
+          ) : weatherImpact.length === 0 ? (
+            <SectionStateCard
+              icon={Cloud}
+              title="No hay suficientes datos climaticos"
+              message="Todavia no hay base suficiente para comparar lluvia vs trafico en este rango."
+            />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Impacto del Clima en el Trafico</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {weatherImpact.map((impact) => (
+                    <div key={impact.is_raining ? 'rain' : 'clear'} className="p-6 rounded-lg border-2">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Cloud className={`h-8 w-8 ${impact.is_raining ? 'text-blue-500' : 'text-yellow-500'}`} />
+                        <h3 className="text-lg font-semibold">
+                          {impact.is_raining ? 'Con Lluvia' : 'Sin Lluvia'}
+                        </h3>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Velocidad promedio:</span>
+                          <span className="font-semibold">{impact.avg_speed} km/h</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Tiempo de viaje:</span>
+                          <span className="font-semibold">{impact.avg_travel_time} min</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Congestion tipica:</span>
+                          <span className="font-semibold capitalize">
+                            {impact.typical_congestion}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Muestras:</span>
+                          <span className="font-semibold">{impact.sample_count}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={weatherImpact}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="is_raining" tickFormatter={(value) => (value ? 'Con Lluvia' : 'Sin Lluvia')} />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="avg_speed" fill="#3b82f6" name="Velocidad Promedio (km/h)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           )}
-          {weatherImpact.length > 0 && (
-            <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Impacto del Clima en el Tráfico</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                {weatherImpact.map((impact) => (
-                  <div
-                    key={impact.is_raining ? 'rain' : 'clear'}
-                    className="p-6 rounded-lg border-2"
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <Cloud
-                        className={`h-8 w-8 ${impact.is_raining ? 'text-blue-500' : 'text-yellow-500'}`}
-                      />
-                      <h3 className="text-lg font-semibold">
-                        {impact.is_raining ? 'Con Lluvia' : 'Sin Lluvia'}
-                      </h3>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Velocidad promedio:</span>
-                        <span className="font-semibold">{impact.avg_speed} km/h</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Tiempo de viaje:</span>
-                        <span className="font-semibold">{impact.avg_travel_time} min</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Congestión típica:</span>
-                        <span className="font-semibold capitalize">
-                          {impact.typical_congestion}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Muestras:</span>
-                        <span className="font-semibold">{impact.sample_count}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={weatherImpact}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="is_raining"
-                      tickFormatter={(value) => (value ? 'Con Lluvia' : 'Sin Lluvia')}
-                    />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="avg_speed" fill="#3b82f6" name="Velocidad Promedio (km/h)" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-            </>
-          )}
         </TabsContent>
 
-        {/* Comparative Side-by-Side */}
         <TabsContent value="compare" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <GitCompareArrows className="h-5 w-5 text-primary" />
-                Comparar Zonas — Actual vs Historico
+                Comparar Zonas - Actual vs Historico
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Selecciona dos vias para comparar su trafico actual contra el promedio historico (misma hora y dia de la semana).
+                Selecciona dos vias para comparar su trafico actual contra el promedio historico.
               </p>
 
-              {comparisonError && (
+              {roadsState.error && (
                 <div className="mb-4 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
-                  {comparisonError}
+                  {roadsState.error}
                 </div>
               )}
 
-              {/* Road Selectors */}
+              {compareState.error && (
+                <div className="mb-4 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                  {compareState.error}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4 mb-6">
-                {/* Road A Selector */}
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Via A</label>
                   <div className="relative">
@@ -634,12 +775,12 @@ export default function AnalyticsDashboard() {
                       onClick={() => { setDropdownA(!dropdownA); setDropdownB(false); }}
                       className="flex items-center gap-2 px-3 py-2 bg-background border rounded-lg hover:bg-accent transition-colors w-full justify-between text-sm"
                     >
-                      <span className="truncate">{roads.find(r => r.id === compareRoadA)?.name || 'Seleccionar via...'}</span>
+                      <span className="truncate">{roads.find((r) => r.id === compareRoadA)?.name || 'Seleccionar via...'}</span>
                       <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     </button>
                     {dropdownA && (
                       <div className="absolute left-0 top-full mt-1 w-full max-h-48 overflow-y-auto bg-background border rounded-lg shadow-xl z-50">
-                        {roads.map(road => (
+                        {roads.map((road) => (
                           <button
                             key={road.id}
                             onClick={() => { setCompareRoadA(road.id); setDropdownA(false); }}
@@ -653,7 +794,6 @@ export default function AnalyticsDashboard() {
                   </div>
                 </div>
 
-                {/* Road B Selector */}
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Via B</label>
                   <div className="relative">
@@ -661,12 +801,12 @@ export default function AnalyticsDashboard() {
                       onClick={() => { setDropdownB(!dropdownB); setDropdownA(false); }}
                       className="flex items-center gap-2 px-3 py-2 bg-background border rounded-lg hover:bg-accent transition-colors w-full justify-between text-sm"
                     >
-                      <span className="truncate">{roads.find(r => r.id === compareRoadB)?.name || 'Seleccionar via...'}</span>
+                      <span className="truncate">{roads.find((r) => r.id === compareRoadB)?.name || 'Seleccionar via...'}</span>
                       <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     </button>
                     {dropdownB && (
                       <div className="absolute left-0 top-full mt-1 w-full max-h-48 overflow-y-auto bg-background border rounded-lg shadow-xl z-50">
-                        {roads.map(road => (
+                        {roads.map((road) => (
                           <button
                             key={road.id}
                             onClick={() => { setCompareRoadB(road.id); setDropdownB(false); }}
@@ -681,17 +821,16 @@ export default function AnalyticsDashboard() {
                 </div>
               </div>
 
-              {compareLoading ? (
+              {compareState.loading ? (
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : (comparisonA || comparisonB) ? (
                 <>
-                  {/* Side-by-Side Comparison Cards */}
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     {[
-                      { label: roads.find(r => r.id === compareRoadA)?.name || 'Via A', data: comparisonA, color: '#8884d8' },
-                      { label: roads.find(r => r.id === compareRoadB)?.name || 'Via B', data: comparisonB, color: '#82ca9d' },
+                      { label: roads.find((r) => r.id === compareRoadA)?.name || 'Via A', data: comparisonA, color: '#8884d8' },
+                      { label: roads.find((r) => r.id === compareRoadB)?.name || 'Via B', data: comparisonB, color: '#82ca9d' },
                     ].map(({ label, data, color }) => (
                       <Card key={label} className="overflow-hidden">
                         <div className="h-1" style={{ backgroundColor: color }} />
@@ -736,25 +875,24 @@ export default function AnalyticsDashboard() {
                     ))}
                   </div>
 
-                  {/* Overlay Bar Chart */}
                   {comparisonA && comparisonB && (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart
                         data={[
                           {
                             metric: 'Vel. Actual',
-                            [roads.find(r => r.id === compareRoadA)?.name || 'Via A']: comparisonA.current_avg_speed,
-                            [roads.find(r => r.id === compareRoadB)?.name || 'Via B']: comparisonB.current_avg_speed,
+                            [roads.find((r) => r.id === compareRoadA)?.name || 'Via A']: comparisonA.current_avg_speed,
+                            [roads.find((r) => r.id === compareRoadB)?.name || 'Via B']: comparisonB.current_avg_speed,
                           },
                           {
                             metric: 'Vel. Historica',
-                            [roads.find(r => r.id === compareRoadA)?.name || 'Via A']: comparisonA.historical_avg_speed,
-                            [roads.find(r => r.id === compareRoadB)?.name || 'Via B']: comparisonB.historical_avg_speed,
+                            [roads.find((r) => r.id === compareRoadA)?.name || 'Via A']: comparisonA.historical_avg_speed,
+                            [roads.find((r) => r.id === compareRoadB)?.name || 'Via B']: comparisonB.historical_avg_speed,
                           },
                           {
                             metric: 'Diferencia',
-                            [roads.find(r => r.id === compareRoadA)?.name || 'Via A']: Math.abs(comparisonA.speed_difference),
-                            [roads.find(r => r.id === compareRoadB)?.name || 'Via B']: Math.abs(comparisonB.speed_difference),
+                            [roads.find((r) => r.id === compareRoadA)?.name || 'Via A']: Math.abs(comparisonA.speed_difference),
+                            [roads.find((r) => r.id === compareRoadB)?.name || 'Via B']: Math.abs(comparisonB.speed_difference),
                           },
                         ]}
                       >
@@ -763,19 +901,18 @@ export default function AnalyticsDashboard() {
                         <YAxis label={{ value: 'km/h', angle: -90, position: 'insideLeft' }} />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey={roads.find(r => r.id === compareRoadA)?.name || 'Via A'} fill="#8884d8" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey={roads.find(r => r.id === compareRoadB)?.name || 'Via B'} fill="#82ca9d" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey={roads.find((r) => r.id === compareRoadA)?.name || 'Via A'} fill="#8884d8" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey={roads.find((r) => r.id === compareRoadB)?.name || 'Via B'} fill="#82ca9d" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
                 </>
               ) : (
-                <div className="text-center py-8">
-                  <GitCompareArrows className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                  <p className="text-muted-foreground">
-                    Selecciona dos vias arriba para ver la comparacion lado a lado.
-                  </p>
-                </div>
+                <SectionStateCard
+                  icon={GitCompareArrows}
+                  title="Selecciona vias para comparar"
+                  message="Cuando elijas una o dos vias aqui apareceran sus diferencias contra el historico."
+                />
               )}
             </CardContent>
           </Card>
