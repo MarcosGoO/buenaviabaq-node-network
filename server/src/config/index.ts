@@ -41,6 +41,7 @@ const envSchema = z.object({
   OPENWEATHER_API_KEY: optionalNonEmptyString,
   GOOGLE_MAPS_API_KEY: optionalNonEmptyString,
   TOMTOM_API_KEY: optionalNonEmptyString,
+  TRAFFIC_PROVIDER: z.enum(['auto', 'mock', 'tomtom']).default('auto'),
 
   // ML Service
   ML_SERVICE_URL: z.string().url().default('http://localhost:8000'),

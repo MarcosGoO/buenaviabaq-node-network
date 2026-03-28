@@ -35,6 +35,13 @@ vi.mock('@/services/eventsService.js', () => ({
   },
 }));
 
+vi.mock('@/config/index.js', () => ({
+  config: {
+    TRAFFIC_PROVIDER: 'mock',
+    TOMTOM_API_KEY: undefined,
+  },
+}));
+
 import { TrafficService } from '@/services/trafficService.js';
 import { WeatherService } from '@/services/weatherService.js';
 import { EventsService } from '@/services/eventsService.js';
@@ -154,7 +161,8 @@ describe('TrafficService', () => {
     it('travel time should be roughly 10km / speed * 60', async () => {
       const data = await TrafficService.getRealTimeTraffic();
       data.forEach(road => {
-        const expected = Math.round((10 / road.speed_kmh) * 60);
+        const distanceKm = Number(road.metadata?.distance_km) || 10;
+        const expected = Math.round((distanceKm / road.speed_kmh) * 60);
         expect(road.travel_time_minutes).toBe(expected);
       });
     });

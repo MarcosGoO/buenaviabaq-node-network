@@ -17,6 +17,7 @@ function baseConfig(overrides: Partial<RuntimeConfig> = {}): RuntimeConfig {
     OPENWEATHER_API_KEY: undefined,
     GOOGLE_MAPS_API_KEY: undefined,
     TOMTOM_API_KEY: undefined,
+    TRAFFIC_PROVIDER: 'auto',
     ML_SERVICE_URL: 'http://localhost:8000',
     JWT_SECRET: undefined,
     ADMIN_API_KEY: undefined,

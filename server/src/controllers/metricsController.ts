@@ -5,6 +5,7 @@ import { getRequestMetrics } from '@/middleware/requestMetrics.js';
 import { RedisClient } from '@/lib/redis.js';
 import { ObservabilityService } from '@/services/observabilityService.js';
 import { JobScheduler } from '@/jobs/scheduler.js';
+import { TrafficService } from '@/services/trafficService.js';
 
 export class MetricsController {
   static async getMetrics(req: Request, res: Response) {
@@ -15,6 +16,7 @@ export class MetricsController {
     const jobMetrics = ObservabilityService.getJobMetrics();
     const queueStats = await JobScheduler.getQueueStats();
     const redisConnected = await RedisClient.healthCheck();
+    const trafficProvider = TrafficService.getProviderStatus();
 
     const payload = {
       uptime_seconds: Math.floor(process.uptime()),
@@ -53,6 +55,7 @@ export class MetricsController {
       redis: {
         connected: redisConnected,
       },
+      traffic_provider: trafficProvider,
       sockets: {
         connected_clients: socketMetrics.connectedClients,
         peak_connections: socketMetrics.peakConnections,

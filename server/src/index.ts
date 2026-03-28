@@ -36,6 +36,7 @@ import authRoutes from '@/routes/authRoutes.js';
 import { CacheWarmupService } from '@/services/cacheWarmupService.js';
 import { requestIdMiddleware } from '@/api/middleware/requestId.js';
 import { ObservabilityService } from '@/services/observabilityService.js';
+import { TrafficService } from '@/services/trafficService.js';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -105,6 +106,7 @@ app.get('/health', async (req, res) => {
   const requestMetrics = ObservabilityService.getRequestMetrics();
   const socketMetrics = ObservabilityService.getSocketMetrics();
   const jobMetrics = ObservabilityService.getJobMetrics();
+  const trafficProvider = TrafficService.getProviderStatus();
 
   res.json({
     status: (dbConnected && redisConnected) ? 'ok' : 'degraded',
@@ -117,6 +119,12 @@ app.get('/health', async (req, res) => {
       socket: {
         status: 'active',
         connections: socketMetrics.connectedClients,
+      },
+      traffic_provider: {
+        status: trafficProvider.liveData ? 'live' : 'mock',
+        provider: trafficProvider.active,
+        configured: trafficProvider.configured,
+        reason: trafficProvider.reason,
       },
     },
     observability: {
