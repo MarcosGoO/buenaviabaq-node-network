@@ -51,6 +51,18 @@ vi.mock('@/services/eventsService.js', () => ({
   },
 }));
 
+vi.mock('@/services/trafficService.js', () => ({
+  TrafficService: {
+    getRealTimeTraffic: vi.fn().mockResolvedValue([]),
+    getProviderStatus: vi.fn().mockReturnValue({
+      configured: false,
+      active: 'mock',
+      liveData: false,
+      reason: 'Mock provider active for tests',
+    }),
+  },
+}));
+
 import { RoutingService } from '@/services/routingService.js';
 
 const defaultWeather = {
@@ -76,6 +88,14 @@ describe('RoutingService', () => {
     vi.mocked(GeoService.getArroyos).mockResolvedValue([] as never);
     const { EventsService } = await import('@/services/eventsService.js');
     vi.mocked(EventsService.getUpcomingEvents).mockResolvedValue([] as never);
+    const { TrafficService } = await import('@/services/trafficService.js');
+    vi.mocked(TrafficService.getRealTimeTraffic).mockResolvedValue([] as never);
+    vi.mocked(TrafficService.getProviderStatus).mockReturnValue({
+      configured: false,
+      active: 'mock',
+      liveData: false,
+      reason: 'Mock provider active for tests',
+    } as never);
   });
 
   describe('validateCoordinates — via calculateRoutes', () => {
@@ -308,6 +328,74 @@ describe('RoutingService', () => {
         expect(hasArroyoWarning).toBe(true);
       }
     });
+
+    it('should enrich matching roads with live traffic metadata', async () => {
+      const { pool } = await import('@/db');
+      const { TrafficService } = await import('@/services/trafficService.js');
+
+      vi.mocked(TrafficService.getRealTimeTraffic).mockResolvedValueOnce([
+        {
+          road_id: 1,
+          road_name: 'Calle 30',
+          congestion_level: 'high',
+          speed_kmh: 18,
+          travel_time_minutes: 11,
+          last_updated: '2026-03-28T12:00:00.000Z',
+          source: 'tomtom',
+          metadata: {
+            confidence: 0.92,
+            road_closure: true,
+            free_flow_speed_kmh: 45,
+          },
+        },
+      ] as never);
+      vi.mocked(TrafficService.getProviderStatus).mockReturnValue({
+        configured: true,
+        active: 'tomtom',
+        liveData: true,
+        reason: 'TomTom active',
+      } as never);
+
+      vi.mocked(pool.query).mockResolvedValue({
+        rows: [
+          {
+            road_id: 1,
+            road_name: 'Calle 30',
+            road_type: 'highway',
+            lanes: 4,
+            max_speed_kmh: 70,
+            length_km: 4,
+            geometry: {},
+            current_speed: 65,
+            congestion_level: 'low',
+          },
+          {
+            road_id: 2,
+            road_name: 'Carrera 38',
+            road_type: 'primary',
+            lanes: 2,
+            max_speed_kmh: 50,
+            length_km: 2,
+            geometry: {},
+            current_speed: 40,
+            congestion_level: 'moderate',
+          },
+        ],
+      } as never);
+
+      const routes = await RoutingService.calculateRoutes({
+        origin: { lat: 10.95, lng: -74.82 },
+        destination: { lat: 10.99, lng: -74.76 },
+        preferences: { avoid_congestion: true, max_routes: 3 },
+      });
+
+      expect(routes.length).toBeGreaterThan(0);
+      const liveRoute = routes.find(route => route.metadata.live_traffic);
+      expect(liveRoute).toBeDefined();
+      expect(liveRoute?.metadata.traffic_source).toBe('tomtom');
+      expect(liveRoute?.metadata.closure_segments).toBeGreaterThanOrEqual(1);
+      expect(liveRoute?.warnings.some(w => w.toLowerCase().includes('trafico en vivo'))).toBe(true);
+    });
   });
 
   describe('weather score impact', () => {
@@ -349,7 +437,7 @@ describe('RoutingService', () => {
 
       if (routes.length > 0) {
         const hasWeatherWarning = routes.some(r =>
-          r.warnings.some(w => w.toLowerCase().includes('rain'))
+          r.warnings.some(w => w.toLowerCase().includes('lluvia'))
         );
         expect(hasWeatherWarning).toBe(true);
       }

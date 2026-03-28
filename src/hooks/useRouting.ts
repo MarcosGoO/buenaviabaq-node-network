@@ -24,6 +24,11 @@ export interface RouteSegment {
   estimated_time_minutes: number;
   current_speed_kmh: number;
   congestion_level: string;
+  traffic_source?: 'historical' | 'mock' | 'tomtom';
+  live_data?: boolean;
+  road_closure?: boolean;
+  traffic_confidence?: number | null;
+  traffic_updated_at?: string | null;
   geometry: {
     type: string;
     coordinates: number[][];
@@ -50,6 +55,15 @@ export interface Route {
     weather_affected: boolean;
     arroyo_risk: boolean;
     event_nearby: boolean;
+    strategy?: 'balanced' | 'fastest' | 'resilient' | 'shortest' | 'low-risk';
+    strategy_label?: string;
+    live_traffic?: boolean;
+    traffic_source?: 'historical' | 'mock' | 'tomtom';
+    closure_segments?: number;
+    low_confidence_segments?: number;
+    provider_mode?: 'mock' | 'tomtom';
+    live_reason?: string;
+    last_live_update?: string | null;
   };
 }
 

@@ -157,11 +157,11 @@ function RouteCard({
       )}
     >
       {/* Header row */}
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] font-medium tracking-[0.1em] uppercase text-muted-foreground">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[11px] font-medium tracking-[0.1em] uppercase text-muted-foreground">
           {labels[index] ?? `Ruta ${index + 1}`}
-        </span>
-        <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold", scoreBg(route.overall_score))}>
+          </span>
+          <div className={cn("flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold", scoreBg(route.overall_score))}>
           <span className={scoreColor(route.overall_score)}>{route.overall_score}</span>
           <span className="text-muted-foreground/50">/100</span>
         </div>
@@ -204,7 +204,17 @@ function RouteCard({
       </div>
 
       {/* Flags */}
-      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+        {route.metadata.strategy_label && (
+          <span className="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-500/10 px-1.5 py-0.5 rounded-full">
+            <Route className="h-2.5 w-2.5" /> {route.metadata.strategy_label}
+          </span>
+        )}
+        {route.metadata.live_traffic && route.metadata.traffic_source === "tomtom" && (
+          <span className="flex items-center gap-1 text-[11px] font-medium text-sky-700 bg-sky-500/10 px-1.5 py-0.5 rounded-full">
+            <Navigation2 className="h-2.5 w-2.5" /> Trafico live
+          </span>
+        )}
         {route.metadata.arroyo_risk && (
           <span className="flex items-center gap-1 text-[11px] font-medium text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
             <Droplets className="h-2.5 w-2.5" /> Arroyo
@@ -218,6 +228,11 @@ function RouteCard({
         {route.metadata.congested_segments > 0 && (
           <span className="flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded-full">
             <AlertTriangle className="h-2.5 w-2.5" /> {route.metadata.congested_segments} seg. congestionado{route.metadata.congested_segments > 1 ? "s" : ""}
+          </span>
+        )}
+        {(route.metadata.closure_segments ?? 0) > 0 && (
+          <span className="flex items-center gap-1 text-[11px] font-medium text-rose-700 bg-rose-500/10 px-1.5 py-0.5 rounded-full">
+            <X className="h-2.5 w-2.5" /> {route.metadata.closure_segments} cierre{(route.metadata.closure_segments ?? 0) > 1 ? "s" : ""}
           </span>
         )}
         {!route.metadata.arroyo_risk && !route.metadata.weather_affected && route.metadata.congested_segments === 0 && (

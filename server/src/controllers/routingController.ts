@@ -20,6 +20,22 @@ export class RoutingController {
       RoutingController.isValidCoordinate(routeRequest.destination?.lng);
   }
 
+  private static buildCacheKey(prefix: string, routeRequest: RouteRequest): string {
+    const preferences = {
+      avoid_arroyos: routeRequest.preferences?.avoid_arroyos ?? false,
+      avoid_congestion: routeRequest.preferences?.avoid_congestion ?? false,
+      avoid_events: routeRequest.preferences?.avoid_events ?? false,
+      max_routes: routeRequest.preferences?.max_routes ?? 3,
+    };
+
+    return [
+      prefix,
+      `${routeRequest.origin.lat},${routeRequest.origin.lng}`,
+      `${routeRequest.destination.lat},${routeRequest.destination.lng}`,
+      JSON.stringify(preferences),
+    ].join(':');
+  }
+
   /**
    * POST /api/v1/routes/calculate
    * Calculate multiple route alternatives
@@ -46,7 +62,7 @@ export class RoutingController {
       }
 
       // Generate cache key based on coordinates
-      const cacheKey = `${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
+      const cacheKey = RoutingController.buildCacheKey('routes', routeRequest);
       const cacheTTL = 600;
 
       // Calculate routes (used to type the cache hit as well)
@@ -122,7 +138,7 @@ export class RoutingController {
       }
 
       // Generate cache key
-      const cacheKey = `optimal:${routeRequest.origin.lat},${routeRequest.origin.lng}:${routeRequest.destination.lat},${routeRequest.destination.lng}`;
+      const cacheKey = RoutingController.buildCacheKey('optimal', routeRequest);
       const cacheTTL = 600;
 
       // Check cache
