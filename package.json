@@ -15,6 +15,7 @@
     "geo:import-arroyos": "node scripts/geo/import-arroyos.mjs",
     "preflight": "node scripts/preflight.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test e2e/smoke.spec.ts --project=chromium",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "playwright:install": "playwright install --with-deps chromium"
