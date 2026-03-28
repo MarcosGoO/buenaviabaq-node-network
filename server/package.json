@@ -31,6 +31,10 @@
   ],
   "author": "Marcos GoO",
   "license": "MIT",
+  "overrides": {
+    "path-to-regexp": "0.1.13",
+    "socket.io-parser": "4.2.6"
+  },
   "dependencies": {
     "@socket.io/redis-adapter": "^8.3.0",
     "bullmq": "^5.69.1",

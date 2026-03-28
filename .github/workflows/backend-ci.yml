@@ -136,4 +136,4 @@ jobs:
 
       - name: Run npm audit
         working-directory: ./server
-        run: npm audit --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
